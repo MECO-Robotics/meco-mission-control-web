@@ -27,7 +27,7 @@ export function SubsystemMechanismSection({
   return (
     <section className="robot-config-detail-mechanisms">
       <div className="robot-config-mechanism-header">
-        <h4>Mechanisms</h4>
+        <h3>Mechanisms</h3>
         <button
           aria-label="Add mechanism"
           className="icon-button robot-config-mechanism-add-button"

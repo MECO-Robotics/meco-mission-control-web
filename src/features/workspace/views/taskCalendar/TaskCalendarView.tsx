@@ -15,13 +15,15 @@ import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
+import { buildTopbarAddMenuActions, makeAddMenuAction, WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { ScheduleAgendaMonthList } from "./ScheduleAgendaMonthList";
 import { TaskCalendarMonthStack } from "./TaskCalendarMonthStack";
+import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { groupTaskCalendarEventsByMonth, toEventDateKey, type TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
@@ -47,6 +49,7 @@ interface TaskCalendarViewProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   onTaskDetailOpen: (task: TaskRecord) => void;
+  openCreateTaskModal: () => void;
   searchFilter?: string;
   onSearchChange?: (value: string) => void;
   onTaskEditCanceled?: () => void;
@@ -86,6 +89,7 @@ export function TaskCalendarView({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   onTaskDetailOpen,
+  openCreateTaskModal,
   searchFilter,
   onSearchChange,
   onTaskEditCanceled = () => {},
@@ -156,6 +160,7 @@ export function TaskCalendarView({
   };
 
   const openEvent = (event: TaskCalendarEvent) => {
+    setSelectedDateKey(null);
     if (event.extendedProps.type === "milestone") {
       const milestone = calendar.milestonesById[event.extendedProps.recordId];
       if (milestone) {
@@ -172,7 +177,9 @@ export function TaskCalendarView({
       }
     }
   };
-  const agendaBounds = getSchedulePeriodBounds(agendaStartDate, agendaRange);
+  const activePresentation = presentation;
+  const activeAgendaRange = agendaRange;
+  const agendaBounds = getSchedulePeriodBounds(agendaStartDate, activeAgendaRange);
   const agendaEvents = useMemo(() => calendar.events.filter((event) => {
     const eventDate = toEventDateKey(event.start);
     return eventDate >= agendaBounds.startDate && (!agendaBounds.endDate || eventDate <= agendaBounds.endDate);
@@ -186,22 +193,22 @@ export function TaskCalendarView({
     : calendar.events.length === 0
       ? { title: "No matching schedule items.", description: "Adjust search or filters to see more schedule items." }
       : { title: "No upcoming schedule items.", description: "Choose another start date or add an upcoming schedule item." };
-  const periodDate = presentation === "agenda"
+  const periodDate = activePresentation === "agenda"
     ? new Date(`${agendaStartDate}T12:00:00`)
     : calendar.monthCursor;
-  const periodLabel = presentation === "agenda" && agendaRange === "week"
+  const periodLabel = activePresentation === "agenda" && activeAgendaRange === "week"
     ? formatTimelinePeriodLabel("week", [agendaBounds.startDate])
     : formatMonthYearLabel(formatLocalDate(periodDate));
 
   const changeScheduleRange = (range: TimelineViewInterval) => {
-    if (presentation !== "agenda") return;
+    if (activePresentation !== "agenda") return;
     setAgendaRange(range);
     setAgendaStartDate(getSchedulePeriodBounds(agendaStartDate, range).startDate);
   };
 
   const shiftPeriod = (direction: -1 | 1) => {
-    if (presentation === "agenda") {
-      setAgendaStartDate(agendaRange === "week"
+    if (activePresentation === "agenda") {
+      setAgendaStartDate(activeAgendaRange === "week"
         ? addDaysToDay(agendaStartDate, direction * 7)
         : formatLocalDate(new Date(periodDate.getFullYear(), periodDate.getMonth() + direction, 1)));
     } else {
@@ -211,8 +218,8 @@ export function TaskCalendarView({
   };
 
   const goToToday = () => {
-    if (presentation === "agenda") {
-      setAgendaStartDate(getSchedulePeriodBounds(calendar.todayDateKey, agendaRange).startDate);
+    if (activePresentation === "agenda") {
+      setAgendaStartDate(getSchedulePeriodBounds(calendar.todayDateKey, activeAgendaRange).startDate);
     } else {
       const today = new Date();
       calendar.setMonthCursor(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -241,16 +248,16 @@ export function TaskCalendarView({
   };
 
   return (
-    <section className={`panel dense-panel task-calendar-shell ${presentation === "calendar" ? "task-calendar-full-height" : ""} ${WORKSPACE_PANEL_CLASS}`}>
+    <section className={`panel dense-panel task-calendar-shell ${activePresentation === "calendar" ? "task-calendar-full-height" : ""} ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
           <SchedulePeriodControls
-            onRangeChange={presentation === "agenda" ? changeScheduleRange : undefined}
+            onRangeChange={activePresentation === "agenda" ? changeScheduleRange : undefined}
             onShiftPeriod={shiftPeriod}
             onToday={goToToday}
             periodLabel={periodLabel}
-            presentation={presentation}
-            range={presentation === "calendar" ? "month" : agendaRange}
+            presentation={activePresentation}
+            range={activePresentation === "calendar" ? "month" : activeAgendaRange}
           />
         </WorkspaceTopbarControls>
         <TopbarResponsiveSearch
@@ -261,7 +268,16 @@ export function TaskCalendarView({
           value={calendar.searchFilter}
         />
       </AppTopbarSlotPortal>
-      {presentation === "agenda" ? (
+      <WorkspaceTopbarAddMenu
+        actions={buildTopbarAddMenuActions(
+          makeAddMenuAction("Add meeting", () => window.dispatchEvent(new Event("mission-control:open-meeting"))),
+          makeAddMenuAction("Add milestone", () => window.dispatchEvent(new Event("mission-control:open-milestone"))),
+          makeAddMenuAction("Add task", openCreateTaskModal),
+        )}
+        ariaLabel="Add schedule item"
+        title="Add schedule item"
+      />
+      {activePresentation === "agenda" ? (
         agendaEvents.length === 0 ? (
           <div aria-live="polite" className="empty-state schedule-agenda-empty-state">
             <strong>{agendaEmptyState.title}</strong>
@@ -282,12 +298,20 @@ export function TaskCalendarView({
             onVisibleMonthChange={calendar.setMonthCursor}
             onOpenDay={setSelectedDateKey}
             onOpenEvent={openEvent}
-            onCloseSelectedDay={() => setSelectedDateKey(null)}
             selectedDateKey={selectedDateKey}
             todayDateKey={calendar.todayDateKey}
           />
         </>
       )}
+
+      {activePresentation === "calendar" && selectedDateKey ? (
+        <TaskCalendarDayDetails
+          dateKey={selectedDateKey}
+          events={calendar.eventsByDateKey.get(selectedDateKey) ?? []}
+          onClose={() => setSelectedDateKey(null)}
+          onOpenEvent={openEvent}
+        />
+      ) : null}
 
       <MilestonesMilestoneModal
         activeMilestone={milestoneModalState.activeMilestone}

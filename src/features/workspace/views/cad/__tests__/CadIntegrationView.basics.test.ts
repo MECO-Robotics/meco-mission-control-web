@@ -115,10 +115,12 @@ describe("CAD STEP mapper basics", () => {
     expect(parseOnshapeUrl("not-a-url").ok).toBe(false);
   });
 
-  it("renders the STEP import workflow before the secondary Onshape sync section", () => {
+  it("uses the shared topbar for CAD search and STEP import actions", () => {
     const markup = renderToStaticMarkup(React.createElement(CadIntegrationView, {}));
 
-    expect(markup).toContain("STEP import");
+    expect(markup).toContain('aria-label="Search CAD records"');
+    expect(markup).toContain('aria-label="Add CAD import"');
+    expect(markup).toContain("Detect CAD structure");
     expect(markup).toContain("Export from the master assembly");
     expect(markup).toContain("STEP export guide");
     expect(markup).toContain("/docs/step-export-conventions.md");
@@ -128,7 +130,8 @@ describe("CAD STEP mapper basics", () => {
     expect(markup).toContain("/docs/cross-repo-architecture.md");
     expect(markup).toContain("Onshape status");
     expect(markup).toContain("API budget");
-    expect(markup.indexOf("STEP import")).toBeLessThan(markup.indexOf("CAD / Onshape integration"));
+    expect(markup.indexOf("Detect CAD structure")).toBeLessThan(markup.indexOf("CAD / Onshape integration"));
+    expect(markup).not.toContain("<h2>STEP import</h2>");
     expect(uploadCadStepFile).not.toHaveBeenCalled();
   });
 

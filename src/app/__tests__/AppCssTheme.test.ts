@@ -43,4 +43,11 @@ describe("App.css theme-safe badges", () => {
     expect(googleSlotBlock).toContain("border-radius: 999px;");
     expect(googleSlotBlock).toContain("overflow: hidden;");
   });
+
+  it("keeps pagination controls on defined semantic theme tokens", () => {
+    const paginationCss = readCssTree("src/app/styles/workspace/tables/pagination.css");
+    expect(paginationCss).toContain("color: var(--text-title)");
+    expect(paginationCss).toContain("background: var(--bg-row-alt)");
+    expect(paginationCss).not.toMatch(/var\(--(?:text-strong|bg-base)\)/);
+  });
 });

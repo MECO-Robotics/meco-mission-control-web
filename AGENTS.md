@@ -4,7 +4,9 @@
   [docs/web-contributor-guide.md](docs/web-contributor-guide.md), including for
   documentation-only tasks. Treat its guidance as required, not optional. For
   workspace views, enforce the **Workspace Topbar Contract**: shared topbar
-  actions and filters only when specified, with no view-level title or eyebrow.
+  title, search bar, controls/custom page slots and shared plus action on every
+  view; keep the title visible at compact widths. Do not add view-level titles,
+  second bars, local Add/Create buttons or alternate plus controls.
 - Follow [CONTRIBUTING.md](CONTRIBUTING.md) for setup, validation and PR policy.
 - Work in dedicated worktrees outside base checkouts. Base checkouts are for inspection, fetching and worktree creation.
 - This is an undeployed prototype with disposable development data. Prefer coherent replacement over compatibility scaffolding; update affected consumers and describe resets or breaking changes.
@@ -16,3 +18,4 @@
 - Keep generated diagnostics outside tracked source. Run checks relevant to the change and report actual outcomes and limitations; never claim unrun checks passed.
 - Web merge protections are intentionally disabled during prototype development (user direction, 2026-09-09). Keep CI validation and dedicated-worktree PRs; do not reinstate approval/digest gates without user direction. Deployment approvals remain separate. See docs/prototype-merge-policy.md.
 - Before making any code or configuration modification, invoke the Moyu skill and apply its scope checklist. This is mandatory for every LLM-assisted modification, regardless of size.
+- Do not add eyebrow copy to workspace views unless the user explicitly asks for it.

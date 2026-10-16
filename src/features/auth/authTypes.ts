@@ -4,7 +4,6 @@ import type { AuthConfig, DevBypassRole, EmailCodeDeliveryResponse } from "@/lib
 
 export interface AuthStatusScreenProps {
   body: string;
-  eyebrow?: string;
   isDarkMode?: boolean;
   message?: string | null;
   shellStyle?: CSSProperties;

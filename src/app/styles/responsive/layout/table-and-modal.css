@@ -23,7 +23,7 @@
 
   .table-cell::before {
     content: attr(data-label);
-    color: #58667d;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-size: 0.68rem;
@@ -109,4 +109,3 @@
   max-height: clamp(6.5rem, 18vh, 11rem);
   overflow-y: auto;
 }
-

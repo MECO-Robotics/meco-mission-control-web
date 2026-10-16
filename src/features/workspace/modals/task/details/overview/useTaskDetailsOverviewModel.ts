@@ -86,7 +86,10 @@ export function useTaskDetailsOverviewModel({
     (member) => member.role === "mentor",
   );
   const defaultEditableMemberOptions = Object.values(membersById).filter(
-    (member) => member.role === "student",
+    (member) => member.role === "student" || member.role === "lead",
+  );
+  const ownerOptions = (editableMemberOptions ?? defaultEditableMemberOptions).filter(
+    (member) => member.role === "student" || member.role === "lead",
   );
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
     getStableToneClassName(option.id);
@@ -150,7 +153,7 @@ export function useTaskDetailsOverviewModel({
 
   return {
     assigneeNames,
-    editableMemberOptions: editableMemberOptions ?? defaultEditableMemberOptions,
+    editableMemberOptions: ownerOptions,
     editableMentorOptions,
     editableTask,
     handleAssignedChange,

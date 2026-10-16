@@ -36,7 +36,7 @@ interface AppSidebarProps {
   notificationCount: number;
   onCreateMilestone: () => void;
   onCreatePart: () => void;
-  onCreateQaReport: () => void;
+  onCreateQaReport?: () => void;
   onCreateSeason: () => void;
   onCreateTask: () => void;
   onRefreshWorkspace: () => void;
@@ -126,9 +126,11 @@ export function AppSidebar({
   const {
     isProjectPopupOpen,
     projectPopupRef,
+    projectPopupLeft,
     projectPopupTop,
     projectTriggerRef,
     setIsProjectPopupOpen,
+    setProjectPopupLeft,
     setProjectPopupTop,
     sidebarShellRef,
     scopePanels,
@@ -152,10 +154,9 @@ export function AppSidebar({
   });
 
   const handleProjectTriggerClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    const shellRect = sidebarShellRef.current?.getBoundingClientRect();
     const targetRect = event.currentTarget.getBoundingClientRect();
-    const popupTop = shellRect ? targetRect.top - shellRect.top : 0;
-    setProjectPopupTop(popupTop);
+    setProjectPopupTop(targetRect.top);
+    setProjectPopupLeft(targetRect.right + 6);
 
     setActiveScopePanel(null);
     setIsProjectPopupOpen((current) => !current);
@@ -263,6 +264,7 @@ export function AppSidebar({
         onSelectProjectOption={handleProjectOptionSelect}
         onSelectSeasonOption={handleSeasonOptionSelect}
         projectPopupRef={projectPopupRef}
+        projectPopupLeft={projectPopupLeft}
         projectPopupTop={projectPopupTop}
         projects={projects}
         seasons={seasons}

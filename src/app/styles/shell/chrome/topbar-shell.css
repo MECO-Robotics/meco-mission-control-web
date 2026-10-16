@@ -86,10 +86,6 @@
   border-right: 1px solid var(--border-base);
   background: var(--bg-panel);
   box-sizing: border-box;
-  transition:
-    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    padding-inline 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.18s ease;
 }
 
 .app-topbar[data-collapsed="true"] .app-topbar-brand {

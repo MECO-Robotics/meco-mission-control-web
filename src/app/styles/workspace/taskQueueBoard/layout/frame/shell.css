@@ -87,10 +87,7 @@
   font-size: inherit;
   opacity: 0;
   transform: translateX(-0.2rem);
-  transition:
-    max-width 160ms ease,
-    opacity 160ms ease,
-    transform 160ms ease;
+  transition: opacity 160ms ease, transform 160ms ease;
   white-space: nowrap;
 }
 

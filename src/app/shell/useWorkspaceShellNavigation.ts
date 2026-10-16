@@ -79,8 +79,7 @@ export function useWorkspaceShellNavigation(c: WorkspaceShellController) {
   const previousContext = useRef(navigationContext);
   const currentSearch = writeNavigationLocation(navigationState, navigationContext, scopeParams.toString());
   const availableViews = NAVIGATION_SUB_ITEMS
-    .filter(({ id }) => isNavigationSubItemAvailable(id, { context: navigationContext }))
-    .map((view) => ({ ...view, target: getNavigationTarget(view.id, navigationContext) }));
+    .filter(({ id }) => isNavigationSubItemAvailable(id, { context: navigationContext }));
 
   useLayoutEffect(() => {
     if (c.isLoadingData || c.bootstrap === EMPTY_BOOTSTRAP) return;
@@ -105,7 +104,7 @@ export function useWorkspaceShellNavigation(c: WorkspaceShellController) {
       const currentView = availableViews.find((view) => view.id === currentId);
       const fallback = currentView ?? availableViews.find((view) => view.section === activeSection) ?? availableViews[0];
       if (fallback && (!currentView || (currentId === "resources-structure" && navigationContext !== "robot-project"))) {
-        navigationRef.current.navigate(fallback.target);
+        navigationRef.current.navigate(getNavigationTarget(fallback.id, navigationContext));
         return;
       }
     }

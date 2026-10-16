@@ -6,12 +6,11 @@
   z-index: 900;
   width: var(--shell-sidebar-width);
   height: calc(100vh - var(--shell-topbar-height));
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-compact-popup {
-  position: absolute;
-  left: calc(100% + 0.35rem);
+  position: fixed;
+  left: 0;
   z-index: 1205;
   display: flex;
   flex-direction: column;
@@ -76,4 +75,4 @@
 }
 .sidebar-local-workspace-status { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.5rem; color: var(--text-muted); font-size: 0.72rem; }
 .sidebar-local-workspace-status button { min-height: 28px; padding: 0.2rem 0.45rem; font-size: inherit; }
-.sidebar-local-workspace-mark { display: grid; place-items: center; min-height: 28px; color: var(--accent); font-size: 0.7rem; }
+.sidebar-local-workspace-mark { display: grid; place-items: center; min-height: 28px; color: var(--official-blue); font-size: 0.7rem; }

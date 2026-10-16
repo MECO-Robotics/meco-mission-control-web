@@ -29,6 +29,7 @@ export function renderSidebar(
     seasons?: SeasonRecord[];
     sessionUser?: SessionUser | null;
     taskView?: "calendar" | "timeline" | "robot-map" | "kanban" | "agenda";
+    worklogsView?: "logs" | "activity" | "qa" | "results";
   },
 ) {
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {
@@ -72,7 +73,7 @@ export function renderSidebar(
       taskView: options?.taskView ?? "kanban",
       toggleDarkMode: jest.fn(),
       toggleSidebar: jest.fn(),
-      worklogsView: "logs",
+      worklogsView: options?.worklogsView ?? "logs",
     };
 
   return renderToStaticMarkup(React.createElement(AppSidebar, sidebarProps));

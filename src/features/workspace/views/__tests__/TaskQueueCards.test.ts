@@ -172,7 +172,7 @@ describe("Task Queue cards", () => {
     expect(markup).toContain('aria-label="Design discipline"');
     expect(markup).not.toContain("task-queue-board-card-priority-medium");
     expect(markup).toContain("task-queue-board-card-priority-accented");
-    expect(markup).toContain("--task-queue-board-card-priority-accent:#c58a00");
+    expect(markup).toContain("--task-queue-board-card-priority-accent:var(--status-warning-text)");
     expect(markup).toContain("Medium priority</span>");
     expect(markup.indexOf('aria-label="Design discipline"')).toBeLessThan(
       markup.indexOf("profile-avatar"),

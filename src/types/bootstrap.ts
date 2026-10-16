@@ -2,7 +2,6 @@ import type { ArtifactRecord, MaterialRecord, PartDefinitionRecord, PartInstance
 import type {
   AuditActionRecord,
   AttendanceRecord,
-  EscalationRecord,
   MeetingRecord,
   MilestoneRecord,
   MilestoneRequirementRecord,
@@ -46,8 +45,7 @@ export interface BootstrapPayload {
   purchaseItems: PurchaseItemRecord[];
   manufacturingProcesses: import("./recordsExecution").ManufacturingProcessRecord[];
   milestoneRequirements: MilestoneRequirementRecord[];
-  escalations?: EscalationRecord[];
-  actions?: AuditActionRecord[];
+  actions: AuditActionRecord[];
 }
 
 export type PlatformBootstrapPayload = BootstrapPayload;

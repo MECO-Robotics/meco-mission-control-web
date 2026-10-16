@@ -12,6 +12,22 @@ Prefer cohesive ownership, explicit dependencies and one authoritative represent
 
 PRs should explain the problem, resulting behavior and validation. Include screenshots for visible changes and contract/migration evidence when applicable. Issue/project bookkeeping and optional context adapters are not prerequisites for routine contributions.
 
+## Refresh the shared local application
+
+When an integrated change needs to appear in the shared local app, merge it into
+`development` through the normal review flow, then fast-forward the default web
+and platform checkouts with `git pull --ff-only`. Keep persistent
+browser-facing services on those default checkouts; do not point them at feature
+worktrees. Restart a configured service from its default checkout if it still
+runs stale code, and confirm its working directory and process directory resolve
+there.
+
+For the usual local ports, check the Vite app at
+`http://127.0.0.1:5173/` and `/src/main.tsx`, then check the API at
+`http://127.0.0.1:8080/health` and `/api/bootstrap`. A commit or push alone
+does not update a server process that is running from another checkout or an
+older revision.
+
 ## Validation
 
 Use focused tests while developing. Before marking a code or CI change ready, run `npm run verify`: it owns contract validation, workflow security checks, TypeScript, lint, Jest and the production bundle build. Do not repeat these commands separately after that same revision passes. Documentation-only changes require link/command review and `git diff --check`.

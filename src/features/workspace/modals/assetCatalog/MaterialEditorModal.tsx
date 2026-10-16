@@ -72,14 +72,7 @@ export function MaterialEditorModal({
           min="0"
           onChange={(event) => {
             const onHandQuantity = Number(event.target.value);
-            setMaterialDraft((current) => ({
-              ...current,
-              onHandQuantity,
-              reorderPoint:
-                materialModalMode === "create"
-                  ? Math.floor(onHandQuantity / 2)
-                  : current.reorderPoint,
-            }));
+            setMaterialDraft((current) => ({ ...current, onHandQuantity }));
           }}
           type="number"
           value={materialDraft.onHandQuantity}
@@ -88,17 +81,11 @@ export function MaterialEditorModal({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Reorder point</span>
         <input
-          disabled={materialModalMode === "create"}
           min="0"
           onChange={(event) => updateDraft("reorderPoint", Number(event.target.value))}
           type="number"
           value={materialDraft.reorderPoint}
         />
-        {materialModalMode === "create" ? (
-          <small style={{ color: "var(--text-copy)" }}>
-            Auto-set to 50% of on-hand quantity while adding.
-          </small>
-        ) : null}
       </label>
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Location</span>

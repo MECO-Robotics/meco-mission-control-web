@@ -1,14 +1,24 @@
+.page-shell .panel {
+  min-width: 0;
+  border: 1px solid var(--border-base);
+  border-radius: 20px;
+  padding: 1rem;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-soft);
+}
+
 .panel.dense-panel {
   display: grid;
   gap: 0.7rem;
   min-width: 0;
 }
 
-.workspace-panel {
+.page-shell .panel.workspace-panel {
   margin: 0;
   border-radius: 0;
   border: 0;
-  background: var(--bg-panel);
+  background: transparent;
+  box-shadow: none;
 }
 
 .panel-header.compact-header {

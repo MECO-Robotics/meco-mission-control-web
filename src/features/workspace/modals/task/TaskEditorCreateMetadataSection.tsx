@@ -13,7 +13,7 @@ export function TaskEditorCreateMetadataSection({
   taskDraft,
 }: TaskEditorCreateMetadataSectionProps) {
   return (
-    <details className="task-details-section-collapse modal-wide" open>
+    <details className="task-details-section-collapse modal-wide">
       <summary className="task-details-section-title task-details-section-summary">
         <span>Task metadata</span>
       </summary>

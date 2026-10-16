@@ -206,7 +206,7 @@ export function CadStepMappingReviewTable({
                     </p>
                     <div className="cad-row-actions">
                       <button
-                        className="secondary-button compact-action"
+                        className="secondary-action compact-action"
                         disabled={isSavingMapping || usesPlaceholderParser || isConfirmBlocked}
                         onClick={() => confirmMapping(
                           effectiveTargetKind,
@@ -215,14 +215,6 @@ export function CadStepMappingReviewTable({
                         type="button"
                       >
                         Confirm
-                      </button>
-                      <button
-                        className="ghost-button compact-action"
-                        disabled={isSavingMapping || usesPlaceholderParser}
-                        onClick={() => confirmMapping("IGNORE", null)}
-                        type="button"
-                      >
-                        Ignore
                       </button>
                       <button
                         className="ghost-button compact-action"

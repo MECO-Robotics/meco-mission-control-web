@@ -1,11 +1,24 @@
 import * as React from "react";
+import * as ReactDOMServer from "react-dom/server";
 import { ArrowDownUp } from "lucide-react";
 
 import { FilterDropdown } from "../FilterDropdown";
 import { SortDirectionToggle } from "../SortDirectionToggle";
 import { WorkspaceSortMenu } from "../WorkspaceSortMenu";
+import { CompactFilterMenu } from "../workspaceCompactFilterMenu";
 
 describe("WorkspaceSortMenu", () => {
+  it("includes visible active-count badges in the menu accessible name", () => {
+    const markup = ReactDOMServer.renderToStaticMarkup(React.createElement(CompactFilterMenu, {
+      activeCount: 1,
+      ariaLabel: "Sort documents",
+      buttonLabel: "Sort",
+      iconOnly: true,
+      items: [{ label: "Sort by", content: React.createElement("span", null, "Document") }],
+    }));
+    expect(markup).toContain('aria-label="Sort documents, 1 active"');
+  });
+
   it("shares the sort icon, field picker, and direction toggle across views", () => {
     const onDirectionChange = jest.fn();
     const onFieldChange = jest.fn();
@@ -29,6 +42,7 @@ describe("WorkspaceSortMenu", () => {
     const sortBy = items[0];
 
     expect(menu.props.iconOnly).toBe(true);
+    expect(menu.props.ariaLabel).toBe("Sort tasks");
     expect((menu.props.icon as React.ReactElement).type).toBe(ArrowDownUp);
     expect(sortBy?.label).toBe("Sort by");
     expect(sortBy?.labelControl?.type).toBe(SortDirectionToggle);

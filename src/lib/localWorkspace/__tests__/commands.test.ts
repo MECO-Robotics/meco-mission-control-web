@@ -16,8 +16,8 @@ function snapshot(): BootstrapPayload {
   return state;
 }
 
-function command(state: BootstrapPayload, path: string, body: object = {}, method = "POST") {
-  return applyLocalCommand(state, path, { method, body: JSON.stringify(body) }) as { item: { id: string } };
+function command<T = { item: { id: string } }>(state: BootstrapPayload, path: string, body: object = {}, method = "POST", actorMemberId?: string | null): T {
+  return applyLocalCommand(state, path, { method, body: JSON.stringify(body) }, actorMemberId) as T;
 }
 
 test("local CRUD writes canonical Task records and rejects removed ManufacturingItem routes", () => {
@@ -27,6 +27,229 @@ test("local CRUD writes canonical Task records and rejects removed Manufacturing
   expect(state.tasks.find(({ id }) => id === created.id)).not.toHaveProperty("blockers");
   expect(() => command(state, "/tasks", { title: "Invalid", linkedManufacturingIds: ["old"] })).toThrow("removed Task fields");
   expect(() => command(state, "/manufacturing", { title: "Duplicate work" })).toThrow("nothing was synced");
+});
+
+test("local QA review attribution follows the current mentor or admin actor, not payload metadata or roster order", () => {
+  const state = snapshot();
+  state.members.push({ id: "participant", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" });
+  state.members.push(
+    { id: "mentor-a", name: "Mentor A", email: "a@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "mentor-b", name: "Mentor B", email: "b@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "admin", name: "Admin", email: "admin@example.com", role: "admin", elevated: true, seasonId: "season" },
+  );
+  state.tasks[0].status = "waiting-for-qa";
+  const submitted = command(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    createdByMemberId: "participant", participantIds: ["participant"], mentorId: "mentor-a", requestedById: "participant",
+    summary: "Local QA", notes: "Checked assembly", result: "minor-fix", status: "reviewed", actorMemberId: "mentor-a", reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z",
+  }, "POST", "mentor-b").item;
+
+  expect(state.reports).toContainEqual(expect.objectContaining({ id: submitted.id, reportType: "qa", status: "reviewed", reviewedById: "mentor-b", summary: "Local QA" }));
+  expect(state.reports[0].reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  state.tasks[0].status = "waiting-for-qa";
+  const adminReview = command<{ item: BootstrapPayload["reports"][number] }>(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    participantIds: ["participant"], summary: "Admin QA", notes: "Admin checked", result: "pass", status: "reviewed",
+    reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z",
+  }, "POST", "admin").item;
+  expect(adminReview).toMatchObject({ reviewedById: "admin", status: "reviewed" });
+  expect(adminReview.reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  expect(() => command(state, "/qa-reports/submit", { reportType: "qa", projectId: "missing" })).toThrow("incomplete or no longer valid");
+  expect(() => command(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    participantIds: ["participant"], summary: "Unlinked", notes: "", result: "pass", status: "reviewed",
+  }, "POST", "participant")).toThrow("local mentor or admin reviewer is required");
+});
+
+test("local QA review returns an unfinalizable pass to work and allows another request", () => {
+  const state = snapshot();
+  state.members.push(
+    { id: "participant", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" },
+    { id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" },
+  );
+  state.tasks[0] = { ...state.tasks[0], ownerId: "participant", assigneeIds: ["participant"], mentorId: "mentor", status: "in-progress", isBlocked: false, isWaitingOnDependency: false };
+  const request = command<{ item: BootstrapPayload["qaRequests"][number] }>(state, "/qa-requests", {
+    projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], subject: "Ready for QA", mentorId: "mentor",
+    requestedById: "mentor", createdAt: "1999-01-01", status: "cancelled",
+  }, "POST", "participant").item;
+  expect(request).toMatchObject({ requestedById: "participant", status: "requested" });
+
+  command(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], participantIds: ["participant"],
+    summary: "Pass without work log", notes: "Reviewed", result: "pass", status: "reviewed",
+  }, "POST", "mentor");
+  expect(state.qaRequests).toEqual([]);
+  expect(state.tasks[0].status).toBe("in-progress");
+
+  state.workLogs.push({ id: "work-log", taskId: "task", date: "2026-10-16", hours: 1, participantIds: ["participant"], notes: "Work completed" });
+  expect(command(state, "/qa-requests", {
+    projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], subject: "Ready again", mentorId: "mentor",
+  }, "POST", "participant").item).toMatchObject({ requestedById: "participant", status: "requested" });
+});
+
+test("local QA requests require a task and actual requester and cancellation preserves other workflow state", () => {
+  const state = snapshot();
+  state.members.push(
+    { id: "participant", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" },
+    { id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" },
+  );
+  state.tasks[0] = { ...state.tasks[0], ownerId: "participant", assigneeIds: ["participant"], mentorId: "mentor", status: "in-progress", isBlocked: false, isWaitingOnDependency: false };
+  const base = { projectId: "robot-project", subject: "QA request", mentorId: "mentor" };
+  expect(() => command(state, "/qa-requests", { ...base, targetRefs: [], requestedById: "participant" }, "POST", "participant")).toThrow("exactly one task");
+  expect(() => command(state, "/qa-requests", { ...base, targetRefs: [{ kind: "task", id: "task" }], requestedById: "participant" })).toThrow("roster member is required");
+  const request = command<{ item: BootstrapPayload["qaRequests"][number] }>(state, "/qa-requests", {
+    ...base, targetRefs: [{ kind: "task", id: "task" }], requestedById: "mentor",
+  }, "POST", "participant").item;
+  const second = { ...request, id: "second-active-request", status: "in-review" as const };
+  const unrelated = { ...request, id: "unrelated-request", targetRefs: [{ kind: "task" as const, id: "completed-task" }] };
+  state.qaRequests.push(second, unrelated);
+  state.tasks.push({ ...state.tasks[0], id: "completed-task", status: "complete" });
+
+  const queuedBeforeDelete = structuredClone(state.qaRequests);
+  expect(() => command(state, `/qa-requests/${request.id}`, {}, "DELETE")).toThrow("retained as workflow history");
+  expect(state.qaRequests).toEqual(queuedBeforeDelete);
+  expect(state.tasks[0].status).toBe("waiting-for-qa");
+
+  expect(() => command(state, `/qa-requests/${request.id}`, { requestedById: "mentor" }, "PATCH")).toThrow("request details are read-only");
+  expect(state.qaRequests.find((item) => item.id === request.id)?.requestedById).toBe("participant");
+  command(state, `/qa-requests/${request.id}`, { status: "cancelled" }, "PATCH");
+  expect(state.tasks[0].status).toBe("waiting-for-qa");
+  command(state, `/qa-requests/${second.id}`, { status: "cancelled" }, "PATCH");
+  expect(state.tasks[0].status).toBe("in-progress");
+  expect(state.qaRequests.map((item) => item.id)).toEqual([request.id, second.id, unrelated.id]);
+  expect(state.qaRequests.slice(0, 2).map((item) => item.status)).toEqual(["cancelled", "cancelled"]);
+  command(state, `/qa-requests/${unrelated.id}`, { status: "cancelled" }, "PATCH");
+  expect(state.tasks.find((task) => task.id === "completed-task")?.status).toBe("complete");
+  expect(state.qaRequests.map((item) => item.id)).toEqual([request.id, second.id, unrelated.id]);
+});
+
+test("task QA requests require an assigned student or lead active in the task season", () => {
+  const makeState = () => {
+    const state = snapshot();
+    state.members.push(
+      { id: "student", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" },
+      { id: "lead", name: "Lead", email: "lead@example.com", role: "lead", elevated: true, seasonId: "season" },
+      { id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" },
+      { id: "admin", name: "Admin", email: "admin@example.com", role: "admin", elevated: true, seasonId: "season" },
+      { id: "other-season-lead", name: "Other Season Lead", email: "other@example.com", role: "lead", elevated: true, seasonId: "other-season", activeSeasonIds: ["other-season"] },
+    );
+    state.tasks[0] = { ...state.tasks[0], assigneeIds: ["student"], mentorId: "mentor", status: "in-progress", isBlocked: false, isWaitingOnDependency: false };
+    return state;
+  };
+  const payload = { projectId: "robot-project", targetRefs: [{ kind: "task" as const, id: "task" }], subject: "QA", mentorId: "mentor", requestedById: "student" };
+
+  for (const actorId of ["lead", "mentor", "admin"]) {
+    const state = makeState();
+    const before = structuredClone(state);
+    expect(() => command(state, "/qa-requests", payload, "POST", actorId)).toThrow("Only assigned students and leads");
+    expect(state).toEqual(before);
+  }
+
+  const outOfSeason = makeState();
+  outOfSeason.tasks[0].assigneeIds = ["other-season-lead"];
+  const beforeOutOfSeason = structuredClone(outOfSeason);
+  expect(() => command(outOfSeason, "/qa-requests", payload, "POST", "other-season-lead")).toThrow("Only assigned students and leads");
+  expect(outOfSeason).toEqual(beforeOutOfSeason);
+
+  const assignedLead = makeState();
+  assignedLead.tasks[0].assigneeIds = ["lead"];
+  const created = command<{ item: BootstrapPayload["qaRequests"][number] }>(assignedLead, "/qa-requests", payload, "POST", "lead").item;
+  expect(created).toMatchObject({ requestedById: "lead", status: "requested" });
+  expect(assignedLead.tasks[0].status).toBe("waiting-for-qa");
+});
+
+test("local task QA eligibility checks blocking risk records even when the task flag is stale", () => {
+  const state = snapshot();
+  state.members.push(
+    { id: "participant", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" },
+    { id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" },
+  );
+  state.tasks[0] = { ...state.tasks[0], ownerId: "participant", assigneeIds: ["participant"], mentorId: "mentor", status: "in-progress", isBlocked: false, isWaitingOnDependency: false };
+  state.risks.push({
+    id: "blocking-risk", projectId: "robot-project", title: "Block", detail: "", category: "other", severity: "high",
+    status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task" }],
+    mitigationTaskId: null, ownerGroupId: null, ownerMemberId: null, mitigationDueDate: null,
+    createdAt: "2026-10-16", updatedAt: "2026-10-16", resolvedAt: null,
+  });
+  expect(() => command(state, "/qa-requests", {
+    projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], subject: "Blocked", mentorId: "mentor",
+  }, "POST", "participant")).toThrow("no blocking risks");
+  expect(state.qaRequests).toEqual([]);
+  expect(state.tasks[0].status).toBe("in-progress");
+  expect(state.tasks[0].isBlocked).toBe(false);
+
+  state.tasks[0].status = "waiting-for-qa";
+  state.qaRequests.push({
+    id: "pending", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], subject: "Pending",
+    mentorId: "mentor", requestedById: "participant", createdAt: "2026-10-16", status: "requested",
+  });
+  const reportCount = state.reports.length;
+  expect(() => command(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], participantIds: ["participant"],
+    summary: "Blocked review", notes: "Must stay pending", result: "pass", status: "reviewed",
+  }, "POST", "mentor")).toThrow("no blocking risks");
+  expect(state.reports).toHaveLength(reportCount);
+  expect(state.qaRequests.map((request) => request.id)).toEqual(["pending"]);
+  expect(state.tasks[0].status).toBe("waiting-for-qa");
+});
+
+test("local finding retests use canonical finding history and replay operation IDs idempotently", () => {
+  const state = snapshot();
+  state.members.push(
+    { id: "mentor-a", name: "Mentor A", email: "a@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "mentor-b", name: "Mentor B", email: "b@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "admin", name: "Admin", email: "admin@example.com", role: "admin", elevated: true, seasonId: "season" },
+    { id: "student", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" },
+  );
+  state.testResults.push({ id: "test-result", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], title: "Drive test", status: "fail" });
+  state.testFindings.push({
+    id: "finding", reportId: null, testResultId: "test-result", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    title: "Loose fastener", detail: "Retorque", severity: "medium", status: "open", createdAt: "2026-10-16", updatedAt: "2026-10-16",
+  });
+  const payload = { operationId: "retest-1", sourceType: "test", result: "pass", notes: "Torque verified" };
+  const first = command(state, "/report-findings/finding/retest", { ...payload, actorMemberId: "mentor-a", reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z" }, "POST", "mentor-b").item;
+  const replay = command(state, "/report-findings/finding/retest", payload, "POST", "mentor-b").item;
+
+  expect(first).toEqual(replay);
+  expect(state.testFindings[0].status).toBe("resolved");
+  expect(state.testFindings[0].retests).toHaveLength(1);
+  expect(state.testFindings[0].retests![0]).toMatchObject({ operationId: "retest-1", sourceType: "test", reviewedById: "mentor-b", supersedesId: "test-result" });
+  expect(state.testFindings[0].retests![0].reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  const adminRetest = command<{ item: BootstrapPayload["testFindings"][number] }>(state, "/report-findings/finding/retest", { ...payload, operationId: "retest-admin", actorMemberId: "mentor-a", reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z" }, "POST", "admin").item;
+  expect(adminRetest.retests?.at(-1)).toMatchObject({ operationId: "retest-admin", reviewedById: "admin" });
+  expect(adminRetest.retests?.at(-1)?.reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  expect(() => command(state, "/report-findings/finding/retest", { ...payload, notes: "Different payload" })).toThrow("different retest payload");
+  expect(() => command(state, "/report-findings/finding/retest", { ...payload, operationId: "retest-student" }, "POST", "student")).toThrow("local mentor or admin reviewer is required");
+  expect(() => command(state, "/report-findings/finding/retest", { ...payload, operationId: "retest-unlinked" })).toThrow("local mentor or admin reviewer is required");
+});
+
+test("local purchase receipts preserve operation identity, stock updates and linked service decimals", () => {
+  const state = snapshot();
+  state.partDefinitions.push({ id: "bearing", seasonId: "season", name: "Bearing", partNumber: "B-1", revision: "A", iteration: 1, isArchived: false, type: "bearing", defaultAcquisitionMethod: "purchase-cots", materialId: "steel", description: "" });
+  state.materials.push({ id: "steel", name: "Steel", category: "metal", unit: "kg", onHandQuantity: 0, reorderPoint: 0, location: "", preferredVendorId: null, notes: "" });
+  state.purchaseItems.push({
+    id: "part-purchase", taskId: "task", kind: "cots-goods", partDefinitionId: "bearing", materialId: "steel", title: "Bearing", quantity: 3,
+    quotes: [], selectedQuoteId: null, approvalStatus: "approved", approvedById: null, approvedAt: null, purchaseOrderNumber: null,
+    orderStatus: "ordered", finalCost: null, expectedDeliveryDate: null, trackingNumber: null, trackingUrl: null, orderedAt: null, deliveredAt: null,
+  });
+  const payload = { operationId: "receipt-1", quantity: 2, location: "Shelf A" };
+  const first = command<{ receipt: { quantity: number; partInstanceIds: string[] } }>(state, "/purchases/part-purchase/receipts", payload).receipt;
+  const replay = command<{ receipt: { quantity: number; partInstanceIds: string[] } }>(state, "/purchases/part-purchase/receipts", payload).receipt;
+  expect(replay).toEqual(first);
+  expect(state.purchaseItems[0].receipts).toHaveLength(1);
+  expect(state.partInstances).toHaveLength(2);
+  expect(state.materials[0].onHandQuantity).toBe(0);
+  expect(() => command(state, "/purchases/part-purchase/receipts", { ...payload, quantity: 1 })).toThrow("different receipt payload");
+  expect(() => command(state, "/purchases/part-purchase/receipts", { ...payload, operationId: "fractional-part", quantity: 1.5 })).toThrow("whole number");
+
+  state.purchaseItems.push({ ...state.purchaseItems[0], id: "material-purchase", partDefinitionId: null, quantity: 3, receipts: [] });
+  command(state, "/purchases/material-purchase/receipts", { operationId: "material-receipt", quantity: 0.5, location: "Material shelf" });
+  expect(state.materials[0]).toMatchObject({ onHandQuantity: 0.5, location: "Material shelf" });
+
+  state.purchaseItems.push({ ...state.purchaseItems[0], id: "service-purchase", kind: "manufacturing-service", quantity: 3, receipts: [] });
+  const serviceReceipt = command<{ receipt: { quantity: number; partInstanceIds: string[] } }>(state, "/purchases/service-purchase/receipts", { operationId: "service-receipt", quantity: 1.5, location: "Shop" }).receipt;
+  expect(serviceReceipt.quantity).toBe(1.5);
+  expect(serviceReceipt.partInstanceIds).toEqual([]);
 });
 
 test("local Tasks derive blocked state from canonical Risks and dependencies", () => {

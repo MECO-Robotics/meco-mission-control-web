@@ -11,7 +11,6 @@ describe("RobotMapCanvasActions", () => {
   it("keeps destructive reset behind a confirmation panel", () => {
     const initialMarkup = renderToStaticMarkup(
       React.createElement(RobotMapCanvasActions, {
-        onAddSubsystem: jest.fn(),
         onResetLayout: jest.fn(),
       }),
     );

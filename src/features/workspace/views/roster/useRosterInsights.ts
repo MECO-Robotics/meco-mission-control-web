@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 
-import { fetchRosterInsights } from "@/lib/auth";
+import { fetchRosterInsights } from "@/lib/auth/records/roster";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RosterInsightsResponse } from "@/types/rosterInsights";
 

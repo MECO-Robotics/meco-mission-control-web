@@ -21,7 +21,7 @@
   border: 1px solid var(--border-base);
   border-radius: 8px;
   background: var(--bg-panel);
-  box-shadow: 0 10px 20px rgba(15, 28, 52, 0.14);
+  box-shadow: var(--shadow-overlay);
 }
 
 .sidebar-settings-menu[data-open="true"] .sidebar-settings-popover {
@@ -98,7 +98,7 @@
 
 .sidebar-settings-menu-value {
   color: var(--text-copy);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;

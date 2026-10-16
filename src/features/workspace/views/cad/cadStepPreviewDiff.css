@@ -5,7 +5,7 @@
 }
 
 .cad-step-preview-group {
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  border: 1px solid var(--border-base);
   border-radius: 8px;
   display: grid;
   gap: 8px;
@@ -26,26 +26,26 @@
 }
 
 .cad-step-preview-item {
-  border-left: 3px solid rgba(37, 99, 235, 0.42);
+  border-left: 1px solid var(--border-base);
   display: grid;
   gap: 2px;
   padding-left: 9px;
 }
 
 .cad-step-preview-item[data-tone="added"] {
-  border-left-color: rgba(22, 163, 74, 0.65);
+  border-left-color: var(--status-success-text);
 }
 
 .cad-step-preview-item[data-tone="removed"] {
-  border-left-color: rgba(220, 38, 38, 0.65);
+  border-left-color: var(--status-danger-text);
 }
 
 .cad-step-preview-item[data-tone="warning"] {
-  border-left-color: rgba(245, 158, 11, 0.75);
+  border-left-color: var(--status-warning-text);
 }
 
 .cad-step-preview-item span {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.78rem;
 }
 

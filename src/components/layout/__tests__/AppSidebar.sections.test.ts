@@ -35,6 +35,22 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain('aria-label="Parts"');
     expect(markup).not.toContain("sidebar-section-heading");
   });
+  it("opens nested view selectors on hover or keyboard focus when folded", () => {
+    const markup = renderSidebar([], "worklogs", { isCollapsed: true, worklogsView: "activity" });
+
+    expect(markup).toContain('aria-label="Activity views" class="sidebar-nested-nav sidebar-nested-nav-compact"');
+    expect(markup).toContain('<p class="sidebar-nested-nav-title">Activity</p>');
+    expect(markup).toContain('aria-label="Work logs"');
+    expect(markup).toContain('aria-label="Changes"');
+    expect(markup).not.toMatch(/<button[^>]*>Activity<\/button>/);
+    expect(markup).toMatch(/<div class="sidebar-nav-group" data-has-compact-subitems="true">[\s\S]*?data-tutorial-target="sidebar-view-work-activity"/);
+    expect(markup).toMatch(/<div class="sidebar-nav-group"><button(?=[^>]*data-tutorial-target="sidebar-view-resources-materials")/);
+
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
+    expect(sidebarCss).toContain('.sidebar-nav-group[data-has-compact-subitems="true"]:hover .sidebar-nested-nav-compact');
+    expect(sidebarCss).toContain('.sidebar-nav-group[data-has-compact-subitems="true"]:focus-within .sidebar-nested-nav-compact');
+    expect(sidebarCss).toMatch(/\.sidebar-nested-nav-title\s*\{[^}]*font-size:\s*0\.7rem;[^}]*pointer-events:\s*none;/);
+  });
   it("keeps unavailable Resources subitems visible and openable", () => {
     const markup = renderSidebar([], "inventory");
     expect(markup).toContain('data-enabled="false"');
@@ -58,5 +74,27 @@ describe("flat sidebar navigation", () => {
     expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-structure")(?=[^>]*data-robot-disabled="true")(?=[^>]*aria-disabled="true")[^>]*>/);
     const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
     expect(sidebarCss).toMatch(/\.sidebar-nav-item\[data-robot-disabled="true"\]\s*\{[^}]*opacity:\s*0\.48;[^}]*cursor:\s*not-allowed;/);
+  });
+
+  it("uses theme-aware colors for nested navigation and its keyboard focus ring", () => {
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
+    expect(sidebarCss).toContain("border-left: 1px solid var(--border-base)");
+    expect(sidebarCss).toContain("color: var(--text-copy)");
+    expect(sidebarCss).toContain("background: var(--meco-soft-blue)");
+    expect(sidebarCss).toContain("color: var(--text-title)");
+    expect(sidebarCss).toContain("outline: 2px solid var(--status-info-text)");
+    expect(sidebarCss).not.toMatch(/var\(--(?:border-subtle|text-secondary|sidebar-active-bg|text-primary|focus-ring),/);
+  });
+
+  it("keeps shell collapse immediate and disables remaining chrome transitions for reduced motion", () => {
+    const motionCss = readFileSync("src/app/styles/shell/layout/motion-a.css", "utf8");
+    const reducedMotionRules = motionCss.split("@media (prefers-reduced-motion: reduce)")[1];
+    const frameCss = readFileSync("src/app/styles/shell/layout/frame.css", "utf8");
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-core.css", "utf8");
+    expect(frameCss).not.toMatch(/transition:\s*[^;]*padding/);
+    expect(sidebarCss).not.toMatch(/transition:\s*[^;]*width/);
+    expect(reducedMotionRules).toContain(".app-topbar-brand");
+    expect(reducedMotionRules).toContain(".app-topbar-brand-icon");
+    expect(reducedMotionRules).toContain("transition: none");
   });
 });

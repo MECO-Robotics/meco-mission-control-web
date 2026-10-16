@@ -22,6 +22,14 @@ import type {
   CadStepSnapshotRecord
 } from "../model/cadStepTypes";
 
+function getCadWorkflowErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/prisma\.\w+\.\w+\(\)|invocation in \/|can't reach database server/i.test(message)) {
+    return "CAD service is unavailable. Check that the local database is running, then try again.";
+  }
+  return message;
+}
+
 export function useCadStepWorkflow({
   projectId,
   seasonId,
@@ -126,7 +134,7 @@ export function useCadStepWorkflow({
 
   const handleCadSnapshotDetailsError = useCallback((snapshotId: string, error: unknown) => {
     if (selectedCadSnapshotIdRef.current === snapshotId) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(getCadWorkflowErrorMessage(error));
     }
   }, []);
 
@@ -134,7 +142,7 @@ export function useCadStepWorkflow({
     let isActive = true;
     void loadCadSnapshots().catch((error) => {
       if (isActive) {
-        setMessage(error instanceof Error ? error.message : String(error));
+        setMessage(getCadWorkflowErrorMessage(error));
       }
     });
     return () => {
@@ -174,7 +182,7 @@ export function useCadStepWorkflow({
       );
     } catch (error) {
       if (isCurrentUpload(requestId, requestedProjectId, requestedSeasonId)) {
-        setMessage(error instanceof Error ? error.message : String(error));
+        setMessage(getCadWorkflowErrorMessage(error));
       }
     } finally {
       if (uploadRequestRef.current === requestId) {
@@ -216,7 +224,7 @@ export function useCadStepWorkflow({
         setMessage(input.applyToFuture ? "Mapping confirmed and saved for future STEP imports." : "Mapping confirmed for this snapshot.");
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(getCadWorkflowErrorMessage(error));
     } finally {
       setIsSavingMapping(false);
     }
@@ -235,7 +243,7 @@ export function useCadStepWorkflow({
         setMessage("Hierarchy decision applied.");
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(getCadWorkflowErrorMessage(error));
     } finally {
       setIsSavingMapping(false);
     }
@@ -275,7 +283,7 @@ export function useCadStepWorkflow({
       await loadCadSnapshots(selectedCadSnapshotId);
       setMessage("CAD snapshot finalized.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(getCadWorkflowErrorMessage(error));
     } finally {
       setIsFinalizing(false);
     }

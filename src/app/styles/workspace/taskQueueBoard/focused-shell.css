@@ -73,8 +73,8 @@
   height: calc(1.45rem * var(--task-queue-zoom, 1));
   padding: 0 calc(0.45rem * var(--task-queue-zoom, 1));
   border-radius: 999px;
-  background: rgba(22, 71, 142, 0.1);
-  color: var(--official-blue);
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
   font-size: calc(0.8rem * var(--task-queue-zoom, 1));
   font-weight: 800;
   line-height: 1;

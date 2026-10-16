@@ -74,6 +74,16 @@ export interface PurchaseQuoteRecord {
   quotedAt: string | null;
 }
 
+export interface PurchaseReceiptRecord {
+  id: string;
+  /** Client operation key; absent on receipts created before idempotent receiving. */
+  operationId?: string;
+  quantity: number;
+  location: string;
+  receivedAt: string;
+  partInstanceIds: string[];
+}
+
 export interface PurchaseItemRecord {
   id: string;
   taskId: string;
@@ -95,6 +105,7 @@ export interface PurchaseItemRecord {
   trackingUrl: string | null;
   orderedAt: string | null;
   deliveredAt: string | null;
+  receipts?: PurchaseReceiptRecord[];
 }
 
 export interface VendorRecord {

@@ -26,7 +26,7 @@
   width: var(--task-queue-board-column-width, 15.5rem);
 }
 
-:is(.task-queue-board, .worklog-activity-board) .task-queue-board-column {
+.task-queue-board .task-queue-board-column {
   flex: 0 0 var(--task-queue-board-column-width, 15.5rem);
   width: var(--task-queue-board-column-width, 15.5rem);
 }
@@ -36,13 +36,13 @@
   min-height: 0;
 }
 
-:is(.task-queue-board, .worklog-activity-board) .task-queue-board-column {
+.task-queue-board .task-queue-board-column {
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   min-height: 0;
 }
 
-:is(.task-queue-board, .worklog-activity-board) .task-queue-board-column-body {
+.task-queue-board .task-queue-board-column-body {
   align-content: start;
   min-height: 0;
   overflow-y: auto;

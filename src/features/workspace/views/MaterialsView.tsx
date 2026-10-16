@@ -157,12 +157,6 @@ export function MaterialsView({
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Materials manager</h2>
-        </div>
-      </div>
-
       <div className={`table-shell ${materialsFilterMotionClass}`}>
         <div
           className="ops-table ops-table-header materials-table"
@@ -261,8 +255,6 @@ export function MaterialsView({
 
         {filteredMaterials.length === 0 ? (
           <WorkspaceEmptyState
-            actionLabel={hasMaterialFilters ? undefined : "Add material"}
-            onAction={hasMaterialFilters ? undefined : openCreateMaterialModal}
             reason={
               hasMaterialFilters
                 ? "The current search or filters hide every material record in this scope."

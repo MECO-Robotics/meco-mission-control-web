@@ -7,18 +7,16 @@ const scopePanels = (sidebarCatalog.find((item) => item.id === "scope-panels")?.
 const POPUP_VERTICAL_MARGIN = 8;
 
 function clampPopupTop(
-  shellElement: HTMLDivElement | null,
   popupElement: HTMLDivElement | null,
   preferredTop: number,
 ) {
-  if (!shellElement || !popupElement) {
+  if (!popupElement || typeof window === "undefined") {
     return preferredTop;
   }
 
-  const shellHeight = shellElement.getBoundingClientRect().height;
   const popupHeight = popupElement.getBoundingClientRect().height;
   const minimumTop = POPUP_VERTICAL_MARGIN;
-  const maximumTop = Math.max(minimumTop, shellHeight - popupHeight - POPUP_VERTICAL_MARGIN);
+  const maximumTop = Math.max(minimumTop, window.innerHeight - popupHeight - POPUP_VERTICAL_MARGIN);
 
   return Math.min(Math.max(preferredTop, minimumTop), maximumTop);
 }
@@ -35,6 +33,7 @@ export function useAppSidebarPopupState({
   const projectTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const [projectPopupTop, setProjectPopupTop] = useState(0);
+  const [projectPopupLeft, setProjectPopupLeft] = useState(0);
   const [isProjectPopupOpen, setIsProjectPopupOpen] = useState(false);
 
   useEffect(() => {
@@ -81,7 +80,7 @@ export function useAppSidebarPopupState({
       return;
     }
 
-    const clampedTop = clampPopupTop(sidebarShellRef.current, projectPopupRef.current, projectPopupTop);
+    const clampedTop = clampPopupTop(projectPopupRef.current, projectPopupTop);
     if (Math.abs(clampedTop - projectPopupTop) > 0.5) {
       setProjectPopupTop(clampedTop);
     }
@@ -91,9 +90,11 @@ export function useAppSidebarPopupState({
     isProjectPopupOpen,
     projectPopupRef,
     projectPopupTop,
+    projectPopupLeft,
     projectTriggerRef,
     setIsProjectPopupOpen,
     setProjectPopupTop,
+    setProjectPopupLeft,
     sidebarShellRef,
     scopePanels,
   };

@@ -6,6 +6,7 @@ import { CompactFilterMenu } from "./workspaceCompactFilterMenu";
 
 export function WorkspaceSortMenu<T extends SortDirection>({
   activeCount = 1,
+  ariaLabel,
   direction,
   field,
   label,
@@ -14,6 +15,7 @@ export function WorkspaceSortMenu<T extends SortDirection>({
   options,
 }: {
   activeCount?: number;
+  ariaLabel?: string;
   direction: T;
   field: string;
   label: string;
@@ -24,7 +26,7 @@ export function WorkspaceSortMenu<T extends SortDirection>({
   return (
     <CompactFilterMenu
       activeCount={activeCount}
-      ariaLabel={`Sort ${label}`}
+      ariaLabel={ariaLabel ?? `Sort ${label}`}
       buttonLabel="Sort"
       className="task-queue-sort-menu"
       icon={<ArrowDownUp size={14} />}

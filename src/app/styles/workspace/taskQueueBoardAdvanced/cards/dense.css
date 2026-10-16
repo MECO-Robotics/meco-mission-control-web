@@ -1,9 +1,9 @@
 .task-queue-board-card-priority-medium {
-  color: #ca8a04;
+  color: var(--status-warning-text);
 }
 
 .task-queue-board-card-priority-low {
-  color: #2563eb;
+  color: var(--status-neutral-text);
 }
 
 .task-queue-board-card-meta .task-queue-board-card-person {

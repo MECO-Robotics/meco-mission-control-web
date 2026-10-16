@@ -86,18 +86,22 @@ describe("TimelineView", () => {
     expect(css).toMatch(/\.timeline-task-status-logo\s*\{[\s\S]*width:\s*var\(--timeline-task-status-size\)/);
     expect(css).toMatch(/\.timeline-task-status-logo\.is-compact\s*\{[\s\S]*--timeline-task-status-track-height:\s*1rem/);
     expect(css).toMatch(/\.timeline-task-status-logo\.is-compact\s*\{[\s\S]*--timeline-task-status-size:\s*0\.9rem/);
-    expect(css).toMatch(/\.timeline-task-status-logo-signal-in-progress\s*\{[\s\S]*color:\s*#b77900/);
-    expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-for-qa\s*\{[\s\S]*color:\s*#275098/);
+    expect(css).toMatch(/\.timeline-task-status-logo-signal-in-progress\s*\{[\s\S]*color:\s*var\(--status-warning-text\)/);
+    expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-for-qa\s*\{[\s\S]*color:\s*var\(--status-info-text\)/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-blocked\s*\{[\s\S]*color:\s*var\(--official-red\)/);
-    expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-on-dependency\s*\{[\s\S]*color:\s*#c25a14/);
+    const timelineTaskStatusCss = readFileSync(
+      join(process.cwd(), "src/app/styles/workspace/timelineTaskStatus.css"),
+      "utf8",
+    );
+    expect(timelineTaskStatusCss).toMatch(/\.timeline-task-status-logo-signal-waiting-on-dependency\s*\{[\s\S]*color:\s*var\(--status-warning-text\)/);
     expect(css).toMatch(
-      /\.timeline-bar \.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*--timeline-reveal-color:/,
+      /\.timeline-bar\s*\{[\s\S]*--timeline-reveal-color:/,
     );
     expect(css).toMatch(
       /\.timeline-bar \.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*text-overflow:\s*ellipsis/,
     );
-    expect(css).toMatch(/\.timeline-in-progress\s*\{[\s\S]*--timeline-task-status-accent:\s*#b77900/);
-    expect(css).toMatch(/\.timeline-complete\s*\{[\s\S]*--timeline-task-status-accent:\s*#246847/);
+    expect(css).toMatch(/\.timeline-in-progress\s*\{[\s\S]*--timeline-task-status-accent:\s*var\(--status-warning-text\)/);
+    expect(css).toMatch(/\.timeline-complete\s*\{[\s\S]*--timeline-task-status-accent:\s*var\(--status-success-text\)/);
   });
 
   it("fades timeline task bars when tasks continue outside the scoped view", () => {

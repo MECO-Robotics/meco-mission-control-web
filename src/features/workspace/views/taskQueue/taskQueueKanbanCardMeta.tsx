@@ -8,10 +8,10 @@ import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspa
 import { readTaskAssigneeIds, readTaskSubsystemIds, readTaskWorkstreamIds, formatSubsystemNames, formatWorkstreamNames } from "./taskQueueKanbanCard";
 
 const TASK_QUEUE_CARD_PRIORITY_ACCENTS: Record<TaskRecord["priority"], string> = {
-  critical: "#b42318",
-  high: "#e5484d",
-  medium: "#c58a00",
-  low: "#2563eb",
+  critical: "var(--status-danger-text)",
+  high: "var(--status-danger-text)",
+  medium: "var(--status-warning-text)",
+  low: "var(--status-neutral-text)",
 };
 
 export function getTaskQueueCardPriorityAccentColor(priority: TaskRecord["priority"]) {

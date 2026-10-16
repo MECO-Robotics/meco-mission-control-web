@@ -136,7 +136,7 @@ export function CompactFilterMenu({
         aria-controls={menuId}
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        aria-label={ariaLabel}
+        aria-label={activeCount > 0 ? `${ariaLabel}, ${activeCount} active` : ariaLabel}
         className="toolbar-filter-menu-button task-queue-filter-menu-button"
         onClick={() => {
           onButtonClick?.();

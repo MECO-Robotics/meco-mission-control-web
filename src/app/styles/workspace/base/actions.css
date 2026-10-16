@@ -11,6 +11,14 @@
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
+.kanban-draggable-card,
+.task-queue-board-column {
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
 .primary-action,
 .secondary-action,
 .danger-action,
@@ -35,9 +43,18 @@
 }
 
 .danger-action {
-  background: #fff1f2;
-  color: #b42318;
-  border: 1px solid #fda29b;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  border: 1px solid color-mix(in srgb, var(--status-danger-text) 42%, transparent);
+}
+
+button.ops-row {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
 .primary-action:hover,
@@ -51,6 +68,24 @@
 .member-row:hover,
 .tab:hover {
   transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-action,
+  .secondary-action,
+  .danger-action,
+  .icon-button,
+  .subsystem-toggle,
+  .timeline-day-number-button,
+  .timeline-bar,
+  .subsystem-manager-row,
+  .ops-row,
+  .member-row,
+  .kanban-draggable-card,
+  .task-queue-board-column {
+    transition: none;
+  }
+
 }
 
 .editable-hover-target {

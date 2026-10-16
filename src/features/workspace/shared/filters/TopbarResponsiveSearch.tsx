@@ -1,5 +1,6 @@
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { useTopbarSearchOverride } from "./TopbarSearchOverride";
 
 import {
   ACTION_BUTTON_WIDTH_PX,
@@ -59,8 +60,19 @@ export function TopbarResponsiveSearch({
   tutorialTarget,
   value,
 }: TopbarResponsiveSearchProps) {
+  const searchOverride = useTopbarSearchOverride()?.active;
+  const displayedValue = searchOverride?.value ?? value;
+  const displayedPlaceholder = searchOverride ? `Search ${searchOverride.label}…` : placeholder;
+  const displayedAriaLabel = searchOverride ? `Search ${searchOverride.label} options` : ariaLabel;
+  const handleChange = searchOverride?.onChange ?? onChange;
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const hasSearchOverride = Boolean(searchOverride);
+  useEffect(() => {
+    if (!hasSearchOverride) return;
+    const frame = window.requestAnimationFrame(() => searchInputRef.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [hasSearchOverride]);
   const resolvedMode = mode ?? "dynamic-label";
   const compactLabel =
     compactPlaceholder && compactPlaceholder.trim().length > 0 ? compactPlaceholder.trim() : "Search";
@@ -82,9 +94,10 @@ export function TopbarResponsiveSearch({
     legacyIconWidth,
     legacySwitchWidth,
     onCompactModeChange,
-    placeholder,
+    placeholder: displayedPlaceholder,
     resolvedActionCount,
     resolvedMode,
+    forceCompactAtNarrowWidth: portalToTopbar,
     searchRef,
     shouldUseCollisionDetection,
   });
@@ -93,6 +106,7 @@ export function TopbarResponsiveSearch({
     (searchMode === "compact" || (searchWidth !== null && searchWidth <= legacySwitchWidth))
       ? compactLabel
       : placeholder;
+  const activePlaceholder = searchOverride ? displayedPlaceholder : resolvedPlaceholder;
   const rootStyle =
     resolvedActionCount > 0
       ? ({
@@ -108,25 +122,25 @@ export function TopbarResponsiveSearch({
   const layout = (
     <TopbarResponsiveSearchLayout
       actions={actions}
-      ariaLabel={ariaLabel}
+      ariaLabel={displayedAriaLabel}
       compactLabel={compactLabel}
       compactRef={compactRef}
-      hasCompactLabelVariant={compactLabel !== placeholder}
-      isActive={value.trim() !== ""}
+      hasCompactLabelVariant={compactLabel !== activePlaceholder}
+      isActive={displayedValue.trim() !== ""}
       isCompactOpen={isCompactOpen}
       isDynamicMode={resolvedMode === "dynamic-label"}
       isIconMode={searchMode === "icon"}
       onActionsMouseDown={onActionsMouseDown}
-      onChange={onChange}
-      placeholder={placeholder}
-      resolvedPlaceholder={resolvedPlaceholder}
+      onChange={handleChange}
+      placeholder={activePlaceholder}
+      resolvedPlaceholder={activePlaceholder}
       rootClassName={`topbar-responsive-search${actions ? " has-actions" : ""}${className ? ` ${className}` : ""}`}
       rootStyle={rootStyle}
       searchInputRef={searchInputRef}
       searchRef={searchRef}
       setIsCompactOpen={setIsCompactOpen}
       tutorialTarget={tutorialTarget}
-      value={value}
+      value={displayedValue}
     />
   );
 

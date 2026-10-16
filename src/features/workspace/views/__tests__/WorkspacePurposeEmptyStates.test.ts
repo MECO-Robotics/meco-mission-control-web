@@ -13,7 +13,7 @@ import { WorkflowView } from "@/features/workspace/views/WorkflowView";
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("workspace purpose empty states", () => {
-  it("explains empty materials and offers the create action", () => {
+  it("explains empty materials and keeps creation in the shared topbar menu", () => {
     const markup = renderToStaticMarkup(
       React.createElement(MaterialsView, {
         bootstrap: EMPTY_BOOTSTRAP,
@@ -24,7 +24,8 @@ describe("workspace purpose empty states", () => {
 
     expect(markup).toContain("Manage consumable and raw material inventory here");
     expect(markup).toContain("No stock, vendor, location, or reorder threshold records");
-    expect(markup).toContain("Add material");
+    expect(markup).toContain('aria-label="Add material"');
+    expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No materials match the current filters.");
   });
 
@@ -62,7 +63,7 @@ describe("workspace purpose empty states", () => {
     expect(markup).not.toContain("No documents artifacts match the current filters.");
   });
 
-  it("explains empty workflows and offers the create action", () => {
+  it("explains empty workflows and keeps creation in the shared topbar menu", () => {
     const markup = renderToStaticMarkup(
       React.createElement(WorkflowView, {
         artifacts: [],
@@ -75,7 +76,8 @@ describe("workspace purpose empty states", () => {
 
     expect(markup).toContain("Organize project workstreams here");
     expect(markup).toContain("No workflow lanes have been created");
-    expect(markup).toContain("Add workflow");
+    expect(markup).toContain('aria-label="Add workflow"');
+    expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No workflows match the current search.");
   });
 
@@ -120,7 +122,8 @@ describe("workspace purpose empty states", () => {
 
     expect(markup).toContain("Catalog reusable part definitions here");
     expect(markup).toContain("No reusable parts have been defined");
-    expect(markup).toContain("Add part definition");
+    expect(markup).toContain('aria-label="Add part"');
+    expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No part definitions match the current search.");
     expect(markup).not.toContain("No part instances match the current filters.");
   });

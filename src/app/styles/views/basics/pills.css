@@ -100,6 +100,6 @@
 }
 
 .priority-critical {
-  background: rgba(234, 28, 45, 0.12);
-  color: var(--official-red);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }

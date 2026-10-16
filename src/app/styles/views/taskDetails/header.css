@@ -26,10 +26,11 @@
   color: var(--text-title);
 }
 
-.modal-card .icon-button.task-details-close-button {
-  color: #fff !important;
-  border: 1px solid color-mix(in srgb, var(--official-red) 72%, black) !important;
-  background: linear-gradient(135deg, #ea1c2d, #b81d2c) !important;
+.modal-card .icon-button.task-details-close-button,
+.risk-review-context .icon-button.task-details-close-button {
+  color: var(--official-red);
+  border: 0;
+  background: transparent;
   font-weight: 900;
   border-radius: 999px;
   width: 2rem;
@@ -39,14 +40,15 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-  box-shadow: 0 0 0 1px rgba(234, 28, 45, 0.12);
+  box-shadow: none;
 }
 
 .modal-card .icon-button.task-details-close-button:hover,
-.modal-card .icon-button.task-details-close-button:focus-visible {
-  background: linear-gradient(135deg, #f02c3d, #8f1320) !important;
-  color: #fff !important;
-  border-color: color-mix(in srgb, var(--official-red) 85%, black) !important;
+.modal-card .icon-button.task-details-close-button:focus-visible,
+.risk-review-context .icon-button.task-details-close-button:hover,
+.risk-review-context .icon-button.task-details-close-button:focus-visible {
+  background: transparent;
+  color: var(--official-red);
 }
 
 .task-details-header {
@@ -115,17 +117,17 @@
 }
 
 .task-detail-header-status-icon-signal-not-started {
-  color: #54627b;
+  color: var(--status-neutral-text);
 }
 
 .task-detail-header-status-icon-signal-in-progress {
-  color: #b77900;
+  color: var(--status-warning-text);
 }
 
 .task-detail-header-status-icon-signal-waiting-for-qa {
-  color: #275098;
+  color: var(--status-info-text);
 }
 
 .task-detail-header-status-icon-signal-complete {
-  color: #246847;
+  color: var(--status-success-text);
 }

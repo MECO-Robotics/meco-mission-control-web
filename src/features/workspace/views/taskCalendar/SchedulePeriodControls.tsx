@@ -26,11 +26,7 @@ export function SchedulePeriodControls({
       aria-label={presentation === "timeline" ? "Timeline period controls" : `${presentation} period controls`}
       className={`timeline-period-controls${range === "week" ? " is-week" : ""}${isTimeline && range === "all" ? " is-all" : ""}`}
     >
-      <ScheduleRangeSelector
-        onChange={onRangeChange}
-        presentation={presentation}
-        value={range}
-      />
+      <ScheduleRangeSelector onChange={onRangeChange} presentation={presentation} value={range} />
       {showsPeriodNavigation ? (
         <>
           <span aria-hidden="true" className="timeline-period-divider" />

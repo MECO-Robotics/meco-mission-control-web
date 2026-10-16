@@ -10,8 +10,8 @@ export function WorkspaceSubsystemsSection(props: WorkspaceContentPanelsViewProp
     disablePanelAnimations = false,
     membersById,
     openCreateMechanismModal,
-    openCreatePartInstanceModal,
     openCreateSubsystemModal,
+    openCreatePartInstanceModal,
     openEditMechanismModal,
     openEditPartInstanceModal,
     openEditSubsystemModal,
@@ -38,8 +38,8 @@ export function WorkspaceSubsystemsSection(props: WorkspaceContentPanelsViewProp
             bootstrap={bootstrap}
             membersById={membersById}
             openCreateMechanismModal={openCreateMechanismModal}
-            openCreatePartInstanceModal={openCreatePartInstanceModal}
             openCreateSubsystemModal={openCreateSubsystemModal}
+            openCreatePartInstanceModal={openCreatePartInstanceModal}
             openEditMechanismModal={openEditMechanismModal}
             openEditPartInstanceModal={openEditPartInstanceModal}
             openEditSubsystemModal={openEditSubsystemModal}

@@ -10,7 +10,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("WorkLogEditorModal", () => {
-  it("shows the task's first ordered subsystem as its selected context", () => {
+  it("keeps subsystem context in the searchable task option without repeating it below", () => {
     const bootstrap: BootstrapPayload = {
       ...EMPTY_BOOTSTRAP,
       subsystems: [
@@ -47,7 +47,11 @@ describe("WorkLogEditorModal", () => {
       }),
     );
 
-    expect(html).toContain("Primary - Task summary");
+    expect(html).toContain("Task summary");
+    expect(html).not.toContain("Primary - Task summary");
     expect(html).not.toContain("Secondary - Task summary");
+    expect(html).toContain('aria-label="Task: Task title - Primary, Secondary"');
+    expect(html).toContain('aria-label="Participants: Select participants"');
+    expect(html).not.toContain("Hold Ctrl or Cmd");
   });
 });

@@ -4,12 +4,13 @@ import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "reac
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
-import { WorkReportEditorActions } from "./WorkReportEditorActions";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 
 interface QaReportEditorModalProps {
   bootstrap: BootstrapPayload;
   closeQaReportModal: () => void;
-  handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
+  handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>, status: QaReportPayload["status"]) => void | Promise<void>;
+  canReviewQa?: boolean;
   isSavingQaReport: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   qaReportDraft: QaReportPayload;
@@ -21,6 +22,7 @@ export function QaReportEditorModal({
   closeQaReportModal: onClose,
   handleQaReportSubmit,
   isSavingQaReport,
+  canReviewQa = false,
   requestPhotoUpload,
   qaReportDraft,
   setQaReportDraft,
@@ -32,7 +34,15 @@ export function QaReportEditorModal({
   };
   const taskRef = qaReportDraft.targetRefs.find((ref) => ref.kind === "task");
   const selectedTask = bootstrap.tasks.find((task) => task.id === taskRef?.id);
+  const taskOptions = bootstrap.tasks.map((task) => {
+    const subsystemName = task.subsystemIds
+      .map((subsystemId) => bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId)?.name)
+      .filter(Boolean)
+      .join(", ") || "Unknown subsystem";
+    return { id: task.id, name: `${task.title} - ${subsystemName}` };
+  });
   const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
+  const participantOptions = bootstrap.members.map((member) => ({ id: member.id, name: member.name }));
 
   return (
     <ModalDialog label="Add QA report" onClose={closeQaReportModal}>
@@ -57,37 +67,28 @@ export function QaReportEditorModal({
         </div>
         <form
           className="modal-form task-details-grid"
-          onSubmit={handleQaReportSubmit}
+          onSubmit={(event) => {
+            const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+            const status = submitter?.value === "draft" || submitter?.value === "reviewed" ? submitter.value : "submitted";
+            handleQaReportSubmit(event, status);
+          }}
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
             <span>Task</span>
-            <select
-              aria-label="Task"
-              onChange={(milestone) =>
+            <FilterDropdown allLabel="Choose a task" ariaLabel="Task" portalMenu singleSelect showAllOption={false}
+              onChange={(selection) => {
+                const taskId = selection[0];
+                if (!taskId) return;
                 setQaReportDraft((current) => ({
                   ...current,
-                  projectId: bootstrap.tasks.find((task) => task.id === milestone.target.value)?.projectId ?? current.projectId,
-                  targetRefs: [{ kind: "task", id: milestone.target.value }],
-                }))
-              }
-              required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
+                  projectId: bootstrap.tasks.find((task) => task.id === taskId)?.projectId ?? current.projectId,
+                  targetRefs: [{ kind: "task", id: taskId }],
+                }));
               }}
-              value={taskRef?.id ?? ""}
-            >
-              <option disabled value="">
-                Choose a task
-              </option>
-              {bootstrap.tasks.map((task) => (
-                <option key={task.id} value={task.id}>
-                  {task.title}
-                </option>
-              ))}
-            </select>
+              options={taskOptions} buttonContent={<span>{taskOptions.find((option) => option.id === taskRef?.id)?.name ?? "Choose a task"}</span>}
+              value={taskRef?.id ? [taskRef.id] : []}
+            />
             {selectedTask ? (
               <small style={{ color: "var(--text-copy)" }}>{selectedTask.summary}</small>
             ) : null}
@@ -114,49 +115,24 @@ export function QaReportEditorModal({
             </select>
           </label>
           <label className="field">
-            <span>Reviewed date</span>
+            <span>Observed date</span>
             <input
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  reviewedAt: parseLocalDate(milestone.target.value)?.toISOString() ?? null,
+                  createdAt: parseLocalDate(milestone.target.value)?.toISOString() ?? current.createdAt,
                 }))
               }
               type="date"
-              value={qaReportDraft.reviewedAt ? localTodayDate(new Date(qaReportDraft.reviewedAt)) : ""}
+              value={qaReportDraft.createdAt ? localTodayDate(new Date(qaReportDraft.createdAt)) : ""}
             />
           </label>
           <label className="field modal-wide">
             <span>Participants</span>
-            <select
-              multiple
-              onChange={(milestone) =>
-                setQaReportDraft((current) => ({
-                  ...current,
-                  participantIds: Array.from(
-                    milestone.currentTarget.selectedOptions,
-                    (option) => option.value,
-                  ),
-                }))
-              }
-              size={Math.min(bootstrap.members.length || 1, 5)}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              value={qaReportDraft.participantIds}
-            >
-              {bootstrap.members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-            <small style={{ color: "var(--text-copy)" }}>
-              Hold Ctrl or Cmd to select multiple people.
-            </small>
+            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" portalMenu compactSummary buttonContent={<span>{qaReportDraft.participantIds.length ? `Participants (${qaReportDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setQaReportDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={qaReportDraft.participantIds} />
+            {qaReportDraft.participantIds.length ? <small>{qaReportDraft.participantIds.map((id) => participantOptions.find((option) => option.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
           </label>
+          <small className="modal-wide">{canReviewQa ? "Choose whether to save, submit, or approve this report." : "Submit this report for review by a mentor or admin."}</small>
           <label className="field modal-wide">
             <span>Notes</span>
             <textarea
@@ -184,14 +160,12 @@ export function QaReportEditorModal({
               return requestPhotoUpload(qaReportPhotoProjectId, file);
             }}
           />
-          <WorkReportEditorActions
-            disabled={
-              isSavingQaReport || bootstrap.tasks.length === 0 || bootstrap.members.length === 0
-            }
-            isSaving={isSavingQaReport}
-            onCancel={closeQaReportModal}
-            submitLabel="Add QA report"
-          />
+          <div className="modal-actions modal-wide">
+            <button className="secondary-action" onClick={closeQaReportModal} type="button">Cancel</button>
+            <button className="secondary-action" disabled={isSavingQaReport || bootstrap.tasks.length === 0 || !taskRef?.id || bootstrap.members.length === 0 || qaReportDraft.participantIds.length === 0} type="submit" value="draft">{isSavingQaReport ? "Saving…" : "Save draft"}</button>
+            <button className="primary-action" disabled={isSavingQaReport || bootstrap.tasks.length === 0 || !taskRef?.id || bootstrap.members.length === 0 || qaReportDraft.participantIds.length === 0} type="submit" value="submitted">{isSavingQaReport ? "Saving…" : "Submit for review"}</button>
+            {canReviewQa ? <button className="primary-action" disabled={isSavingQaReport || bootstrap.tasks.length === 0 || !taskRef?.id || bootstrap.members.length === 0 || qaReportDraft.participantIds.length === 0} type="submit" value="reviewed">{isSavingQaReport ? "Saving…" : "Review and approve"}</button> : null}
+          </div>
         </form>
       </section>
     </ModalDialog>

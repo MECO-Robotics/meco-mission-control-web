@@ -101,7 +101,6 @@ export const getIconPillRequiredWidth = (container: HTMLDivElement, resolvedActi
 export const setTopbarSearchCollisionMode = (
   searchRef: RefObject<HTMLDivElement | null>,
   mode: SearchCompactMode,
-  leftWidthPx?: number | null,
 ) => {
   if (typeof document === "undefined") {
     return;
@@ -116,14 +115,10 @@ export const setTopbarSearchCollisionMode = (
 
   if (mode === "icon") {
     topbar.setAttribute("data-topbar-search-mode", "icon");
-    if (typeof leftWidthPx === "number" && leftWidthPx > 0) {
-      topbar.style.setProperty("--app-topbar-left-collapse-width", `${Math.ceil(leftWidthPx)}px`);
-    }
     return;
   }
 
   topbar.removeAttribute("data-topbar-search-mode");
-  topbar.style.removeProperty("--app-topbar-left-collapse-width");
 };
 
 const collectCollisionTargets = (

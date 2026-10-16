@@ -99,7 +99,7 @@ export function ArtifactEditorModal({
           <option value="">Add a linked record…</option>
           {targets.map((target) => <option key={`${target.kind}:${target.id}`} value={`${target.kind}:${target.id}`}>{target.label}</option>)}
         </select>
-        <span>{artifactDraft.targetRefs.map((ref) => <button key={`${ref.kind}:${ref.id}`} className="secondary-action" type="button" onClick={() => setArtifactDraft((current) => ({ ...current, targetRefs: current.targetRefs.filter((item) => item.kind !== ref.kind || item.id !== ref.id) }))}>{ref.kind} · {ref.id} ×</button>)}</span>
+        <span>{artifactDraft.targetRefs.map((ref) => <button key={`${ref.kind}:${ref.id}`} className="secondary-action" type="button" onClick={() => setArtifactDraft((current) => ({ ...current, targetRefs: current.targetRefs.filter((item) => item.kind !== ref.kind || item.id !== ref.id) }))}>{targets.find((target) => target.kind === ref.kind && target.id === ref.id)?.label ?? `${ref.kind} · ${ref.id}`} ×</button>)}</span>
       </label>
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Status</span>

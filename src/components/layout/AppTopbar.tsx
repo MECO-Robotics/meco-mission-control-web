@@ -10,7 +10,8 @@ import {
 } from "@/lib/branding";
 
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
-import { AppSidebarAddMenu } from "./sidebar/AppSidebarAddMenu";
+import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 
 interface AppTopbarProps {
   activeViewLabel?: string | null;
@@ -18,7 +19,7 @@ interface AppTopbarProps {
   isSidebarCollapsed: boolean;
   onCreateMilestone: () => void;
   onCreatePart: () => void;
-  onCreateQaReport: () => void;
+  onCreateQaReport?: () => void;
   onCreateTask: () => void;
 }
 
@@ -61,25 +62,29 @@ export function AppTopbar({
           src={topbarLogo.src}
         />
       </div>
-      {activeViewLabel ? (
-        <div className="app-topbar-left">
-          <div className="app-topbar-view-title">
-            <h1>{activeViewLabel}</h1>
-          </div>
+      <div className="app-topbar-left">
+        <div className="app-topbar-view-title">
+          <h1>{activeViewLabel?.trim() || "Workspace"}</h1>
         </div>
-      ) : null}
+      </div>
       <div className="app-topbar-search-slot">
         <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
         <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
         <div className="app-topbar-zoom-host" id={APP_TOPBAR_SLOT_IDS.zoom} />
+      </div>
+      <div className="app-topbar-add-root">
         <div className="app-topbar-add-host" id={APP_TOPBAR_SLOT_IDS.add} />
         <div className="app-topbar-add-fallback">
-          <AppSidebarAddMenu
-            onCreateMilestone={onCreateMilestone}
-            onCreatePart={onCreatePart}
-            onCreateQaReport={onCreateQaReport}
-            onCreateTask={onCreateTask}
-            placement="topbar"
+          <WorkspaceTopbarAddMenu
+            actions={buildTopbarAddMenuActions(
+              makeAddMenuAction("Add task", onCreateTask),
+              makeAddMenuAction("Add milestone", onCreateMilestone),
+              makeAddMenuAction("Add part", onCreatePart),
+              ...(onCreateQaReport ? [makeAddMenuAction("Add QA report", onCreateQaReport)] : []),
+            )}
+            ariaLabel="Add workspace item"
+            title="Add to workspace"
+            portal={false}
           />
         </div>
       </div>

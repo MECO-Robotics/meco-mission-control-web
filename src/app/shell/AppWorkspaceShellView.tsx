@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { resetLocalDemo } from "@/lib/localWorkspace/session";
 import { AddSeasonPopup, RobotProjectPopup, SidebarOverlay } from "./AppWorkspaceShellOverlays";
 import { AppTopbar, AppSidebar, WorkspaceModalHost, WorkspaceContent, WorkspaceShellLoading } from "./workspaceShell";
+import { TopbarSearchOverrideProvider } from "@/features/workspace/shared/filters/TopbarSearchOverride";
+import { resolveSignedInMemberForSessionUser } from "@/lib/appUtils/common";
 
 export function AppWorkspaceShellView({ controller }: { controller: AppWorkspaceController }) {
   const c = mergeWorkspaceShellController(controller);
@@ -19,6 +21,18 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     handleSelectSeason,
     handleSelectProject,
   } = useWorkspaceShellNavigation(c);
+  const workspaceOperationScope = JSON.stringify({
+    identity: c.isPublicDemoSession ? "public-demo" : c.sessionUser ? `account:${c.sessionUser.accountId}` : localMode === "demo" ? "local-demo" : "local",
+    localMode: localMode ?? "server",
+    seasonId: c.selectedSeasonId ?? "all-seasons",
+    projectId: c.selectedProjectId ?? "all-projects",
+  });
+  const receiptOperationScope = c.isPublicDemoSession ? "public-demo" : c.sessionUser ? `account:${c.sessionUser.accountId}` : localMode === "demo" ? "local-demo" : "local";
+  const localActorMemberId = c.sessionUser && !c.isPublicDemoSession
+    ? resolveSignedInMemberForSessionUser(c.bootstrap.members, c.sessionUser)?.id ?? null
+    : null;
+  const canReviewQa = Boolean(c.sessionUser && !c.isPublicDemoSession && c.signedInMember && ["mentor", "admin"].includes(c.signedInMember.role));
+  const canCreateQaReport = Boolean(c.sessionUser && !c.isPublicDemoSession && c.signedInMember && ["lead", "mentor", "admin"].includes(c.signedInMember.role));
   return (
     <main
       className={`page-shell ${c.isDarkMode ? "dark-mode" : ""} ${c.isSidebarCollapsed ? "is-sidebar-collapsed" : ""} ${c.isSidebarOverlay ? "is-sidebar-overlay" : ""}`}
@@ -26,14 +40,15 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       data-navigation-view={activeSubItemId ?? "help"}
       style={c.pageShellStyle}
     >
+      <TopbarSearchOverrideProvider>
       <Suspense fallback={<WorkspaceShellLoading />}>
         <AppTopbar
       activeViewLabel={activeViewLabel}
       isDarkMode={c.isDarkMode}
-      isSidebarCollapsed={c.isSidebarCollapsed}
+      isSidebarCollapsed={c.isSidebarCollapsed || c.isSidebarOverlay}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
-      onCreateQaReport={c.openCreateQaReportModal}
+      onCreateQaReport={canCreateQaReport ? c.openCreateQaReportModal : undefined}
       onCreateTask={c.openCreateTaskModal}
     />
         <AppSidebar
@@ -47,7 +62,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       notificationCount={c.notificationHistory.length}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
-      onCreateQaReport={c.openCreateQaReportModal}
+      onCreateQaReport={canCreateQaReport ? c.openCreateQaReportModal : undefined}
       onCreateSeason={c.handleCreateSeason}
       onCreateTask={c.openCreateTaskModal}
       onRefreshWorkspace={c.loadWorkspace}
@@ -84,12 +99,20 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         {c.isAddSeasonPopupOpen ? <AddSeasonPopup controller={c} /> : null}
         {c.robotProjectModalMode ? <RobotProjectPopup controller={c} /> : null}
         <SidebarOverlay controller={c} />
-        <WorkspaceContent
+        <div className="workspace-content-clip">
+          <WorkspaceContent
           {...c}
+          workspaceOperationScope={workspaceOperationScope}
+          receiptOperationScope={receiptOperationScope}
+          receiptViewScope={workspaceOperationScope}
+          canReviewQa={canReviewQa}
+          canCreateQaReport={canCreateQaReport}
+          localActorMemberId={localActorMemberId}
           allMembers={c.bootstrap.members}
           artifacts={c.scopedArtifacts}
           availabilityBootstrap={c.bootstrap}
           bootstrap={c.scopedBootstrap}
+          canReceivePurchases={c.signedInMember?.role === "mentor" || c.signedInMember?.role === "admin"}
           onDeleteRisk={c.handleDeleteRisk}
           onCreateRisk={c.handleCreateRisk}
           onUpdateRisk={c.handleUpdateRisk}
@@ -106,7 +129,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           onTaskEditSaved={c.notifyTaskEditSaved}
           onStartInteractiveTutorial={() => void c.startInteractiveTutorial("planning")}
           onStartInteractiveTutorialChapter={(chapterId) => void c.startInteractiveTutorial(chapterId)}
-        />
+          />
+        </div>
       </Suspense>
 
       <>
@@ -119,11 +143,15 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           <WorkspaceModalHost
             {...c}
             bootstrap={c.scopedBootstrap}
+            canReviewQa={canReviewQa}
+            signedInMemberId={c.sessionUser && !c.isPublicDemoSession ? c.signedInMember?.id ?? null : null}
+            requestedQaTaskIds={c.requestedQaTaskIds}
             onTaskEditCanceled={c.notifyTaskEditCanceled}
           />
         </Suspense>
       ) : null}
     </>
+      </TopbarSearchOverrideProvider>
     </main>
   );
 }

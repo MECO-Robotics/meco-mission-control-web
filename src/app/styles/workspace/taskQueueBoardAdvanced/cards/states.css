@@ -5,8 +5,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: var(--task-queue-board-card-context-bg, rgba(15, 28, 52, 0.08));
-  border: 1px solid var(--task-queue-board-card-context-border, rgba(15, 28, 52, 0.16));
+  background: var(--task-queue-board-card-context-bg, var(--bg-row-alt));
+  border: 1px solid var(--task-queue-board-card-context-border, var(--border-base));
   color: var(--task-queue-board-card-context-accent, var(--text-copy));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--task-queue-board-card-context-accent, var(--text-copy)) 18%, transparent);
 }
@@ -18,9 +18,9 @@
   padding: calc(0.1rem * var(--task-queue-zoom, 1)) calc(0.36rem * var(--task-queue-zoom, 1));
   max-width: min(100%, calc(8.5rem * var(--task-queue-zoom, 1)));
   border-radius: 999px;
-  background: color-mix(in srgb, var(--task-queue-board-card-context-accent, var(--official-blue)) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--task-queue-board-card-context-accent, var(--official-blue)) 28%, transparent);
-  color: var(--task-queue-board-card-context-accent, var(--official-blue));
+  background: color-mix(in srgb, var(--task-queue-board-card-context-accent, var(--status-info-text)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--task-queue-board-card-context-accent, var(--status-info-text)) 28%, transparent);
+  color: var(--task-queue-board-card-context-accent, var(--status-info-text));
   box-shadow: none;
   font-size: calc(0.63rem * var(--task-queue-zoom, 1));
   font-weight: 800;
@@ -37,9 +37,9 @@
 }
 
 .task-queue-board-card-priority-critical {
-  color: #dc2626;
+  color: var(--status-danger-text);
 }
 
 .task-queue-board-card-priority-high {
-  color: #ef4444;
+  color: var(--status-danger-text);
 }

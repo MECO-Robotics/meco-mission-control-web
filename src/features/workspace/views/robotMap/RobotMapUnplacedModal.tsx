@@ -6,7 +6,6 @@ import { SubsystemMapCard } from "./SubsystemMapCard";
 import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
 
 interface RobotMapUnplacedModalProps {
-  onAddSubsystem: () => void;
   onAutoArrange: () => void;
   onClose: () => void;
   onPlaceSubsystem: (subsystemId: string) => void;
@@ -17,7 +16,6 @@ interface RobotMapUnplacedModalProps {
 }
 
 export function RobotMapUnplacedModal({
-  onAddSubsystem,
   onAutoArrange,
   onClose,
   onPlaceSubsystem,
@@ -46,13 +44,7 @@ export function RobotMapUnplacedModal({
             <LayoutGrid aria-hidden="true" size={14} />
             <span>Auto-arrange</span>
           </button>
-          <RobotMapCanvasActions
-            onAddSubsystem={() => {
-              onClose();
-              onAddSubsystem();
-            }}
-            onResetLayout={onResetLayout}
-          />
+          <RobotMapCanvasActions onResetLayout={onResetLayout} />
         </div>
 
         <div className="robot-config-unplaced-modal-list">

@@ -5,8 +5,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { MilestoneReportEditorModal } from "@/features/workspace/modals/workReports/EventReportEditorModal";
 import { QaReportEditorModal } from "@/features/workspace/modals/workReports/QaReportEditorModal";
+import { MaterialEditorModal } from "@/features/workspace/modals/assetCatalog/MaterialEditorModal";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
-import { buildEmptyQaReportPayload, buildEmptyTestResultPayload } from "@/lib/appUtils/payloadBuilders";
+import { buildEmptyMaterialPayload, buildEmptyQaReportPayload, buildEmptyTestResultPayload } from "@/lib/appUtils/payloadBuilders";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { renderTaskModal } from "./support/WorkspaceModals.task.test.helpers";
 import { createBootstrap } from "./support/WorkspaceModals.test.shared";
@@ -116,6 +117,8 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("Task metadata");
     expect(markup).toContain("Estimated hours");
     expect(markup).toContain("Requires documentation");
+    expect(markup).toMatch(/<details class="task-details-section-collapse modal-wide">[\s\S]*?<summary class="task-details-section-title task-details-section-summary">\s*<span>Task metadata<\/span>/);
+    expect(markup).toMatch(/<details class="modal-wide"><summary>Optional task details<\/summary>[\s\S]*?Task photo/);
     expect(markup).toContain('disabled="" type="submit">Create task');
   });
 
@@ -182,8 +185,41 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("task-details-close-button");
     expect(markup).toContain('aria-label="Close QA report modal"');
     expect(markup).toContain("modal-form task-details-grid");
+    expect(markup).toContain('aria-label="Task: Inspect intake - Drive"');
+    expect(markup).toContain("Inspect intake - Drive");
+    expect(markup).toContain('value="submitted">Submit for review</button>');
+    expect(markup).not.toContain("Review and approve");
     expect(markup).toContain("Result");
     expect(markup).toContain("Notes");
+    expect(markup).toContain('aria-label="Participants: Student"');
+    expect(markup).not.toContain("Hold Ctrl or Cmd");
+
+    const reviewerMarkup = renderToStaticMarkup(React.createElement(QaReportEditorModal, {
+      bootstrap, closeQaReportModal: jest.fn(), handleQaReportSubmit: jest.fn(), canReviewQa: true, isSavingQaReport: false,
+      requestPhotoUpload: jest.fn(async () => "https://cdn.example.test/qa.png"), qaReportDraft: buildEmptyQaReportPayload(bootstrap), setQaReportDraft: jest.fn(),
+    }));
+    expect(reviewerMarkup).toContain('value="reviewed">Review and approve</button>');
+  });
+
+  it("allows setting a material reorder point while creating the record", () => {
+    const bootstrap = createBootstrap();
+    const markup = renderToStaticMarkup(React.createElement(MaterialEditorModal, {
+      activeMaterialId: null,
+      bootstrap,
+      closeMaterialModal: jest.fn(),
+      handleDeleteMaterial: jest.fn(),
+      handleMaterialSubmit: jest.fn(),
+      isDeletingMaterial: false,
+      isSavingMaterial: false,
+      materialDraft: buildEmptyMaterialPayload(),
+      materialModalMode: "create",
+      requestPhotoUpload: jest.fn(async () => "https://cdn.example.test/material.png"),
+      setMaterialDraft: jest.fn(),
+    }));
+
+    expect(markup).toContain("Reorder point");
+    expect(markup).not.toContain('disabled="" min="0" type="number" value="0"');
+    expect(markup).not.toContain("Auto-set to 50%");
   });
 
   it("targets QA evidence at the selected task", () => {

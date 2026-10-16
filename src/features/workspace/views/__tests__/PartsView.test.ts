@@ -104,7 +104,6 @@ describe("PartsView filters", () => {
         filteredPartDefinitions: bootstrap.partDefinitions,
         hasActiveFilters: false,
         hasHiddenArchivedPartDefinitions: false,
-        onCreatePartDefinition: jest.fn(),
         onEditPartDefinition: jest.fn(),
         partDefinitionFilterMotionClass: "",
         pageChangeHandlers: {

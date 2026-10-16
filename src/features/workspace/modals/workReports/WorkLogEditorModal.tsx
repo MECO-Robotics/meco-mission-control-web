@@ -4,6 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { WorkLogPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import { WorkReportEditorActions } from "./WorkReportEditorActions";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 
 interface WorkLogEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -31,9 +32,14 @@ export function WorkLogEditorModal({
   };
   const selectedTask = bootstrap.tasks.find((task) => task.id === workLogDraft.taskId);
   const workLogPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
-  const selectedSubsystem = selectedTask
-    ? bootstrap.subsystems.find((subsystem) => subsystem.id === selectedTask.subsystemIds[0])
-    : null;
+  const taskOptions = bootstrap.tasks.map((task) => {
+    const subsystemName = task.subsystemIds
+      .map((subsystemId) => bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId)?.name)
+      .filter(Boolean)
+      .join(", ") || "Unknown subsystem";
+    return { id: task.id, name: `${task.title} - ${subsystemName}` };
+  });
+  const participantOptions = bootstrap.members.map((member) => ({ id: member.id, name: member.name }));
 
   return (
     <ModalDialog label="Add work log" onClose={closeWorkLogModal}>
@@ -63,53 +69,16 @@ export function WorkLogEditorModal({
         >
           <label className="field modal-wide">
             <span>Task</span>
-            <select
-              aria-label="Task"
-              onChange={(milestone) =>
-                setWorkLogDraft((current) => ({
-                  ...current,
-                  taskId: milestone.target.value,
-                }))
-              }
-              required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              value={workLogDraft.taskId}
-            >
-              <option value="" disabled>
-                Choose a task
-              </option>
-              {bootstrap.tasks.map((task) => {
-                const subsystemName =
-                  task.subsystemIds
-                    .map(
-                      (subsystemId) =>
-                        bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId)
-                          ?.name,
-                    )
-                    .filter(Boolean)
-                    .join(", ") || "Unknown subsystem";
-
-                return (
-                  <option key={task.id} value={task.id}>
-                    {task.title} - {subsystemName}
-                  </option>
-                );
-              })}
-            </select>
+            <FilterDropdown allLabel="Choose a task" ariaLabel="Task" portalMenu onChange={(selection) => {
+              const taskId = selection[0];
+              if (taskId) setWorkLogDraft((current) => ({ ...current, taskId }));
+            }} options={taskOptions} showAllOption={false} singleSelect buttonContent={<span>{taskOptions.find((option) => option.id === workLogDraft.taskId)?.name ?? "Choose a task"}</span>} value={workLogDraft.taskId ? [workLogDraft.taskId] : []} />
             {bootstrap.tasks.length === 0 ? (
               <small style={{ color: "var(--text-copy)" }}>
                 No tasks are available in this filtered workspace.
               </small>
             ) : null}
-            {selectedTask ? (
-              <small style={{ color: "var(--text-copy)" }}>
-                {selectedSubsystem?.name ?? "Unknown subsystem"} - {selectedTask.summary}
-              </small>
-            ) : null}
+            {selectedTask ? <small style={{ color: "var(--text-copy)" }}>{selectedTask.summary}</small> : null}
           </label>
           <label className="field">
             <span>Date</span>
@@ -143,34 +112,8 @@ export function WorkLogEditorModal({
           </label>
           <label className="field modal-wide">
             <span>Participants</span>
-            <select
-              multiple
-              onChange={(milestone) =>
-                setWorkLogDraft((current) => ({
-                  ...current,
-                  participantIds: Array.from(
-                    milestone.currentTarget.selectedOptions,
-                    (option) => option.value,
-                  ),
-                }))
-              }
-              size={Math.min(bootstrap.members.length || 1, 5)}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              value={workLogDraft.participantIds}
-            >
-              {bootstrap.members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-            <small style={{ color: "var(--text-copy)" }}>
-              Hold Ctrl or Cmd to select multiple people.
-            </small>
+            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" portalMenu compactSummary buttonContent={<span>{workLogDraft.participantIds.length ? `Participants (${workLogDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setWorkLogDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={workLogDraft.participantIds} />
+            {workLogDraft.participantIds.length ? <small>{workLogDraft.participantIds.map((id) => participantOptions.find((option) => option.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
           </label>
           <label className="field modal-wide">
             <span>Notes</span>

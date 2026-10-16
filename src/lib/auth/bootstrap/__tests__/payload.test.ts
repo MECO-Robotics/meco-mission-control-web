@@ -7,7 +7,6 @@ import { buildHomeViewModel } from "@/features/workspace/views/overview/overview
 import { summarizeUri } from "@/features/workspace/views/artifacts/artifactInventoryModel";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
-  EscalationRecord,
   MeetingRecord,
   MilestoneRequirementRecord,
   QaRequestRecord,
@@ -65,51 +64,43 @@ describe("normalizeBootstrapPayload", () => {
     expect(normalized.milestones[0]?.readinessStatus).toBe("blocked");
   });
 
-  it("normalizes platform schedule date fields before the Home view reads milestones", () => {
-    const payload = {
-      ...structuredClone(EMPTY_BOOTSTRAP),
-      milestones: [{
-        id: "milestone-1",
-        title: "Robot checkpoint",
-        type: "practice",
-        startDateTime: "2026-09-28T00:00:00.000Z",
-        endDateTime: null,
-        description: "",
-        projectIds: [],
-      }],
-    } as unknown as BootstrapPayload;
+  it("preserves canonical schedule times and artifact URIs", () => {
+    const payload = structuredClone(EMPTY_BOOTSTRAP);
+    payload.milestones = [{
+      id: "milestone-1",
+      seasonId: "season-1",
+      title: "Robot checkpoint",
+      type: "practice",
+      status: "planned",
+      readinessStatus: "blocked",
+      startAt: "2026-09-28T00:00:00.000Z",
+      endAt: null,
+      description: "",
+      projectIds: [],
+    }];
+    payload.artifacts = [{
+      id: "document-1",
+      projectId: "project-1",
+      targetRefs: [{ kind: "project", id: "project-1" }],
+      kind: "document",
+      title: "Build notes",
+      summary: "Robot build notes",
+      status: "published",
+      uri: "https://example.org/build-notes",
+      updatedAt: "2026-09-30T00:00:00.000Z",
+    }];
 
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.milestones[0]).toMatchObject({ startAt: "2026-09-28T00:00:00.000Z", endAt: null });
-    expect(buildHomeViewModel(normalized, new Date("2026-09-27T12:00:00")).upcomingMilestones).toMatchObject([
+    expect(buildHomeViewModel({ bootstrap: normalized, today: new Date("2026-09-27T12:00:00") }).upcomingMilestones).toMatchObject([
       { id: "milestone-1", title: "Robot checkpoint" },
     ]);
-  });
-
-  it("maps the platform artifact link field for Documents", () => {
-    const payload = {
-      ...structuredClone(EMPTY_BOOTSTRAP),
-      artifacts: [{
-        id: "document-1",
-        projectId: "project-1",
-        targetRefs: [{ kind: "project", id: "project-1" }],
-        kind: "document",
-        title: "Build notes",
-        summary: "Robot build notes",
-        status: "published",
-        link: "https://example.org/build-notes",
-        updatedAt: "2026-09-30T00:00:00.000Z",
-      }],
-    } as unknown as BootstrapPayload;
-
-    const normalized = normalizeBootstrapPayload(payload);
-
     expect(normalized.artifacts[0]?.uri).toBe("https://example.org/build-notes");
     expect(summarizeUri(normalized.artifacts[0]!.uri)).toBe("example.org/build-notes");
   });
 
-  it("preserves calendar and triage bootstrap records", () => {
+  it("preserves calendar bootstrap records", () => {
     const meetings: MeetingRecord[] = [
       {
         id: "meeting-1",
@@ -123,13 +114,6 @@ describe("normalizeBootstrapPayload", () => {
         description: "",
       },
     ];
-    const escalations: EscalationRecord[] = [
-      {
-        title: "Battery shipment delayed",
-        detail: "Critical battery order is delayed by 3 days.",
-        severity: "high",
-      },
-    ];
     const payload: BootstrapPayload = {
       ...EMPTY_BOOTSTRAP,
       meetings,
@@ -141,14 +125,12 @@ describe("normalizeBootstrapPayload", () => {
           totalHours: 3,
         },
       ],
-      escalations,
     };
 
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.meetings).toEqual(meetings);
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
-    expect(normalized.escalations).toEqual(escalations);
   });
 
   it("preserves QA requests required by the platform bootstrap contract", () => {

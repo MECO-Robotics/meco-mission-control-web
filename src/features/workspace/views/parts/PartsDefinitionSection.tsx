@@ -17,7 +17,6 @@ interface PartsDefinitionSectionProps {
   filteredPartDefinitions: BootstrapPayload["partDefinitions"];
   hasActiveFilters: boolean;
   hasHiddenArchivedPartDefinitions: boolean;
-  onCreatePartDefinition: () => void;
   onEditPartDefinition: (partDefinition: PartDefinitionRecord) => void;
   partDefinitionFilterMotionClass: string;
   pageChangeHandlers: {
@@ -44,7 +43,6 @@ export function PartsDefinitionSection({
   filteredPartDefinitions,
   hasActiveFilters,
   hasHiddenArchivedPartDefinitions,
-  onCreatePartDefinition,
   onEditPartDefinition,
   partDefinitionFilterMotionClass,
   pageChangeHandlers,
@@ -102,14 +100,6 @@ export function PartsDefinitionSection({
         })}
         {filteredPartDefinitions.length === 0 ? (
           <WorkspaceEmptyState
-            actionLabel={
-              hasActiveFilters || hasHiddenArchivedPartDefinitions ? undefined : "Add part definition"
-            }
-            onAction={
-              hasActiveFilters || hasHiddenArchivedPartDefinitions
-                ? undefined
-                : onCreatePartDefinition
-            }
             reason={
               hasHiddenArchivedPartDefinitions
                 ? "Archived part definitions are hidden. Turn on Show archived to review existing definitions."

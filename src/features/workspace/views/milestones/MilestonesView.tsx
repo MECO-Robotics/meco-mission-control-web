@@ -127,12 +127,6 @@ export function MilestonesView({
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Milestone agenda</h2>
-        </div>
-      </div>
-
       <MilestonesAgendaList
         milestones={milestones.processedMilestones}
         onOpenMilestone={openMilestone}

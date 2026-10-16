@@ -14,7 +14,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 
 | Area | Views | Consolidation |
 | --- | --- | --- |
-| Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
+| Home | Action Required, next four milestone timeline, task status distribution | Uses selected project scope; one attention row per source record; Risks provides build review and linked work |
 | Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
 | Team | People, Teams | People combines directory, presence, availability and individual workload; Teams manages ResponsibleGroups, adds or reuses matching WorkType disciplines, and derives team workload/capacity |
@@ -25,7 +25,29 @@ Task details use a drawer on desktop and fill the narrow viewport. Logging work 
 
 The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
 
+### Home dashboard signals
+
+Home uses the selected project (or all projects) and current bootstrap data. The active person filter also scopes tasks and task-linked risks. Each signal answers a separate project-lead decision:
+
+This hierarchy follows dashboard evaluation research that measures whether users can complete real decisions and whether the displayed data is accurate, current, and complete, rather than rewarding chart count. PLM context also connects product structure and change workflows to manufacturing, which supports routing action rows to their owning domain. See the [dashboard evaluation framework](https://eprints.whiterose.ac.uk/id/eprint/184215/1/dashboard_evaluation.pdf), [dashboard decision study](https://osuva.uwasa.fi/items/76b8c883-a991-4901-8cac-82ac65eb3f3b), and [PTC Windchill overview](https://www.ptc.com/en/products/windchill).
+
+| Signal | Decision question and source | Status and ordering rule | Click destination |
+| --- | --- | --- | --- |
+| Action Required | What needs attention now? Shares the Risks queue's active risks and blocked, overdue, waiting-for-QA or due-soon task signals. Multiple signals for the same source record are combined into one row with their reasons. | Ranks blocking work first, then overdue, critical/high risks, waiting-for-QA tasks, tasks due within seven days, and other active risks. Priority, due date, title and record identity break ties. Shows the five highest-ranked rows. | Task opens its detail drawer; risk opens that risk's details. “View all” opens Risks. |
+| Upcoming milestones | What is coming next, and what readiness has been recorded? Reads milestones in the scoped bootstrap payload. | Excludes complete and past milestones, sorts by start date, and shows the next four with existing milestone status and readiness. Missing readiness is “Not assessed”; it is not treated as ready. | Opens the selected milestone in Schedule → Agenda. |
+| Task status | How are scoped tasks distributed across execution states, and which group needs follow-up? Reads current scoped bootstrap tasks and groups by their stored status. | Displays exact counts for not started, in progress, waiting for QA, and complete. The stacked bar is proportional to those counts; labels and counts remain visible without color. | Activating a status label reveals matching tasks; selecting a task opens its detail drawer. |
+
 See [navigation-consolidation.md](navigation-consolidation.md) for the cross-client scope, validation and contract changes.
+
+### Risks triage
+
+Risks is a build-review surface with coordinated charts, a ranked queue and a selected-record inspector. Bottlenecks by area show unfinished work split into blocked, waiting on dependencies, QA and other work. Deadline exposure compares recorded task and mitigation deadlines. These are current-state diagnostics, not a delivery forecast or an aggregate health score. Tasks linked to multiple areas appear in each area's chart.
+
+Selecting a chart segment filters the same deduplicated record queue; the selected context can be cleared in the shared topbar. Search, source/owner/signal filters and priority/title/due-date sorting apply to this queue. Resolved risks are excluded by default and can be included explicitly. Selecting a record reveals its context, next actions and an explicit relationship diagram. The diagram distinguishes attached work, mitigation and prerequisite links, reports missing records, and preserves cycles without inventing associations. Manufacturing attachments identify tasks with manufacturing details; purchase attachments identify purchase records and their linked tasks. A mitigation task is a response, not automatically affected work.
+
+Ownership, severity and status changes live with the selected risk and show pending/failure feedback. Task actions use the existing task details. The full risk editor retains attachments, mitigation and audit context. Add risk remains in the shared topbar plus menu. The old severity board, repeated action-count lists, Project health dashboard and hours-based pseudo-progress are removed.
+
+Home shares the same risks-and-tasks queue and urgency rules for its Action Required preview. Its five-row limit does not limit the Risks queue. Purchasing, manufacturing and report review records stay in their owning domain views.
 
 ## Data and API Contract Notes
 
@@ -34,7 +56,7 @@ The frontend normalizes bootstrap data at its boundary. Reports use the canonica
 When changing data contracts:
 
 1. Update the platform route/schema contract first.
-2. Align `src/types/**` and `src/lib/auth.ts` in this repo.
+2. Align `src/types/**` and the relevant module under `src/lib/auth/` in this repo.
 3. Validate scoped season/project behavior, including `All projects` and non-robot project cases.
 4. Verify view gating for robot-only tabs and controls.
 
@@ -64,7 +86,8 @@ Key implications for web-app changes:
 
 The following recent PR themes are now part of the current spec:
 
-- Metrics is a decision-focused dashboard, not just a statistics page.
+- Risks connects current bottlenecks and recorded deadlines to reviewable records and explicit dependency links.
+- Home prioritizes Action Required, then the next four milestones, with task status distribution as its only supporting chart. It uses current scoped data and does not imply historical trends or an aggregate readiness score.
 - Attention has become Action Required and should function as cross-domain triage.
 - WorkLogs Activity now shows platform audit actions, not only work-log records, and follows the
   platform retention/privacy policy for archive, delete, and admin-access behavior.
@@ -97,5 +120,13 @@ npm run test:ci -- WorkLogsView
 - Do not describe the old primary-tab model as the current user-facing navigation.
 - Do not describe Part Mapping as a normal standalone page without noting robot-only gating and Robot Configuration ownership.
 - Do not describe Attention as the current label; user-facing copy is Action Required.
-- Do not treat Metrics as a generic chart page; it is now decision and readiness oriented.
+- Do not restore the retired Project health score or treat logged hours as completion. Risks shows recorded work states, deadlines and response links.
 - Do not place Robot Configuration under generic task planning copy without noting its configuration role.
+
+## Receiving and current evidence
+
+Purchases show received and remaining quantities with receipt locations and history. Mentor/admin users can record partial receipts for ordered, shipped or delivered purchases. Receiving records quantity and stock destination; it does not mark work or parts ready. An acknowledged receipt stays pending reconciliation if the following refresh fails, so the same action cannot be accidentally retried.
+
+New task drafts use the selected project and a subsystem from that project. Owner defaults and choices use leads/students; mentor defaults use mentors. Missing eligible people remain unassigned. Existing advanced and manufacturing details remain available and retain saved values when collapsed.
+
+Part readiness uses reviewed, revision-matched evidence. Historical results remain stored; stale results do not verify a changed part revision. Required milestone criteria must exist before readiness can be established.

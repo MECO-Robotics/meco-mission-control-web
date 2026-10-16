@@ -33,6 +33,7 @@
 
 @media (max-width: 880px) {
   .app-topbar-search-slot {
+    justify-content: flex-start;
     overflow-x: auto;
     overflow-y: hidden;
     overscroll-behavior-x: contain;
@@ -41,8 +42,7 @@
 
   .app-topbar-search-slot:has(.app-topbar-controls-host:not(:empty)),
   .app-topbar-search-slot:has(.app-topbar-search-host:not(:empty)),
-  .app-topbar-search-slot:has(.app-topbar-zoom-host:not(:empty)),
-  .app-topbar-search-slot:has(.app-topbar-add-host:not(:empty)) {
+  .app-topbar-search-slot:has(.app-topbar-zoom-host:not(:empty)) {
     --app-topbar-scroll-hint-size: 1.25rem;
     -webkit-mask-image: linear-gradient(
       to right,

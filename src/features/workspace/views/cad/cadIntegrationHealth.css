@@ -10,10 +10,10 @@
 }
 
 .cad-health-badge {
-  background: var(--cad-health-bg, rgba(112, 128, 154, 0.12));
-  border: 1px solid var(--cad-health-border, rgba(112, 128, 154, 0.22));
+  background: var(--cad-health-bg, var(--status-neutral-bg));
+  border: 1px solid var(--border-base);
   border-radius: 999px;
-  color: var(--cad-health-fg, #54627b);
+  color: var(--cad-health-fg, var(--status-neutral-text));
   flex: 0 0 auto;
   font-size: 0.68rem;
   font-weight: 800;
@@ -22,20 +22,17 @@
 }
 
 .cad-health-connected {
-  --cad-health-bg: rgba(61, 153, 108, 0.12);
-  --cad-health-border: rgba(61, 153, 108, 0.26);
-  --cad-health-fg: #246847;
+  --cad-health-bg: var(--status-success-bg);
+  --cad-health-fg: var(--status-success-text);
 }
 
 .cad-health-expired {
-  --cad-health-bg: rgba(220, 120, 18, 0.14);
-  --cad-health-border: rgba(220, 120, 18, 0.28);
-  --cad-health-fg: #a84712;
+  --cad-health-bg: var(--status-warning-bg);
+  --cad-health-fg: var(--status-warning-text);
 }
 
 .cad-health-disconnected,
 .cad-health-unavailable {
-  --cad-health-bg: rgba(183, 28, 38, 0.12);
-  --cad-health-border: rgba(183, 28, 38, 0.26);
-  --cad-health-fg: #9b1d2a;
+  --cad-health-bg: var(--status-danger-bg);
+  --cad-health-fg: var(--status-danger-text);
 }

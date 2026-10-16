@@ -12,7 +12,6 @@ import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
 interface RobotMapCanvasProps {
   cadViewer: (onOrbitingChange: (isOrbiting: boolean) => void) => ReactNode;
   isLayoutEditEnabled: boolean;
-  onAddSubsystem: () => void;
   onAutoArrange: () => void;
   onDraftLayoutChange: (subsystemId: string, layout: SubsystemLayoutFields) => void;
   onLayoutDrop: (subsystemId: string, layout: SubsystemLayoutFields) => void;
@@ -26,7 +25,6 @@ interface RobotMapCanvasProps {
 export function RobotMapCanvas({
   cadViewer,
   isLayoutEditEnabled,
-  onAddSubsystem,
   onAutoArrange,
   onDraftLayoutChange,
   onLayoutDrop,
@@ -106,7 +104,7 @@ export function RobotMapCanvas({
 
           <div className="robot-config-map-edit-overlay">
             {hasUnplacedSubsystems ? (
-              <button aria-expanded={isUnplacedModalOpen} aria-haspopup="dialog" aria-label={`Show ${unplacedSubsystems.length} unplaced subsystems`} className="secondary-action queue-toolbar-action robot-config-unplaced-trigger" onClick={() => setIsUnplacedModalOpen(true)} type="button">
+              <button aria-expanded={isUnplacedModalOpen} aria-haspopup="dialog" className="secondary-action queue-toolbar-action robot-config-unplaced-trigger" onClick={() => setIsUnplacedModalOpen(true)} type="button">
                 <Layers3 aria-hidden="true" size={14} />
                 <span>Unplaced</span>
                 <span className="robot-config-unplaced-count">{unplacedSubsystems.length}</span>
@@ -129,7 +127,7 @@ export function RobotMapCanvas({
 
           {!hasUnplacedSubsystems ? (
             <div className="robot-config-map-actions-overlay">
-              <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
+              <RobotMapCanvasActions onResetLayout={onResetLayout} />
             </div>
           ) : null}
           {pendingPlacementSubsystemId ? (
@@ -147,7 +145,6 @@ export function RobotMapCanvas({
 
       {isUnplacedModalOpen && hasUnplacedSubsystems ? (
         <RobotMapUnplacedModal
-          onAddSubsystem={onAddSubsystem}
           onAutoArrange={onAutoArrange}
           onClose={() => setIsUnplacedModalOpen(false)}
           onPlaceSubsystem={beginSubsystemPlacement}

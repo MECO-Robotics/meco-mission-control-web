@@ -1,6 +1,7 @@
 import { requestApi } from "./core/request";
 import { normalizeBootstrapPayload } from "./bootstrap/payload";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { QaFindingRecord } from "@/types/recordsReporting";
 
 export function fetchBootstrap(
   personId?: string | null,
@@ -22,6 +23,19 @@ export function fetchBootstrap(
   return requestApi<BootstrapPayload>(`/bootstrap${query}`, {}, onUnauthorized).then(
     normalizeBootstrapPayload,
   );
+}
+
+export async function fetchFindingForRetest(
+  findingId: string,
+  sourceType: "qa" | "test",
+  seasonId: string | null,
+  projectId: string | null,
+  onUnauthorized?: () => void,
+): Promise<QaFindingRecord | null> {
+  const bootstrap = await fetchBootstrap(null, seasonId, projectId, onUnauthorized);
+  const findings = sourceType === "qa" ? bootstrap.qaFindings : bootstrap.testFindings;
+  const finding = findings.find((candidate) => candidate.id === findingId) ?? null;
+  return finding && (!projectId || finding.projectId === projectId) ? finding : null;
 }
 
 export function startInteractiveTutorialSession(onUnauthorized?: () => void) {

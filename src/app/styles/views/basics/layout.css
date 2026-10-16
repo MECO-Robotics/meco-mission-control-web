@@ -1,54 +1,58 @@
 .status-waiting-for-qa {
-  background: rgba(39, 80, 152, 0.14);
-  color: #275098;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .priority-high {
-  background: rgba(233, 131, 53, 0.14);
-  color: #a84712;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .status-in-progress {
-  background: rgba(183, 121, 0, 0.16);
-  color: #8a5c00;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
-.priority-medium,
-.status-not-started {
-  background: rgba(112, 128, 154, 0.16);
-  color: #54627b;
+.priority-medium {
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
-.priority-low,
+.status-not-started,
+.priority-low {
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
+}
+
 .status-complete {
-  background: rgba(61, 153, 108, 0.16);
-  color: #246847;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 
 .purchase-requested,
 .manufacturing-requested {
-  background: rgba(112, 128, 154, 0.16);
-  color: #54627b;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
 }
 
 .purchase-approved,
 .manufacturing-approved,
 .purchase-shipped,
 .manufacturing-qa {
-  background: rgba(76, 121, 207, 0.12);
-  color: #275098;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .purchase-purchased,
 .manufacturing-in-progress {
-  background: rgba(233, 131, 53, 0.14);
-  color: #a84712;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
 .purchase-delivered,
 .manufacturing-complete {
-  background: rgba(61, 153, 108, 0.16);
-  color: #246847;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 
 .roster-layout {

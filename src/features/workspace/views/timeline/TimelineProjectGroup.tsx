@@ -102,7 +102,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
         width: "100%",
         minWidth: `${gridMinWidth}px`,
         gridTemplateColumns: timelineGridTemplate,
-        gridAutoRows: "38px",
+        gridAutoRows: "var(--timeline-row-height, 38px)",
         background: projectBackground,
         borderBottom: "1px solid var(--border-base)",
         position: "relative",
@@ -166,7 +166,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
               subsystem.index % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-alt)";
             const groupStyle = buildTimelineSubsystemHighlightStyle(subsystem.color, {
               boxShadow: `inset 3px 0 0 ${subsystem.color}`,
-              gridAutoRows: "38px",
+              gridAutoRows: "var(--timeline-row-height, 38px)",
             });
             return (
               <TimelineSubsystemRowGroup

@@ -28,6 +28,26 @@ it("lets the current owner handle a current unauthorized request", async () => {
   expect(getSessionCsrfToken()).toBeNull();
 });
 
+it("keeps local reviewer identity out of the remote HTTP request", async () => {
+  globalThis.fetch = jest.fn(async () => new Response('{"item":{}}'));
+  const options = { method: "POST", headers: { "Content-Type": "application/json" }, body: "{\"status\":\"reviewed\"}" };
+  await requestApi("/qa-reports/submit", options, undefined, "mentor-b");
+  const sentOptions = jest.mocked(fetch).mock.calls[0][1]!;
+  expect(sentOptions).toMatchObject({ method: options.method, body: options.body });
+  expect(new Headers(sentOptions.headers).get("Content-Type")).toBe("application/json");
+  expect(sentOptions).not.toHaveProperty("localActorMemberId");
+});
+
+it("keeps the local task QA requester out of the remote HTTP request body", async () => {
+  globalThis.fetch = jest.fn(async () => new Response('{"item":{}}'));
+  const options = { method: "POST", headers: { "Content-Type": "application/json" }, body: "{\"subject\":\"Build QA\"}" };
+  await requestApi("/qa-requests", options, undefined, "student-1");
+  const sentOptions = jest.mocked(fetch).mock.calls[0][1]!;
+  expect(sentOptions).toMatchObject({ method: options.method, body: options.body });
+  expect(sentOptions).not.toHaveProperty("localActorMemberId");
+  expect(sentOptions.body).not.toContain("student-1");
+});
+
 it("rejects a successful session response without a user", async () => {
   globalThis.fetch = jest.fn(async () => new Response('{"user":null}'));
   await expect(fetchWebSession()).rejects.toMatchObject({ statusCode: 401 });

@@ -34,8 +34,8 @@
   --part-manager-action-border: rgba(15, 28, 52, 0.1);
   --part-manager-action-shadow: 0 8px 18px rgba(15, 28, 52, 0.08);
   --part-manager-secondary-text: var(--official-black);
-  --part-manager-danger-surface: rgba(255, 241, 242, 0.96);
-  --part-manager-danger-text: #b42318;
+  --part-manager-danger-surface: var(--status-danger-bg);
+  --part-manager-danger-text: var(--status-danger-text);
 }
 
 .part-manager-shell > .panel-subsection {
@@ -48,8 +48,6 @@
   --part-manager-action-border: rgba(148, 163, 184, 0.28);
   --part-manager-action-shadow: 0 8px 18px rgba(2, 6, 23, 0.28);
   --part-manager-secondary-text: var(--text-title);
-  --part-manager-danger-surface: rgba(69, 10, 10, 0.7);
-  --part-manager-danger-text: #fca5a5;
 }
 
 .part-manager-shell .secondary-action,
@@ -89,7 +87,7 @@
 }
 
 .auth-error {
-  background: rgba(234, 28, 45, 0.1);
-  color: var(--official-red);
-  border: 1px solid rgba(234, 28, 45, 0.2);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  border: 1px solid color-mix(in srgb, var(--status-danger-text) 30%, transparent);
 }

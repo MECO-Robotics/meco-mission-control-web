@@ -26,7 +26,10 @@ export function WorkspaceTaskModalsSection(props: WorkspaceModalHostViewProps) {
           advancedSectionOpen={advancedSectionOpen}
           onEditTask={editor.openEditTaskModal}
           onLogWork={props.openCreateWorkLogModal}
-          onSubmitQa={props.openCreateQaReportModal}
+          onSubmitQa={props.canCreateQaReport ? props.openCreateQaReportModal : undefined}
+          onRequestQa={props.requestTaskQa}
+          signedInMemberId={props.signedInMemberId}
+          acknowledgedQaTaskIds={props.requestedQaTaskIds}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
         />
       ) : null}

@@ -20,7 +20,7 @@
     radial-gradient(circle at 84% 10%, rgba(234, 28, 45, 0.24), transparent 26%),
     linear-gradient(160deg, #0b1731 0%, #10284d 100%);
   color: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.18);
+  box-shadow: var(--shadow-soft);
 }
 
 .auth-intro::before {
@@ -63,4 +63,3 @@
   color: rgba(226, 232, 240, 0.86);
   margin: 0;
 }
-

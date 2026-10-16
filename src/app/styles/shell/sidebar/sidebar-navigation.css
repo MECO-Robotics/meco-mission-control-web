@@ -103,7 +103,7 @@
   gap: 2px;
   margin: 2px 0 8px 30px;
   padding-left: 10px;
-  border-left: 1px solid var(--border-subtle, #d9e0e9);
+  border-left: 1px solid var(--border-base);
 }
 
 .sidebar-nested-nav-item {
@@ -115,7 +115,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-copy);
   text-align: left;
   font: inherit;
   font-size: 0.875rem;
@@ -129,13 +129,59 @@
 
 .sidebar-nested-nav-item:hover,
 .sidebar-nested-nav-item[data-active="true"] {
-  background: var(--sidebar-active-bg, #e8eef7);
-  color: var(--text-primary, #173b72);
+  background: var(--meco-soft-blue);
+  color: var(--text-title);
 }
 
 .sidebar-nested-nav-item:focus-visible {
-  outline: 2px solid var(--focus-ring, #2563eb);
+  outline: 2px solid var(--status-info-text);
   outline-offset: 1px;
+}
+
+.sidebar-nested-nav-title {
+  margin: 0;
+  padding: 0.18rem 0.55rem 0.32rem;
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-nav-group[data-has-compact-subitems="true"] {
+  position: relative;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-nav-group[data-has-compact-subitems="true"]:hover,
+.sidebar[data-collapsed="true"] .sidebar-nav-group[data-has-compact-subitems="true"]:focus-within {
+  z-index: 1300;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-nested-nav-compact {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  min-width: 10.5rem;
+  margin: 0;
+  padding: 0.38rem;
+  border: 1px solid var(--border-base);
+  border-radius: 10px;
+  background: var(--bg-panel);
+  box-shadow: 0 12px 24px rgba(15, 28, 52, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+  z-index: 1300;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-nav-group[data-has-compact-subitems="true"]:hover .sidebar-nested-nav-compact,
+.sidebar[data-collapsed="true"] .sidebar-nav-group[data-has-compact-subitems="true"]:focus-within .sidebar-nested-nav-compact {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
 }
 
 .sidebar[data-collapsed="true"] .sidebar-nav-item-rollout {

@@ -4,7 +4,48 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { TaskCalendarMonthStack } from "../TaskCalendarMonthStack";
+import { TaskCalendarMonthGrid } from "../TaskCalendarMonthGrid";
 import { createContinuousCalendarDates, getCalendarMonthWeekCount } from "../taskCalendarLayout";
+import type { TaskCalendarEvent } from "../taskCalendarEvents";
+
+function findDayCell(element: React.ReactNode, dateKey: string): React.ReactElement<{
+  children?: React.ReactNode;
+  "data-date"?: string;
+  tabIndex?: number;
+  onKeyDown?: (event: { key: string; target: unknown; currentTarget: unknown; preventDefault: () => void }) => void;
+}> | null {
+  if (!React.isValidElement(element)) return null;
+  const candidate = element as React.ReactElement<{ children?: React.ReactNode; "data-date"?: string; tabIndex?: number; onKeyDown?: (event: { key: string; target: unknown; currentTarget: unknown; preventDefault: () => void }) => void }>;
+  if (candidate.type === "article" && candidate.props["data-date"] === dateKey) return candidate;
+  for (const child of React.Children.toArray(candidate.props.children)) {
+    const cell = findDayCell(child, dateKey);
+    if (cell) return cell;
+  }
+  return null;
+}
+
+function findElementWithClass(element: React.ReactNode, className: string): React.ReactElement<{
+  children?: React.ReactNode;
+  className?: string;
+  "aria-label"?: string;
+  type?: string;
+  onClick?: (event: { stopPropagation: () => void }) => void;
+}> | null {
+  if (!React.isValidElement(element)) return null;
+  const candidate = element as React.ReactElement<{
+    children?: React.ReactNode;
+    className?: string;
+    "aria-label"?: string;
+    type?: string;
+    onClick?: (event: { stopPropagation: () => void }) => void;
+  }>;
+  if (candidate.props.className?.includes(className)) return candidate;
+  for (const child of React.Children.toArray(candidate.props.children)) {
+    const match = findElementWithClass(child, className);
+    if (match) return match;
+  }
+  return null;
+}
 
 describe("TaskCalendarMonthStack", () => {
   it("renders a continuous date grid with one sticky weekday header and month labels on day one", () => {
@@ -14,7 +55,6 @@ describe("TaskCalendarMonthStack", () => {
         monthCursor: new Date(2026, 9, 1),
         onOpenDay: jest.fn(),
         onOpenEvent: jest.fn(),
-        onCloseSelectedDay: jest.fn(),
         onVisibleMonthChange: jest.fn(),
         selectedDateKey: null,
         todayDateKey: "2026-10-01",
@@ -22,6 +62,11 @@ describe("TaskCalendarMonthStack", () => {
     );
 
     expect(markup).toContain('aria-label="Calendar"');
+    expect(markup).toContain('aria-label="Calendar dates"');
+    expect(markup).toContain('role="grid"');
+    expect(markup).toContain('data-date="2026-10-01" aria-current="date"');
+    expect(markup).toContain('role="columnheader"');
+    expect(markup.match(/role="gridcell" tabindex="0"/g)).toHaveLength(1);
     expect(markup.match(/class="task-calendar-weekdays"/g)).toHaveLength(1);
     ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((weekday) => {
       expect(markup).toContain(`>${weekday}</span>`);
@@ -53,5 +98,50 @@ describe("TaskCalendarMonthStack", () => {
     expect(getCalendarMonthWeekCount(new Date(2015, 1, 1))).toBe(4);
     expect(getCalendarMonthWeekCount(new Date(2026, 9, 1))).toBe(5);
     expect(getCalendarMonthWeekCount(new Date(2026, 7, 1))).toBe(6);
+  });
+
+  it("keeps one rendered day in the tab order and supports arrow navigation after month navigation", () => {
+    const cursor = new Date(2040, 3, 1);
+    const todayDateKey = "2026-10-16";
+    const markup = renderToStaticMarkup(React.createElement(TaskCalendarMonthStack, {
+      eventsByDateKey: new Map(), monthCursor: cursor, onOpenDay: jest.fn(), onOpenEvent: jest.fn(),
+      onVisibleMonthChange: jest.fn(), selectedDateKey: null, todayDateKey,
+    }));
+    expect(markup.match(/role="gridcell" tabindex="0"/g)).toHaveLength(1);
+    expect(markup).toContain('data-date="2040-04-01"');
+
+    const onMoveFocus = jest.fn();
+    const grid = TaskCalendarMonthGrid({
+      eventsByDateKey: new Map(), monthCells: createContinuousCalendarDates(new Date(2039, 3, 1), 25),
+      onOpenDay: jest.fn(), onOpenEvent: jest.fn(), onMoveFocus, eventCapacity: 4,
+      activeDateKey: "2040-04-01", selectedDateKey: null, todayDateKey,
+    });
+    const activeDay = findDayCell(grid, "2040-04-01");
+    expect(activeDay?.props.tabIndex).toBe(0);
+    activeDay?.props.onKeyDown?.({ key: "ArrowRight", target: activeDay, currentTarget: activeDay, preventDefault: jest.fn() });
+    expect(onMoveFocus).toHaveBeenCalledWith("2040-04-01", 1);
+  });
+
+  it.each(["meeting", "event"] as const)("opens day details from a single read-only %s chip", (type) => {
+    const dateKey = "2026-10-16";
+    const scheduleEvent: TaskCalendarEvent = {
+      id: `${type}:readonly`, start: dateKey, title: `${type} details`,
+      extendedProps: { contextLabel: null, recordId: "readonly", status: "scheduled", type },
+    };
+    const onOpenDay = jest.fn();
+    const onOpenEvent = jest.fn();
+    const grid = TaskCalendarMonthGrid({
+      eventsByDateKey: new Map([[dateKey, [scheduleEvent]]]),
+      monthCells: createContinuousCalendarDates(new Date(2026, 9, 1), 1),
+      onOpenDay, onOpenEvent, onMoveFocus: jest.fn(), eventCapacity: 4,
+      activeDateKey: dateKey, selectedDateKey: null, todayDateKey: dateKey,
+    });
+    const chip = findElementWithClass(grid, `task-calendar-day-event-${type}`);
+
+    expect(chip?.type).toBe("button");
+    expect(chip?.props["aria-label"]).toBe(`View day details for ${scheduleEvent.title}`);
+    chip?.props.onClick?.({ stopPropagation: jest.fn() });
+    expect(onOpenDay).toHaveBeenCalledWith(dateKey);
+    expect(onOpenEvent).not.toHaveBeenCalled();
   });
 });

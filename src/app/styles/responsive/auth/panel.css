@@ -11,15 +11,6 @@
   line-height: 1.12;
 }
 
-.auth-panel-eyebrow {
-  margin: 0;
-  color: var(--official-blue);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-
 .auth-mobile-platforms {
   display: flex;
   flex-wrap: wrap;
@@ -58,4 +49,3 @@
 .auth-release-link:focus-visible {
   text-decoration: none;
 }
-

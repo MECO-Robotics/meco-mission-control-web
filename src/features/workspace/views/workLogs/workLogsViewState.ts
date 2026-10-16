@@ -9,10 +9,6 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import {
-  DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
-  type WorkLogActivityGroupMode,
-} from "./workLogsActivityGrouping";
-import {
   buildTaskById,
   buildWorkLogsSummaryState,
   filterAndSortWorkLogs,
@@ -52,12 +48,10 @@ export type WorkLogPaginationState = {
 
 export type WorkLogsViewState = {
   activityActions: AuditActionRecord[];
-  activityGroupMode: WorkLogActivityGroupMode;
   activitySortMode: ActivitySortMode;
   activitySortDirection: "asc" | "desc";
   activityPagination: ActivityPaginationState;
   search: string;
-  setActivityGroupMode: Dispatch<SetStateAction<WorkLogActivityGroupMode>>;
   setActivitySortMode: Dispatch<SetStateAction<ActivitySortMode>>;
   setActivitySortDirection: Dispatch<SetStateAction<"asc" | "desc">>;
   setSearch: Dispatch<SetStateAction<string>>;
@@ -85,44 +79,6 @@ export type ActivityPaginationState = {
   totalItems: number;
   totalPages: number;
 };
-
-function buildLegacyActivityActions(
-  workLogs: WorkLogRecord[],
-  taskById: Record<string, BootstrapPayload["tasks"][number]>,
-): AuditActionRecord[] {
-  return workLogs.map((workLog) => {
-    const task = taskById[workLog.taskId];
-    const entityLabel = task?.title ?? workLog.taskId;
-
-    return {
-      id: `legacy-worklog-${workLog.id}`,
-      timestamp: `${workLog.date}T12:00:00`,
-      operation: "create",
-      entityType: "worklog",
-      entityId: workLog.id,
-      entityLabel,
-      message: `Logged work on ${entityLabel}`,
-      changedFields: [],
-      projectId: task?.projectId ?? null,
-      taskId: workLog.taskId,
-      subsystemId: task?.subsystemIds[0] ?? null,
-      actorMemberId: null,
-      memberIds: workLog.participantIds,
-    };
-  });
-}
-
-export function selectActivityActions({
-  auditActions,
-  taskById,
-  workLogs,
-}: {
-  auditActions: AuditActionRecord[];
-  taskById: Record<string, BootstrapPayload["tasks"][number]>;
-  workLogs: WorkLogRecord[];
-}) {
-  return auditActions.length > 0 ? auditActions : buildLegacyActivityActions(workLogs, taskById);
-}
 
 export function actionMatchesSearch({
   action,
@@ -177,9 +133,6 @@ export function useWorkLogsViewState({
   subsystemsById,
 }: WorkLogsViewStateArgs): WorkLogsViewState {
   const [search, setSearch] = useRememberedViewState("activity.search", "");
-  const [activityGroupMode, setActivityGroupMode] = useRememberedViewState<WorkLogActivityGroupMode>("activity.activityGroupMode",
-    DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
-  );
   const [activitySortMode, setActivitySortMode] = useRememberedViewState<ActivitySortMode>("activity.sort", "date");
   const [activitySortDirection, setActivitySortDirection] = useRememberedViewState<"asc" | "desc">("activity.sortDirection", "desc");
   const [subsystemFilter, setSubsystemFilter] = useRememberedViewState<FilterSelection>("activity.subsystemFilter", []);
@@ -218,11 +171,7 @@ export function useWorkLogsViewState({
     [sortMode, subsystemFilter, summaryWorkLogs, taskById],
   );
   const activityActions = useMemo(() => {
-    const actions = selectActivityActions({
-      auditActions: bootstrap.actions ?? [],
-      taskById,
-      workLogs: bootstrap.workLogs,
-    });
+    const actions = bootstrap.actions;
     const scopedActions =
       activePersonFilter.length === 0
         ? actions
@@ -260,12 +209,10 @@ export function useWorkLogsViewState({
   const workLogFilterMotionClass = useFilterChangeMotionClass([activePersonFilter, search, sortMode, subsystemFilter]);
   return {
     activityActions,
-    activityGroupMode,
     activitySortMode,
     activitySortDirection,
     activityPagination,
     search,
-    setActivityGroupMode,
     setActivitySortMode,
     setActivitySortDirection,
     setSearch,

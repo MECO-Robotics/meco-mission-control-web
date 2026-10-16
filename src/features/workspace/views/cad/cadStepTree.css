@@ -18,7 +18,7 @@
 }
 
 .cad-tree-node {
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  border: 1px solid var(--border-base);
   border-radius: 8px;
   padding: 10px;
 }
@@ -41,10 +41,10 @@
 
 .cad-tree-fold-button {
   align-items: center;
-  background: var(--surface-input, rgba(255, 255, 255, 0.86));
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.3));
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
   border-radius: 6px;
-  color: var(--text-primary);
+  color: var(--text-title);
   cursor: pointer;
   display: inline-flex;
   flex: 0 0 auto;
@@ -76,10 +76,10 @@
 }
 
 .cad-tree-counts span {
-  background: var(--surface-muted, rgba(148, 163, 184, 0.12));
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
   border-radius: 999px;
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.72rem;
   line-height: 1;
   padding: 4px 7px;
@@ -87,7 +87,7 @@
 
 .cad-tree-node-main > span,
 .cad-tree-parts small {
-  color: var(--text-muted);
+  color: var(--text-copy);
   display: block;
   font-size: 0.76rem;
 }
@@ -100,7 +100,7 @@
 }
 
 .cad-tree-parts li {
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--border-base);
   border-radius: 8px;
   padding: 6px 8px;
 }
@@ -124,9 +124,9 @@
 }
 
 [data-mapping="needs-review"] {
-  border-color: rgba(245, 158, 11, 0.38);
+  border-color: color-mix(in srgb, var(--status-warning-text) 30%, transparent);
 }
 
 [data-mapping="confirmed"] {
-  border-color: rgba(34, 197, 94, 0.34);
+  border-color: color-mix(in srgb, var(--status-success-text) 30%, transparent);
 }

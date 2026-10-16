@@ -4,6 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneType } from "@/types/common";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
 import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 
 const MILESTONE_TYPE_OPTIONS: { id: MilestoneType; name: string }[] = (
   Object.entries(MILESTONE_TYPE_STYLES) as [MilestoneType, (typeof MILESTONE_TYPE_STYLES)[MilestoneType]][]
@@ -146,27 +147,13 @@ export function MilestonesMilestoneModalFields({
 
       <label className="field modal-wide">
         <span style={LABEL_STYLE}>Related projects</span>
-        <select
-          multiple
-          onChange={(milestone) =>
-            setMilestoneDraft((current) => ({
-              ...current,
-              projectIds: Array.from(milestone.currentTarget.selectedOptions, (option) => option.value),
-            }))
-          }
-          size={Math.min(bootstrap.projects.length || 1, 6)}
-          style={{
-            ...FIELD_STYLE,
-            minHeight: "5rem",
-          }}
+        <FilterDropdown allLabel="Select projects" ariaLabel="Related projects" portalMenu compactSummary showAllOption={false}
+          buttonContent={<span>{milestoneDraft.projectIds.length ? `Projects (${milestoneDraft.projectIds.length})` : "Select projects"}</span>}
+          onChange={(selection) => setMilestoneDraft((current) => ({ ...current, projectIds: selection }))}
+          options={bootstrap.projects.map((project) => ({ id: project.id, name: project.name }))}
           value={milestoneDraft.projectIds}
-        >
-          {bootstrap.projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.name}
-            </option>
-          ))}
-        </select>
+        />
+        {milestoneDraft.projectIds.length ? <small>{milestoneDraft.projectIds.map((id) => bootstrap.projects.find((project) => project.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
       </label>
 
       {milestoneError ? (

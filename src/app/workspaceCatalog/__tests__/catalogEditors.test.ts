@@ -211,12 +211,12 @@ it("deletes the active artifact and closes its editor", async () => {
   expect(read().mode).toBeNull();
 });
 
-it("preserves material create reorder points and converts edit records to draft payloads", async () => {
+it("saves the selected material create reorder point and converts edit records to draft payloads", async () => {
   const { read, record } = setup(cases.find((item) => item.name === "material")!);
   read().openCreate();
   read().setDraft({ ...read().draft, name: "Aluminum", onHandQuantity: 9, reorderPoint: 99 });
   await read().submit();
-  expect(inventory.createMaterialRecord).toHaveBeenCalledWith(expect.objectContaining({ name: "Aluminum", reorderPoint: 4 }), expect.any(Function));
+  expect(inventory.createMaterialRecord).toHaveBeenCalledWith(expect.objectContaining({ name: "Aluminum", reorderPoint: 99 }), expect.any(Function));
   read().openEdit(record);
   expect(read().draft).not.toHaveProperty("id");
 });

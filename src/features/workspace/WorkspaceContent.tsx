@@ -45,6 +45,12 @@ function getSwipeDirection<T extends string>(
 }
 
 export interface WorkspaceContentProps {
+  workspaceOperationScope?: string;
+  receiptOperationScope?: string;
+  receiptViewScope?: string;
+  canReviewQa?: boolean;
+  canCreateQaReport?: boolean;
+  localActorMemberId?: string | null;
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;
@@ -120,8 +126,9 @@ export interface WorkspaceContentProps {
   ) => Promise<boolean>;
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
+  canReceivePurchases: boolean;
   openTimelineTaskDetailsModal: (task: TaskRecord) => void;
-  onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
+  onUpdateRisk: (riskId: string, payload: Partial<RiskPayload>) => Promise<void>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;
@@ -208,6 +215,8 @@ export function WorkspaceContent({
     const params = new URLSearchParams(window.location.search);
     if (target.milestoneId) params.set("milestone", target.milestoneId);
     else params.delete("milestone");
+    if (target.riskId) params.set("risk", target.riskId);
+    else params.delete("risk");
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
     if (target.taskView) {
       setTaskView(target.taskView);

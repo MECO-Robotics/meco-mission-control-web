@@ -8,6 +8,35 @@
   background: var(--kanban-lane-surface);
 }
 
+.kanban-draggable-card:hover,
+.kanban-draggable-card:focus-within {
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.kanban-draggable-card.is-kanban-drag-source-active {
+  transform: none;
+}
+
+.task-queue-board-column:has(.is-kanban-drop-target) {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-queue-board-column,
+  .kanban-draggable-card {
+    transition: none;
+  }
+
+  .task-queue-board-column:is(:hover, :focus-within),
+  .kanban-draggable-card:hover,
+  .kanban-draggable-card:focus-within,
+  .kanban-draggable-card.is-kanban-drag-source-active,
+  .task-queue-board-column:has(.is-kanban-drop-target) {
+    transform: none;
+  }
+}
+
 /* Status labels stay above the lane content; the rules define the lane edges. */
 .kanban-status-column {
   align-content: start;
@@ -22,7 +51,7 @@
   min-width: 0;
 }
 
-.task-queue-board-column-header h3 {
+.task-queue-board-column-header :is(h2, h3) {
   margin: 0;
   color: var(--text-title);
   font-size: calc(0.74rem * var(--task-queue-zoom, 1));
@@ -39,8 +68,8 @@
   height: calc(1.3rem * var(--task-queue-zoom, 1));
   padding: 0 calc(0.35rem * var(--task-queue-zoom, 1));
   border-radius: 999px;
-  background: rgba(22, 71, 142, 0.1);
-  color: var(--official-blue);
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
   font-size: calc(0.68rem * var(--task-queue-zoom, 1));
   font-weight: 800;
   line-height: 1;
@@ -192,6 +221,11 @@
 
 .kanban-draggable-card[draggable="false"] {
   cursor: default;
+}
+
+.kanban-draggable-card:focus-within {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 2px;
 }
 
 .task-queue-board-column-header[role="button"] {

@@ -98,25 +98,6 @@
   outline-offset: 1px;
 }
 
-.robot-config-unplaced-add-button {
-  align-items: center;
-  background: linear-gradient(135deg, #16478e, #0d2e5c);
-  border: 1px solid color-mix(in srgb, #16478e 70%, #0d2e5c 30%);
-  border-radius: 999px;
-  color: var(--official-white);
-  display: inline-flex;
-  height: 2.1rem;
-  justify-content: center;
-  line-height: 0;
-  padding: 0;
-  width: 2.1rem;
-}
-
-.robot-config-unplaced-add-button:hover,
-.robot-config-unplaced-add-button:focus-visible {
-  background: linear-gradient(135deg, #1f56a2, #16478e);
-}
-
 .robot-config-unplaced-modal {
   display: grid;
   gap: 0.8rem;

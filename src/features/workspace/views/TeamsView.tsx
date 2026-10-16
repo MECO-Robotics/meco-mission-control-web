@@ -7,6 +7,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { formatHours } from "./roster/rosterInsightsViewModel";
@@ -111,15 +112,16 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
     {draft ? <form className="compact-form teams-editor" onSubmit={save}>
       <h3>{editingId ? "Edit team" : "Create team"}</h3>
       <label className="field"><span>Name</span><input required value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })}/></label>
-      <fieldset className="field"><legend>Projects</legend>{projects.map(project => <label className="checkbox-field" key={project.id}><input type="checkbox" checked={draft.projectIds.includes(project.id)} onChange={event => setDraft({ ...draft, projectIds: event.target.checked ? [...draft.projectIds, project.id] : draft.projectIds.filter(id => id !== project.id) })}/><span>{project.name}</span></label>)}</fieldset>
-      <fieldset className="field"><legend>Members</legend><p className="team-primary-help">Students can belong to several teams. Mark which selected students list this as their primary team.</p>{members.map(member => {
-        const isSelected = draft.memberIds.includes(member.id);
+      <div className="field"><span>Projects</span><FilterDropdown allLabel="Select projects" ariaLabel="Team projects" searchInTopbar buttonContent={<span>{draft.projectIds.length ? `Projects (${draft.projectIds.length})` : "Select projects"}</span>} compactSummary onChange={selection => setDraft(current => current ? { ...current, projectIds: selection } : current)} options={[...projects.map(project => ({ id: project.id, name: project.name })), ...draft.projectIds.filter(id => !projects.some(project => project.id === id)).map(id => ({ id, name: bootstrap.projects.find(project => project.id === id)?.name ?? `Unavailable project · ${id}` }))]} showAllOption={false} value={draft.projectIds} />{draft.projectIds.length ? <small>{draft.projectIds.map(id => projects.find(project => project.id === id)?.name ?? bootstrap.projects.find(project => project.id === id)?.name ?? `Unavailable · ${id}`).join(", ")}</small> : null}</div>
+      <fieldset className="field"><legend>Members</legend><p className="team-primary-help">Students can belong to several teams. Mark which selected students list this as their primary team.</p><FilterDropdown allLabel="Select members" ariaLabel="Team members" searchInTopbar buttonContent={<span>{draft.memberIds.length ? `Members (${draft.memberIds.length})` : "Select members"}</span>} compactSummary onChange={selection => setDraft(current => current ? { ...current, memberIds: selection, primaryMemberIds: current.primaryMemberIds.filter(id => selection.includes(id)) } : current)} options={[...members.map(member => ({ id: member.id, name: `${member.name} · ${member.role}` })), ...draft.memberIds.filter(id => !members.some(member => member.id === id)).map(id => ({ id, name: bootstrap.members.find(member => member.id === id)?.name ?? `Unavailable member · ${id}` }))]} showAllOption={false} value={draft.memberIds} />{draft.memberIds.map(memberId => {
+        const member = bootstrap.members.find(item => item.id === memberId);
+        if (!member) return <div className="team-member-option" key={memberId}><span className="muted-copy">Unavailable member · {memberId}</span></div>;
         const canBePrimary = member.role === "student" || member.role === "lead";
         const isPrimary = draft.primaryMemberIds.includes(member.id);
         const existingPrimary = bootstrap.responsibleGroups.find(group => group.seasonId === draft.seasonId && !group.isArchived && group.primaryMemberIds.includes(member.id));
         return <div className="team-member-option" key={member.id}>
-          <label className="checkbox-field"><input type="checkbox" checked={isSelected} onChange={event => setDraft({ ...draft, memberIds: event.target.checked ? [...draft.memberIds, member.id] : draft.memberIds.filter(id => id !== member.id), primaryMemberIds: event.target.checked ? draft.primaryMemberIds : draft.primaryMemberIds.filter(id => id !== member.id) })}/><span>{member.name} · {member.role}</span></label>
-          {canBePrimary && isSelected ? <button className="secondary-action" type="button" aria-pressed={isPrimary} disabled={isPrimary} onClick={() => setDraft({ ...draft, primaryMemberIds: [...draft.primaryMemberIds, member.id] })}>{isPrimary ? "Primary team" : existingPrimary && existingPrimary.id !== editingId ? `Make primary · currently ${existingPrimary.name}` : "Make primary"}</button> : null}
+          <span>{member.name} · {member.role}</span>
+          {canBePrimary ? isPrimary ? <span className="muted-copy">Primary team</span> : <button className="secondary-action" type="button" onClick={() => setDraft(current => current ? { ...current, primaryMemberIds: [...current.primaryMemberIds, member.id] } : current)}>{existingPrimary && existingPrimary.id !== editingId ? `Make primary · currently ${existingPrimary.name}` : "Make primary"}</button> : null}
         </div>;
       })}</fieldset>
       <div className="modal-actions"><button className="secondary-action" type="button" onClick={() => setDraft(null)}>Cancel</button><button className="primary-action" disabled={saving}>{saving ? "Saving…" : "Save team"}</button></div>
@@ -131,8 +133,8 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       const today = new Date().toISOString().slice(0, 10);
       const blocked = openTasks.filter(task => task.isBlocked);
       const overdue = openTasks.filter(task => task.dueDate < today);
-      const metric = (label: string, count: number, filter: "blocked" | "overdue") => <button type="button" className={`team-task-status-filter is-${filter}`} aria-label={`${count} ${label.toLowerCase()} tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
-        <span className="team-metric-label">{label}</span><strong className={`is-${filter}`}>{count}</strong>
+      const metric = (label: string, count: number, filter: "blocked" | "overdue") => <button type="button" className={`team-task-status-filter is-${filter}`} aria-label={`${label} ${count}`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
+        <span className="team-metric-label">{label}</span>{" "}<strong className={`is-${filter}`}>{count}</strong>
       </button>;
       const drilldownTasks = taskDrilldown?.groupId !== group.id ? tasks : taskDrilldown.filter === "blocked" ? blocked : taskDrilldown.filter === "overdue" ? overdue : openTasks;
       const remaining = openTasks.reduce((sum, task) => sum + Math.max(0, task.estimatedHours - task.actualHours), 0);
@@ -197,7 +199,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       return <article className="panel-card team-card" key={group.id}>
         <header className="panel-header team-card-header">
           <div className="team-card-identity">
-            <h3>{group.name}{group.isArchived ? " · Archived" : ""}</h3>
+            <h2>{group.name}{group.isArchived ? " · Archived" : ""}</h2>
             {group.projectIds.length ? <span>{group.projectIds.map(id => projects.find(project => project.id === id)?.name ?? "Unknown project").join(", ")}</span> : null}
           </div>
           <div className="metric-grid">
@@ -208,7 +210,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
             <div className="team-task-breakdown">
               <span className={`team-task-pie${taskPieTotal === 0 ? " is-empty" : ""}`} role="img" aria-label={`${openForPie.length} open, ${blocked.length} blocked, ${overdueForPie.length} overdue, and ${completedTasks} completed tasks`} style={{ "--team-task-open-end": `${taskPieOpenEnd}deg`, "--team-task-blocked-end": `${taskPieBlockedEnd}deg`, "--team-task-overdue-end": `${taskPieOverdueEnd}deg` } as React.CSSProperties} />
               <span className="team-task-legend">
-                <button type="button" className="team-task-open-filter" aria-label={`${openTasks.length} open tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
+                <button type="button" className="team-task-open-filter" aria-label={`Open ${openTasks.length}`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
                 <span>Done <strong>{completedTasks}</strong></span>
                 {metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}
               </span>

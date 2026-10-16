@@ -46,7 +46,6 @@ describe("WorkflowView", () => {
       }),
     );
 
-    expect(markup).toContain("Add workflow");
     expect(markup).toContain('aria-label="Add workflow"');
   });
 

@@ -138,7 +138,7 @@ function DecisionControls({
         </label>
       ) : null}
       <button
-        className="secondary-button compact-action"
+        className="secondary-action compact-action"
         disabled={isConfirmDisabled}
         onClick={() => onConfirm({
           nodeId: node.id,

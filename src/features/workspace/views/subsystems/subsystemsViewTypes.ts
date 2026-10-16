@@ -6,8 +6,8 @@ export interface SubsystemsViewProps {
   bootstrap: BootstrapPayload;
   membersById: MembersById;
   openCreateMechanismModal: (subsystemId?: string) => void;
-  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openCreateSubsystemModal: () => void;
+  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openEditMechanismModal: (mechanism: MechanismRecord) => void;
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: SubsystemRecord) => void;

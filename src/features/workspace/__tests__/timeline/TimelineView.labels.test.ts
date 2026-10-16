@@ -80,8 +80,8 @@ describe("TimelineView", () => {
     expect(markup).not.toContain("Blocks");
     expect(markup).toContain("min-height:38px");
     expect(daySlotsSource).toContain('minHeight: "38px"');
-    expect(projectGroupSource).toContain('gridAutoRows: "38px"');
-    expect(subsystemGroupSource).toContain('gridAutoRows: "38px"');
+    expect(projectGroupSource).toContain('gridAutoRows: "var(--timeline-row-height, 38px)"');
+    expect(subsystemGroupSource).toContain('gridAutoRows: "var(--timeline-row-height, 38px)"');
     expect(css).toMatch(/\.timeline-row-highlight-anchor\s*\{[\s\S]*min-height:\s*38px/);
   });
 });

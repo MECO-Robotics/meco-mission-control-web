@@ -11,7 +11,7 @@ import { Boxes, FileText, Flag, ListTodo, Plus } from "lucide-react";
 interface AppSidebarAddMenuProps {
   onCreateMilestone: () => void;
   onCreatePart: () => void;
-  onCreateQaReport: () => void;
+  onCreateQaReport?: () => void;
   onCreateTask: () => void;
   placement?: "sidebar" | "topbar";
 }
@@ -38,11 +38,11 @@ export function AppSidebarAddMenu({
       label: "Add task",
       onSelect: onCreateTask,
     },
-    {
+    ...(onCreateQaReport ? [{
       icon: <FileText size={14} strokeWidth={2} />,
       label: "Add report",
       onSelect: onCreateQaReport,
-    },
+    }] : []),
     {
       icon: <Flag size={14} strokeWidth={2} />,
       label: "Add milestone",
