@@ -4,6 +4,7 @@ import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { createWorkLogRecord, createQaReportRecord, createQaRequestRecord, createTestResultRecord } from "@/lib/auth/records/reporting";
 import { reconcileWorkspaceState } from "../../loader/useAppWorkspaceLoaderWorkspaceReconciliation";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
+import { beginSessionChange } from "@/lib/auth/core/sessionStorage";
 import { useAppWorkspaceReportEditor } from "../useAppWorkspaceReportEditor";
 
 jest.mock("react", () => ({ ...jest.requireActual("react"), useCallback: jest.fn((callback) => callback), useEffect: jest.fn(), useRef: jest.fn(), useState: jest.fn() }));
@@ -67,7 +68,8 @@ function setup() {
     effects.splice(0).forEach((effect) => effect());
     return result;
   };
-  return { state, render: Render, task, milestone };
+  const unmount = () => slots.forEach((slot) => (slot as { cleanup?: () => void } | undefined)?.cleanup?.());
+  return { state, render: Render, task, milestone, unmount };
 }
 
 it("opens work logging for the chosen task, removes its overlay, and restores details on dismissal", () => {
@@ -108,6 +110,44 @@ it("allows retry after a failed QA request", async () => {
   await render().requestTaskQa(task.id);
   expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
   expect(state.loadWorkspace).toHaveBeenCalledTimes(1);
+});
+
+it.each([
+  ["project", (state: ReturnType<typeof setup>["state"]) => { state.selectedProjectId = "another-project"; }],
+  ["season", (state: ReturnType<typeof setup>["state"]) => { state.selectedSeasonId = "another-season"; }],
+  ["account", (state: ReturnType<typeof setup>["state"]) => { state.sessionUser = { ...state.sessionUser!, accountId: "another-account" }; }],
+  ["session", () => { beginSessionChange(); }],
+])("ignores a delayed QA request failure after switching %s", async (_scope, switchContext) => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  let reject!: (error: Error) => void;
+  jest.mocked(createQaRequestRecord).mockImplementationOnce(() => new Promise((_resolve, no) => { reject = no; }));
+  const pending = render().requestTaskQa(task.id);
+  switchContext(state);
+  render();
+  reject(new Error("retired request failed"));
+  await pending;
+  expect(state.setDataMessage).not.toHaveBeenCalledWith("retired request failed");
+  expect(state.loadWorkspace).not.toHaveBeenCalled();
+});
+
+it("ignores a delayed QA request success after unmount without acknowledging or refreshing", async () => {
+  const { state, render, task, unmount } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  let resolve!: () => void;
+  jest.mocked(createQaRequestRecord).mockImplementationOnce(() => new Promise((yes) => { resolve = () => yes({} as never); }));
+  const pending = render().requestTaskQa(task.id);
+  unmount();
+  resolve();
+  await pending;
+  expect(render().requestedQaTaskIds).not.toContain(task.id);
+  expect(state.loadWorkspace).not.toHaveBeenCalled();
 });
 
 it("keeps an acknowledged QA request in a waiting state when workspace refresh fails", async () => {

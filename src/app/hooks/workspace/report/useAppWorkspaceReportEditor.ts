@@ -26,7 +26,9 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const { selectedProjectId, selectedSeasonId, setWorkLogModalMode, setQaReportModalMode, setMilestoneReportModalMode } = model;
   const returnToDetails = useRef<(() => void) | null>(null);
   const qaRequestLocks = useRef(new Set<string>());
+  const qaRequestContext = useRef(0);
   const [requestedQaTaskIds, setRequestedQaTaskIds] = useState<string[]>([]);
+  const accountId = model.sessionUser?.accountId;
   const reportIsOpen = Boolean(model.workLogModalMode || model.qaReportModalMode || model.milestoneReportModalMode);
 
   useEffect(() => {
@@ -37,7 +39,12 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
 
   useEffect(() => {
     setRequestedQaTaskIds([]);
-  }, [model.sessionUser?.accountId, model.isPublicDemoSession]);
+  }, [accountId, model.isPublicDemoSession]);
+
+  useEffect(() => {
+    qaRequestContext.current += 1;
+    return () => { qaRequestContext.current += 1; };
+  }, [accountId, model.isPublicDemoSession, selectedProjectId, selectedSeasonId]);
 
   // Successful submissions close through their own handlers; dismissal and save both
   // return to the record that launched this action without stacking dialogs.
@@ -92,8 +99,12 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     const mentor = model.bootstrap.members.find((candidate) => candidate.id === task.mentorId && candidate.role === "mentor");
     if (!mentor || task.status === "not-started" || task.status === "complete" || task.status === "waiting-for-qa" || task.isBlocked || task.isWaitingOnDependency) return;
     if (requestedQaTaskIds.includes(taskId) || model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id) && ["requested", "in-review"].includes(request.status))) return;
-    if (qaRequestLocks.current.has(taskId)) return;
-    qaRequestLocks.current.add(taskId);
+    const context = qaRequestContext.current;
+    const workspace = lifecycle.captureWorkspace();
+    const isCurrent = () => context === qaRequestContext.current && workspace.isCurrent();
+    const lockId = `${context}:${taskId}`;
+    if (qaRequestLocks.current.has(lockId)) return;
+    qaRequestLocks.current.add(lockId);
     model.setDataMessage(null);
     try {
       await createQaRequestRecord({
@@ -103,18 +114,23 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
         mentorId: mentor.id,
       }, model.handleUnauthorized);
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
-      qaRequestLocks.current.delete(taskId);
+      if (isCurrent()) model.setDataMessage(toErrorMessage(error));
+      qaRequestLocks.current.delete(lockId);
+      return;
+    }
+    if (!isCurrent()) {
+      qaRequestLocks.current.delete(lockId);
       return;
     }
     setRequestedQaTaskIds((current) => current.includes(taskId) ? current : [...current, taskId]);
-    qaRequestLocks.current.delete(taskId);
     try {
-      if (!await model.loadWorkspace()) model.setDataMessage("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
+      if (!await workspace.refresh(isCurrent) && isCurrent()) model.setDataMessage("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
     } catch {
-      model.setDataMessage("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
+      if (isCurrent()) model.setDataMessage("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
+    } finally {
+      qaRequestLocks.current.delete(lockId);
     }
-  }, [model, requestedQaTaskIds]);
+  }, [model, requestedQaTaskIds, lifecycle]);
 
   const closeQaReportModal = useCallback(() => { resetEditor(); model.setQaReportModalMode(null); }, [model, resetEditor]);
 
