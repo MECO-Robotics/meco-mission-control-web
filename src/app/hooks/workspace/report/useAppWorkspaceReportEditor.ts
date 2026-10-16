@@ -125,7 +125,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
         targetRefs: [{ kind: "task", id: task.id }],
         subject: `${task.title} — QA request`,
         mentorId: mentor.id,
-      }, model.handleUnauthorized);
+      }, model.handleUnauthorized, localActorMemberId);
     } catch (error) {
       if (isCurrent()) model.setDataMessage(toErrorMessage(error));
       qaRequestLocks.current.delete(lockId);
@@ -146,7 +146,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     } finally {
       qaRequestLocks.current.delete(lockId);
     }
-  }, [model, requestedQaTaskIds, lifecycle, qaRequestLockScope, accountId]);
+  }, [model, requestedQaTaskIds, lifecycle, qaRequestLockScope, accountId, localActorMemberId]);
 
   const closeQaReportModal = useCallback(() => { resetEditor(); model.setQaReportModalMode(null); }, [model, resetEditor]);
 

@@ -29,8 +29,9 @@ export function createQaReportRecord(
 export function createQaRequestRecord(
   payload: Pick<QaRequestRecord, "projectId" | "targetRefs" | "subject" | "mentorId">,
   onUnauthorized?: () => void,
+  localActorMemberId?: string | null,
 ) {
-  return requestItem<QaRequestRecord, typeof payload>("/qa-requests", "POST", payload, onUnauthorized);
+  return requestItem<QaRequestRecord, typeof payload>("/qa-requests", "POST", payload, onUnauthorized, localActorMemberId);
 }
 
 export function retestReportFindingRecord(

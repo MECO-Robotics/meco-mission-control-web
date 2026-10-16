@@ -35,8 +35,8 @@ it("submits QA evidence through the review-owned route without client approval f
 it("requests QA through the existing request route with the assigned mentor and no client-owned request identity", async () => {
   requestItemMock.mockResolvedValueOnce({ id: "qa-request-1" } as never);
   const payload = { projectId: "project-1", targetRefs: [{ kind: "task" as const, id: "task-1" }], subject: "Build — QA request", mentorId: "mentor-1" };
-  await createQaRequestRecord(payload, jest.fn());
-  expect(requestItemMock).toHaveBeenCalledWith("/qa-requests", "POST", payload, expect.any(Function));
+  await createQaRequestRecord(payload, jest.fn(), "student-1");
+  expect(requestItemMock).toHaveBeenCalledWith("/qa-requests", "POST", payload, expect.any(Function), "student-1");
   expect(payload).not.toHaveProperty("requestedById");
   expect(payload).not.toHaveProperty("status");
 });

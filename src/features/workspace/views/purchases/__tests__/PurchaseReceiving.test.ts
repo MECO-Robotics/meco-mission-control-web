@@ -29,6 +29,46 @@ function markup(roleAllowed: boolean, receipts: PurchaseItemRecord["receipts"] =
   return renderToStaticMarkup(React.createElement(PurchasesView, { activePersonFilter: [], bootstrap, openCreatePurchaseModal: jest.fn(), openEditPurchaseModal: jest.fn(), canReceivePurchases: roleAllowed }));
 }
 
+function createPurchasesViewHarness(props: React.ComponentProps<typeof PurchasesView>) {
+  const stateSlots: unknown[] = [];
+  const refSlots: Array<{ current: unknown }> = [];
+  let stateIndex = 0;
+  let refIndex = 0;
+  const stateSpy = jest.spyOn(React, "useState").mockImplementation(((initial: unknown) => {
+    const index = stateIndex++;
+    if (!(index in stateSlots)) stateSlots[index] = typeof initial === "function" ? (initial as () => unknown)() : initial;
+    return [stateSlots[index], (next: unknown) => {
+      stateSlots[index] = typeof next === "function" ? (next as (current: unknown) => unknown)(stateSlots[index]) : next;
+    }] as never;
+  }) as unknown as typeof React.useState);
+  const refSpy = jest.spyOn(React, "useRef").mockImplementation(((initial: unknown) => {
+    const index = refIndex++;
+    refSlots[index] ??= { current: initial };
+    return refSlots[index];
+  }) as typeof React.useRef);
+  const effectSpy = jest.spyOn(React, "useEffect").mockImplementation((() => undefined) as typeof React.useEffect);
+  const memoSpy = jest.spyOn(React, "useMemo").mockImplementation(((factory: () => unknown) => factory()) as typeof React.useMemo);
+  return {
+    render() {
+      stateIndex = 0;
+      refIndex = 0;
+      return PurchasesView(props);
+    },
+    restore() {
+      stateSpy.mockRestore();
+      refSpy.mockRestore();
+      effectSpy.mockRestore();
+      memoSpy.mockRestore();
+    },
+  };
+}
+
+type HarnessElement = React.ReactElement<{ children?: React.ReactNode; [key: string]: unknown }>;
+
+function viewChildren(tree: React.ReactElement<unknown>) {
+  return React.Children.toArray((tree.props as { children?: React.ReactNode }).children) as unknown as HarnessElement[];
+}
+
 describe("purchase receiving UI", () => {
   it("shows partial receipts, remaining quantity and location history to mentors", () => {
     const html = markup(true);
@@ -371,6 +411,138 @@ describe("purchase receiving UI", () => {
       acknowledgedReceiptIds: new Set([item.id]),
     }));
     expect(lockedHtml).not.toContain('>Receive</button>');
+  });
+});
+
+describe("purchase receipt dialog lifetime", () => {
+  const scope = "account:receipt-dialog-test";
+  let receiptStorage: Map<string, string>;
+  let previousLocalStorage: PropertyDescriptor | undefined;
+  let activeHarness: ReturnType<typeof createPurchasesViewHarness> | null = null;
+
+  beforeEach(() => {
+    receiptStorage = new Map();
+    previousLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: {
+        getItem: (key: string) => receiptStorage.get(key) ?? null,
+        setItem: (key: string, value: string) => receiptStorage.set(key, value),
+        removeItem: (key: string) => receiptStorage.delete(key),
+      },
+    });
+  });
+
+  afterEach(() => {
+    activeHarness?.restore();
+    activeHarness = null;
+    if (previousLocalStorage) Object.defineProperty(globalThis, "localStorage", previousLocalStorage);
+    else Reflect.deleteProperty(globalThis, "localStorage");
+  });
+
+  function setup() {
+    const bootstrap = createBootstrap();
+    const purchaseA = { ...item, id: "purchase-a", title: "Purchase A", receipts: [] };
+    const purchaseB = { ...item, id: "purchase-b", title: "Purchase B", receipts: [] };
+    bootstrap.purchaseItems = [purchaseA, purchaseB];
+    const loadWorkspace = jest.fn(async () => undefined);
+    const setDataMessage = jest.fn();
+    const harness = createPurchasesViewHarness({
+      activePersonFilter: [], bootstrap, receiptOperationScope: scope, receiptViewScope: "all-projects",
+      openCreatePurchaseModal: jest.fn(), openEditPurchaseModal: jest.fn(), canReceivePurchases: true,
+      loadWorkspace, setDataMessage,
+    });
+    activeHarness = harness;
+    const open = (target: PurchaseItemRecord) => {
+      const root = harness.render();
+      const table = viewChildren(root)[2];
+      (table.props.onReceive as (item: PurchaseItemRecord) => void)(target);
+      return harness.render();
+    };
+    const formFor = (root: React.ReactElement<unknown>) => viewChildren(root)[3]?.props.children as HarnessElement;
+    const setLocationAndGetForm = (root: React.ReactElement<unknown>) => {
+      const form = formFor(root);
+      const locationField = React.Children.toArray(form.props.children)[2] as HarnessElement;
+      const input = React.Children.toArray(locationField.props.children)[1] as HarnessElement;
+      (input.props as { onChange: (event: { target: { value: string } }) => void }).onChange({ target: { value: "Shelf A" } });
+      return formFor(harness.render());
+    };
+    return { bootstrap, harness, loadWorkspace, open, purchaseA, purchaseB, setDataMessage, setLocationAndGetForm, formFor };
+  }
+
+  it("keeps a late accepted A write from closing B while acknowledging and refreshing A", async () => {
+    const ctx = setup();
+    let finishWrite!: (record: PurchaseItemRecord) => void;
+    jest.mocked(requestItem).mockReturnValueOnce(new Promise<PurchaseItemRecord>((resolve) => { finishWrite = resolve; }) as never);
+    const rootA = ctx.open(ctx.purchaseA);
+    const form = ctx.setLocationAndGetForm(rootA);
+    const saving = (form.props.onSubmit as (event: unknown) => Promise<void>)({ preventDefault: jest.fn() });
+
+    const modalA = viewChildren(rootA)[3];
+    (modalA.props.onClose as () => void)();
+    const rootB = ctx.open(ctx.purchaseB);
+    expect(viewChildren(rootB)[3].props.label).toBe("Receive Purchase B");
+
+    finishWrite({} as PurchaseItemRecord);
+    await saving;
+    const afterA = ctx.harness.render();
+    expect(viewChildren(afterA)[3].props.label).toBe("Receive Purchase B");
+    expect(ctx.loadWorkspace).toHaveBeenCalledTimes(1);
+    expect(ctx.setDataMessage).not.toHaveBeenCalled();
+    expect(restoreReceiptOperation(globalThis.localStorage, scope, ctx.purchaseA.id).kind).toBe("acknowledged");
+  });
+
+  it("keeps a late A failure out of B and restores A with the same operation after an unknown result", async () => {
+    const ctx = setup();
+    let failWrite!: (error: Error) => void;
+    jest.mocked(requestItem).mockReturnValueOnce(new Promise<PurchaseItemRecord>((_resolve, reject) => { failWrite = reject; }) as never);
+    let root = ctx.open(ctx.purchaseA);
+    let form = ctx.setLocationAndGetForm(root);
+    const saving = (form.props.onSubmit as (event: unknown) => Promise<void>)({ preventDefault: jest.fn() });
+    const firstPayload = jest.mocked(requestItem).mock.calls.at(-1)?.[2] as { operationId: string; quantity: number; location: string };
+
+    (viewChildren(root)[3].props.onClose as () => void)();
+    ctx.open(ctx.purchaseB);
+    failWrite(new Error("Connection lost"));
+    await saving;
+    root = ctx.harness.render();
+    expect(viewChildren(root)[3].props.label).toBe("Receive Purchase B");
+    expect(ctx.setDataMessage).not.toHaveBeenCalled();
+
+    root = ctx.open(ctx.purchaseA);
+    expect(restoreReceiptOperation(globalThis.localStorage, scope, ctx.purchaseA.id)).toMatchObject({ kind: "valid", payload: firstPayload });
+    form = ctx.formFor(root);
+    const submit = React.Children.toArray(form.props.children)[5] as HarnessElement;
+    const button = React.Children.toArray(submit.props.children)[1] as HarnessElement;
+    expect(button.props.children).toBe("Check again");
+
+    jest.mocked(requestItem).mockResolvedValueOnce({} as PurchaseItemRecord);
+    await (form.props.onSubmit as (event: unknown) => Promise<void>)({ preventDefault: jest.fn() });
+    expect(jest.mocked(requestItem).mock.calls.at(-1)?.[2]).toEqual(firstPayload);
+  });
+
+  it("keeps an accepted receipt read-only if the same purchase is reopened before its write finishes", async () => {
+    const ctx = setup();
+    let finishWrite!: (record: PurchaseItemRecord) => void;
+    jest.mocked(requestItem).mockReturnValueOnce(new Promise<PurchaseItemRecord>((resolve) => { finishWrite = resolve; }) as never);
+    let root = ctx.open(ctx.purchaseA);
+    let form = ctx.setLocationAndGetForm(root);
+    const saving = (form.props.onSubmit as (event: unknown) => Promise<void>)({ preventDefault: jest.fn() });
+
+    (viewChildren(root)[3].props.onClose as () => void)();
+    ctx.open(ctx.purchaseA);
+    finishWrite({} as PurchaseItemRecord);
+    await saving;
+
+    root = ctx.harness.render();
+    form = ctx.formFor(root);
+    const formChildren = React.Children.toArray(form.props.children) as HarnessElement[];
+    expect(formChildren.some((child) => child.props.role === "status")).toBe(true);
+    const actions = formChildren.find((child) => child.props.className === "modal-actions")!;
+    const recordButton = React.Children.toArray(actions.props.children)[1] as HarnessElement;
+    expect(recordButton.props.disabled).toBe(true);
+    await (form.props.onSubmit as (event: unknown) => Promise<void>)({ preventDefault: jest.fn() });
+    expect(requestItem).toHaveBeenCalledTimes(1);
   });
 });
 

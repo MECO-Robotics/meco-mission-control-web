@@ -54,28 +54,42 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
   const [acknowledgedReceiptIds, setAcknowledgedReceiptIds] = useState(() => new Set(bootstrap.purchaseItems.filter((item) => reconcileAcknowledgedReceiptOperation(getReceiptStorage(), receiptOperationScope, item.id, item.receipts)).map((item) => item.id)));
   const bootstrapRef = useRef(bootstrap);
   const [receiptOperations] = useState(() => new Map<string, ReturnType<typeof createStableReceiptOperation>>());
+  const receiptWriteLocks = useRef(new Set<string>());
+  const dialogGeneration = useRef(0);
+  const receivingItemRef = useRef(receivingItem);
   const receiptScopeRef = useRef(receiptOperationScope);
   const receiptViewScopeRef = useRef(receiptViewScope);
-  useEffect(() => {
-    if (receiptScopeRef.current === receiptOperationScope) return;
+  const receiptScopeChanged = receiptScopeRef.current !== receiptOperationScope;
+  const receiptViewScopeChanged = receiptViewScopeRef.current !== receiptViewScope;
+  if (receiptScopeChanged) {
     receiptScopeRef.current = receiptOperationScope;
+    dialogGeneration.current += 1;
+  }
+  if (receiptViewScopeChanged) {
+    receiptViewScopeRef.current = receiptViewScope;
+    dialogGeneration.current += 1;
+  }
+  receivingItemRef.current = receivingItem;
+  useEffect(() => {
+    if (!receiptScopeChanged) return;
     receiptOperations.clear();
     setReceivingItem(null);
+    receivingItemRef.current = null;
     setReceiptOutcomeUnknown(false);
     setReceiptStorageBlocked(false);
     setReceiptError(null);
     setIsReceiving(false);
     setAcknowledgedReceiptIds(new Set(bootstrap.purchaseItems.filter((item) => reconcileAcknowledgedReceiptOperation(getReceiptStorage(), receiptOperationScope, item.id, item.receipts)).map((item) => item.id)));
-  }, [bootstrap.purchaseItems, receiptOperationScope, receiptOperations]);
+  }, [bootstrap.purchaseItems, receiptOperationScope, receiptOperations, receiptScopeChanged]);
   useEffect(() => {
-    if (receiptViewScopeRef.current === receiptViewScope) return;
-    receiptViewScopeRef.current = receiptViewScope;
+    if (!receiptViewScopeChanged) return;
     setReceivingItem(null);
+    receivingItemRef.current = null;
     setReceiptOutcomeUnknown(false);
     setReceiptStorageBlocked(false);
     setReceiptError(null);
     setIsReceiving(false);
-  }, [receiptViewScope]);
+  }, [receiptViewScope, receiptViewScopeChanged]);
   const clearSavedReceiptOperation = (scope: string, itemId: string) => {
     try { getReceiptStorage()?.removeItem(receiptOperationStorageKey(scope, itemId)); } catch { /* The request outcome is already confirmed. */ }
   };
@@ -137,7 +151,17 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
     if (column === sortField) setSortDirection((current) => current === "ascending" ? "descending" : "ascending");
     else { setSortField(column); setSortDirection("ascending"); }
   };
+  const closeReceiptDialog = () => {
+    dialogGeneration.current += 1;
+    receivingItemRef.current = null;
+    setReceivingItem(null);
+    setReceiptOutcomeUnknown(false);
+    setReceiptError(null);
+    setReceiptStorageBlocked(false);
+    setIsReceiving(false);
+  };
   const openReceipt = (item: PurchaseItemRecord) => {
+    dialogGeneration.current += 1;
     const storage = getReceiptStorage();
     if (reconcileAcknowledgedReceiptOperation(storage, receiptOperationScope, item.id, item.receipts)) {
       setAcknowledgedReceiptIds((current) => new Set(current).add(item.id));
@@ -160,11 +184,13 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
     setReceiptError(invalidSavedOperation
       ? "Saved receipt details could not be read. Check the purchase history before trying again."
       : operation.isOutcomeUnknown() ? "We couldn't confirm whether this receipt was recorded. Choose Check again to confirm it safely with the same details." : null);
+    receivingItemRef.current = item;
     setReceivingItem(item);
+    setIsReceiving(receiptWriteLocks.current.has(mapKey));
   };
   const submitReceipt = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!receivingItem || isReceiving) return;
+    if (!receivingItem || isReceiving || acknowledgedReceiptIds.has(receivingItem.id)) return;
     const quantity = Number(receiptQuantity);
     const location = receiptLocation.trim();
     const received = sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity));
@@ -172,14 +198,20 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
     const remaining = receivingItem.quantity - received;
     if (receiptStorageBlocked || !isValidReceiptQuantity(quantity, remaining, discretePart) || !location || location.length > 200) return;
     const mapKey = operationMapKey(receiptOperationScope, receivingItem.id);
+    if (receiptWriteLocks.current.has(mapKey)) return;
     const receiptOperation = receiptOperations.get(mapKey) ?? createStableReceiptOperation(createClientOperationId);
     receiptOperations.set(mapKey, receiptOperation);
     const operation = receiptOperation.payloadFor(quantity, location);
     const retryingUnknownOutcome = receiptOperation.isOutcomeUnknown();
     const submittedReceiptScope = receiptOperationScope;
     const submittedViewScope = receiptViewScope;
-    const isCurrentView = () => receiptScopeRef.current === submittedReceiptScope && receiptViewScopeRef.current === submittedViewScope;
+    const submittedEditorGeneration = dialogGeneration.current;
+    const isCurrentScope = () => receiptScopeRef.current === submittedReceiptScope;
+    const isCurrentReceipt = () => isCurrentScope() && receiptViewScopeRef.current === submittedViewScope && receivingItemRef.current?.id === receivingItem.id;
+    const isCurrentEditor = () => isCurrentReceipt() && dialogGeneration.current === submittedEditorGeneration && receiptViewScopeRef.current === submittedViewScope;
+    receiptWriteLocks.current.add(mapKey);
     setIsReceiving(true);
+    setReceiptOutcomeUnknown(false);
     const outcome = await submitPersistedPurchaseReceipt({
       storage: getReceiptStorage(),
       scope: receiptOperationScope,
@@ -189,27 +221,30 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
       acknowledge: () => {
         receiptOperations.delete(mapKey);
         persistReceiptOperation(getReceiptStorage(), receiptOperationScope, receivingItem.id, operation, "acknowledged");
-        if (isCurrentView()) {
-          setReceivingItem(null);
-          setAcknowledgedReceiptIds((current) => new Set(current).add(receivingItem.id));
+        if (isCurrentScope()) setAcknowledgedReceiptIds((current) => new Set(current).add(receivingItem.id));
+        if (isCurrentEditor()) {
+          closeReceiptDialog();
         }
       },
-      refresh: () => isCurrentView() ? loadWorkspace?.() ?? Promise.resolve() : Promise.resolve(),
+      refresh: () => isCurrentScope() ? loadWorkspace?.() ?? Promise.resolve() : Promise.resolve(),
       hasReceipt: () => bootstrapRef.current.purchaseItems.find((item) => item.id === receivingItem.id)?.receipts?.some((receipt) => receipt.operationId === operation.operationId) ?? false,
       retainUnknownOnRejection: retryingUnknownOutcome,
       reportError: (message) => {
-        if (isCurrentView()) {
+        if (isCurrentReceipt()) {
           setReceiptError(message);
+          setDataMessage?.(message);
+        } else if (isCurrentScope() && !receivingItemRef.current) {
           setDataMessage?.(message);
         }
       },
     });
     if (outcome === "not-sent") {
       receiptOperation.reset();
-      if (isCurrentView()) {
+      if (isCurrentReceipt()) {
         setIsReceiving(false);
         setReceiptError("We couldn't save this receipt safely. Check your browser storage settings and try again.");
       }
+      receiptWriteLocks.current.delete(mapKey);
       return;
     }
     if (outcome === "unknown") receiptOperation.markOutcomeUnknown();
@@ -217,13 +252,15 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
       receiptOperation.reset();
       clearSavedReceiptOperation(receiptOperationScope, receivingItem.id);
     }
-    if (isCurrentView()) {
+    if (isCurrentReceipt()) {
       setReceiptOutcomeUnknown(outcome === "unknown");
       setIsReceiving(false);
     }
+    receiptWriteLocks.current.delete(mapKey);
   };
 
   const isDiscreteReceipt = receivingItem !== null && isDiscretePurchaseReceipt(receivingItem);
+  const receiptAlreadyRecorded = receivingItem !== null && acknowledgedReceiptIds.has(receivingItem.id);
   const receiptUnit = isDiscreteReceipt
     ? "parts"
     : receivingItem?.materialId
@@ -242,13 +279,14 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
       <PurchaseFiltersToolbar approval={approval} bootstrap={bootstrap} search={search} setApproval={setApproval} setSearch={setSearch} setOrderStatus={setOrderStatus} setProject={setProject} setVendor={setVendor} orderStatus={orderStatus} project={project} uniqueVendors={uniqueVendors} vendor={vendor} sortField={sortField} sortDirection={sortDirection} onSortFieldChange={(field) => setSortField(field as PurchaseColumn)} onSortDirectionChange={setSortDirection} />
       <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add purchase", onSelect: openCreatePurchaseModal })} ariaLabel="Add purchase" title="Add purchase" tutorialTarget="create-purchase-button" />
       <PurchaseTable bootstrap={bootstrap} filteredPurchases={pagination.pageItems} filterMotionClass={filterMotionClass} hasPurchaseFilters={hasFilters} context={context} openEditPurchaseModal={openEditPurchaseModal} canReceivePurchases={canReceivePurchases} onReceive={openReceipt} acknowledgedReceiptIds={acknowledgedReceiptIds} pagination={pagination} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} />
-      {receivingItem ? <ModalDialog label={`Receive ${receivingItem.title}`} onClose={() => setReceivingItem(null)} dismissOnBackdrop><form className="modal-card" onSubmit={submitReceipt}>
-        <div className="panel-header compact-header"><h2>Receive {receivingItem.title}</h2><button className="secondary-action" type="button" onClick={() => setReceivingItem(null)}>Close</button></div>
-        <label className="field"><span>Quantity received ({receiptUnit})</span><input autoFocus disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked} min={isDiscreteReceipt ? 1 : undefined} max={Math.min(1000, sumReceiptQuantities([receivingItem.quantity - sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity))]))} step={isDiscreteReceipt ? "1" : "any"} required type="number" value={receiptQuantity} onChange={(event) => { setReceiptQuantity(event.target.value); beginNewReceiptOperation(); }} /></label>
-        <label className="field"><span>Location</span><input disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked} maxLength={200} required value={receiptLocation} onChange={(event) => { setReceiptLocation(event.target.value); beginNewReceiptOperation(); }} /></label>
+      {receivingItem ? <ModalDialog label={`Receive ${receivingItem.title}`} onClose={closeReceiptDialog} dismissOnBackdrop><form className="modal-card" onSubmit={submitReceipt}>
+        <div className="panel-header compact-header"><h2>Receive {receivingItem.title}</h2><button className="secondary-action" type="button" onClick={closeReceiptDialog}>Close</button></div>
+        <label className="field"><span>Quantity received ({receiptUnit})</span><input autoFocus disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked || receiptAlreadyRecorded} min={isDiscreteReceipt ? 1 : undefined} max={Math.min(1000, sumReceiptQuantities([receivingItem.quantity - sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity))]))} step={isDiscreteReceipt ? "1" : "any"} required type="number" value={receiptQuantity} onChange={(event) => { setReceiptQuantity(event.target.value); beginNewReceiptOperation(); }} /></label>
+        <label className="field"><span>Location</span><input disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked || receiptAlreadyRecorded} maxLength={200} required value={receiptLocation} onChange={(event) => { setReceiptLocation(event.target.value); beginNewReceiptOperation(); }} /></label>
         {receiptError ? <p role="alert">{receiptError}</p> : null}
         {receiptOutcomeUnknown ? <p>These details are held so Check again can confirm the delivery safely.</p> : null}
-        <div className="modal-actions"><button className="secondary-action" type="button" onClick={() => setReceivingItem(null)}>Cancel</button><button className="primary-action" disabled={isReceiving || receiptStorageBlocked || !receiptLocation.trim()} type="submit">{isReceiving ? "Receiving…" : receiptOutcomeUnknown ? "Check again" : "Record receipt"}</button></div>
+        {receiptAlreadyRecorded ? <p role="status">This receipt was accepted. Refresh the purchase history before recording another delivery.</p> : null}
+        <div className="modal-actions"><button className="secondary-action" type="button" onClick={closeReceiptDialog}>Cancel</button><button className="primary-action" disabled={isReceiving || receiptStorageBlocked || receiptAlreadyRecorded || !receiptLocation.trim()} type="submit">{isReceiving ? "Receiving…" : receiptOutcomeUnknown ? "Check again" : "Record receipt"}</button></div>
       </form></ModalDialog> : null}
     </section>
   );

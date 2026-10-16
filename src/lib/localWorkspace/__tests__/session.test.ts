@@ -1,6 +1,7 @@
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { requestApi } from "@/lib/auth/core/request";
+import { createQaRequestRecord } from "@/lib/auth/records/reporting";
 import { enterLocalDemo, getLocalWorkspaceMode, leaveLocalWorkspace, resetLocalDemo } from "../session";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -51,11 +52,12 @@ it("uses only the current request actor in local tutorial reviews and drops it a
     { id: "mentor-b", name: "Mentor B", email: "mentor-b@example.com", role: "mentor", elevated: true, seasonId: "season-2026" },
     { id: "admin-1", name: "Admin", email: "admin@example.com", role: "admin", elevated: true, seasonId: "season-2026" },
   );
+  tutorialSeed.tasks[0] = { ...tutorialSeed.tasks[0], status: "waiting-for-qa", isBlocked: false, isWaitingOnDependency: false };
   globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(tutorialSeed)));
   await requestApi("/tutorial/session/start", { method: "POST" });
   const payload = {
     reportType: "qa", projectId: "project-a", targetRefs: [{ kind: "task", id: "task-1" }],
-    participantIds: ["lead-1"], summary: "Local review", notes: "Checked", result: "pass", status: "reviewed",
+    participantIds: ["lead-1"], summary: "Local review", notes: "Checked", result: "minor-fix", status: "reviewed",
     reviewedById: "mentor-1", reviewedAt: "1999-01-01T00:00:00Z",
   };
   const review = (localActorMemberId?: string | null) => requestApi<{ item: BootstrapPayload["reports"][number] }>(
@@ -69,6 +71,120 @@ it("uses only the current request actor in local tutorial reviews and drops it a
   expect(adminReview.item).toMatchObject({ reviewedById: "admin-1" });
   await expect(review()).rejects.toMatchObject({ statusCode: 403 });
   expect(fetch).toHaveBeenCalledTimes(1);
+});
+
+it("records task QA requests with canonical actor and task state through the local request adapter", async () => {
+  const tutorialSeed = createBootstrap();
+  tutorialSeed.tasks[0] = {
+    ...tutorialSeed.tasks[0],
+    assigneeIds: ["student-1"],
+    mentorId: "mentor-1",
+    status: "in-progress",
+    isBlocked: false,
+    isWaitingOnDependency: false,
+  };
+  const unrelatedTask = { ...tutorialSeed.tasks[1], status: "in-progress" as const };
+  tutorialSeed.tasks[1] = unrelatedTask;
+  tutorialSeed.workLogs.push({ id: "qa-cycle-worklog", taskId: "task-1", date: "2026-10-16", hours: 1, participantIds: ["student-1"], notes: "Completed task work" });
+  const unrelatedRequest: BootstrapPayload["qaRequests"][number] = {
+    id: "unrelated-qa-request", projectId: unrelatedTask.projectId,
+    targetRefs: [{ kind: "task", id: unrelatedTask.id }], subject: "Other task QA", mentorId: "mentor-1",
+    requestedById: "student-1", createdAt: "2026-10-16T00:00:00.000Z", status: "requested",
+  };
+  tutorialSeed.qaRequests.push(unrelatedRequest);
+  globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(tutorialSeed)));
+  await requestApi("/tutorial/session/start", { method: "POST" });
+  const payload = {
+    projectId: "project-a",
+    targetRefs: [{ kind: "task" as const, id: "task-1" }],
+    subject: "QA request",
+    mentorId: "mentor-1",
+    requestedById: "lead-1",
+    createdAt: "1999-01-01T00:00:00.000Z",
+    status: "cancelled",
+  };
+
+  const studentRequest = await createQaRequestRecord(payload, undefined, "student-1");
+  expect(studentRequest).toMatchObject({
+    projectId: "project-a",
+    requestedById: "student-1",
+    mentorId: "mentor-1",
+    status: "requested",
+  });
+  expect(studentRequest.createdAt).not.toBe("1999-01-01T00:00:00.000Z");
+  expect((await requestApi<BootstrapPayload>("/bootstrap")).tasks[0].status).toBe("waiting-for-qa");
+
+  const duplicate = await createQaRequestRecord(payload, undefined, "student-1");
+  expect(duplicate.id).toBe(studentRequest.id);
+  expect((await requestApi<BootstrapPayload>("/bootstrap")).qaRequests).toHaveLength(2);
+
+  const reportPayload = {
+    reportType: "qa", projectId: "project-a", targetRefs: payload.targetRefs,
+    participantIds: ["lead-1"], summary: "Check completed work", notes: "One work log reviewed", result: "pass",
+    mentorId: null, requestedById: null,
+  };
+  const draft = await requestApi<{ item: BootstrapPayload["reports"][number] }>("/qa-reports/submit", {
+    method: "POST", body: JSON.stringify({ ...reportPayload, status: "draft" }),
+  }, undefined, "mentor-1");
+  expect(draft.item).toMatchObject({ requestedById: "student-1", mentorId: "mentor-1" });
+  expect((await read()).qaRequests[0].id).toBe(studentRequest.id);
+  expect((await read()).tasks[0].status).toBe("waiting-for-qa");
+  const reviewed = await requestApi<{ item: BootstrapPayload["reports"][number] }>("/qa-reports/submit", {
+    method: "POST", body: JSON.stringify({ ...reportPayload, mentorId: "lead-1", requestedById: "lead-1", status: "reviewed" }),
+  }, undefined, "mentor-1");
+  expect(reviewed.item).toMatchObject({ requestedById: "student-1", mentorId: "mentor-1", reviewedById: "mentor-1" });
+  expect((await read()).qaRequests.map((request) => request.id)).toEqual([unrelatedRequest.id]);
+  expect((await read()).tasks[0].status).toBe("complete");
+
+  await requestApi("/tasks/task-1", { method: "PATCH", body: JSON.stringify({ status: "in-progress" }) });
+  await requestApi("/tasks/task-1", { method: "PATCH", body: JSON.stringify({ assigneeIds: ["student-1", "lead-1"] }) });
+  const leadRequest = await createQaRequestRecord(payload, undefined, "lead-1");
+  expect(leadRequest.id).not.toBe(studentRequest.id);
+  expect(leadRequest.requestedById).toBe("lead-1");
+  expect((await requestApi<BootstrapPayload>("/bootstrap")).qaRequests).toHaveLength(2);
+
+  await requestApi("/qa-reports/submit", { method: "POST", body: JSON.stringify({ ...reportPayload, result: "minor-fix", status: "reviewed" }) }, undefined, "mentor-1");
+  expect((await read()).qaRequests.map((request) => request.id)).toEqual([unrelatedRequest.id]);
+  expect((await read()).tasks[0].status).toBe("in-progress");
+  expect(fetch).toHaveBeenCalledTimes(1);
+});
+
+it("does not publish a partial task transition when a local QA review is invalid", async () => {
+  const tutorialSeed = createBootstrap();
+  tutorialSeed.tasks[0] = { ...tutorialSeed.tasks[0], assigneeIds: ["student-1"], mentorId: "mentor-1", status: "in-progress", isBlocked: false, isWaitingOnDependency: false };
+  globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(tutorialSeed)));
+  await requestApi("/tutorial/session/start", { method: "POST" });
+  const payload = { projectId: "project-a", targetRefs: [{ kind: "task" as const, id: "task-1" }], subject: "QA request", mentorId: "mentor-1" };
+  const request = await createQaRequestRecord(payload, undefined, "student-1");
+
+  await expect(requestApi("/qa-reports/submit", { method: "POST", body: JSON.stringify({
+    reportType: "qa", projectId: "project-a", targetRefs: payload.targetRefs, participantIds: ["missing-member"],
+    summary: "Invalid review", notes: "Must not publish", result: "pass", status: "reviewed",
+  }) }, undefined, "mentor-1")).rejects.toThrow("An assigned person is no longer in the local roster.");
+
+  const after = await read();
+  expect(after.qaRequests.map((item) => item.id)).toEqual([request.id]);
+  expect(after.tasks[0].status).toBe("waiting-for-qa");
+  expect(after.reports).toHaveLength(tutorialSeed.reports.length);
+});
+
+it("rejects a task QA request without an authorized actual actor", async () => {
+  const tutorialSeed = createBootstrap();
+  tutorialSeed.tasks[0] = { ...tutorialSeed.tasks[0], assigneeIds: ["student-1"], mentorId: "mentor-1", status: "in-progress" };
+  globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(tutorialSeed)));
+  await requestApi("/tutorial/session/start", { method: "POST" });
+  const payload = { projectId: "project-a", targetRefs: [{ kind: "task" as const, id: "task-1" }], subject: "QA request", mentorId: "mentor-1", requestedById: "lead-1" };
+
+  await expect(createQaRequestRecord(payload)).rejects.toMatchObject({ statusCode: 403 });
+  await expect(createQaRequestRecord({ ...payload, targetRefs: [{ kind: "task", id: "missing-task" }] } as never, undefined, "lead-1")).rejects.toMatchObject({ statusCode: 404 });
+  await requestApi("/tasks/task-1", { method: "PATCH", body: JSON.stringify({ assigneeIds: ["lead-1"] }) });
+  await expect(createQaRequestRecord({ ...payload, mentorId: "missing-mentor" } as never, undefined, "lead-1")).rejects.toMatchObject({ statusCode: 400 });
+  await requestApi("/tasks/task-1", { method: "PATCH", body: JSON.stringify({ assigneeIds: [] }) });
+  await expect(createQaRequestRecord(payload, undefined, "student-1")).rejects.toMatchObject({ statusCode: 403 });
+  expect((await requestApi<BootstrapPayload>("/bootstrap")).qaRequests).toHaveLength(0);
+  await expect(createQaRequestRecord(payload, undefined, "lead-1")).rejects.toMatchObject({ statusCode: 403 });
+  await requestApi("/tasks/task-1", { method: "PATCH", body: JSON.stringify({ assigneeIds: ["lead-1"] }) });
+  await expect(createQaRequestRecord(payload, undefined, "lead-1")).resolves.toMatchObject({ requestedById: "lead-1" });
 });
 
 it("does not publish a write if browser storage rejects it", async () => {

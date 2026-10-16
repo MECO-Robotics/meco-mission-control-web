@@ -42,6 +42,11 @@ function localCommandError(message: string, statusCode: number) {
   return Object.assign(new Error(message), { statusCode });
 }
 
+function hasLocalBlockingRisk(snapshot: BootstrapPayload, task: BootstrapPayload["tasks"][number]) {
+  return snapshot.risks.some((risk) => risk.projectId === task.projectId && risk.blocksWork && risk.status !== "resolved" &&
+    risk.relatedTargets.some((target) => target.kind === "task" && target.id === task.id));
+}
+
 function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, unknown>, actorMemberId?: string | null) {
   const projectId = typeof body.projectId === "string" ? body.projectId : "";
   const targetRefs = Array.isArray(body.targetRefs) ? body.targetRefs as BootstrapPayload["reports"][number]["targetRefs"] : [];
@@ -58,13 +63,30 @@ function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, un
   }
   const reviewer = status === "reviewed" ? snapshot.members.find((member) => member.id === actorMemberId && (member.role === "mentor" || member.role === "admin")) : undefined;
   if (status === "reviewed" && !reviewer) throw localCommandError("A local mentor or admin reviewer is required to review QA.", 403);
+  const reportTask = reportTaskIds.length ? snapshot.tasks.find((task) => task.id === reportTaskIds[0]) : undefined;
+  const requestedQaId = targetRefs.find((ref) => ref.kind === "qa-request")?.id;
+  const matchedRequest = requestedQaId
+    ? snapshot.qaRequests.find((request) => request.id === requestedQaId)
+    : snapshot.qaRequests.find((request) => request.targetRefs.some((ref) =>
+      targetRefs.some((target) => target.kind === ref.kind && target.id === ref.id)));
+  const activeRequest = matchedRequest && (matchedRequest.status === "requested" || matchedRequest.status === "in-review")
+    ? matchedRequest
+    : undefined;
+  if (status === "reviewed" && reportTask && result === "pass") {
+    const waitingOnHardDependency = snapshot.taskDependencies.some((dependency) =>
+      dependency.taskId === reportTask.id && dependency.dependencyType === "hard" && !isTaskDependencySatisfied(dependency, snapshot),
+    );
+    if (reportTask.status !== "waiting-for-qa" || reportTask.isBlocked || reportTask.isWaitingOnDependency || hasLocalBlockingRisk(snapshot, reportTask) || waitingOnHardDependency) {
+      throw localCommandError("A pass requires a task waiting for QA with no blocking risks or unfinished dependencies.", 409);
+    }
+  }
   const now = new Date().toISOString();
   const report: BootstrapPayload["reports"][number] = {
     id: newLocalId(), projectId, reportType: "qa", targetRefs,
     createdByMemberId: typeof body.createdByMemberId === "string" ? body.createdByMemberId : null,
     participantIds: body.participantIds as string[],
-    mentorId: typeof body.mentorId === "string" ? body.mentorId : null,
-    requestedById: typeof body.requestedById === "string" ? body.requestedById : null,
+    mentorId: matchedRequest?.mentorId ?? reportTask?.mentorId ?? null,
+    requestedById: matchedRequest?.requestedById ?? null,
     summary: body.summary.trim(), notes: typeof body.notes === "string" ? body.notes : "",
     ...(typeof body.evidenceNotes === "string" ? { evidenceNotes: body.evidenceNotes } : {}),
     ...(typeof body.photoUrl === "string" ? { photoUrl: body.photoUrl } : {}),
@@ -76,7 +98,112 @@ function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, un
   };
   validateRosterReferences(snapshot, report as unknown as Row);
   snapshot.reports.push(report);
+  if (status === "reviewed" && reportTask) {
+    snapshot.qaRequests = activeRequest
+      ? snapshot.qaRequests.filter((request) => request.id !== activeRequest.id)
+      : snapshot.qaRequests;
+    const canFinalize = result === "pass" && snapshot.workLogs.some((log) => log.taskId === reportTask.id) &&
+      (!reportTask.requiresDocumentation || snapshot.artifacts.some((artifact) =>
+        artifact.targetRefs.some((ref) => ref.kind === "task" && ref.id === reportTask.id))) &&
+      !reportTask.isBlocked && !reportTask.isWaitingOnDependency;
+    snapshot.tasks = snapshot.tasks.map((task) => task.id === reportTask.id
+      ? { ...task, status: result === "pass" && canFinalize ? "complete" : "in-progress" }
+      : task);
+    refreshLocalTaskState(snapshot);
+  }
   return { item: report };
+}
+
+function submitLocalQaRequest(snapshot: BootstrapPayload, body: Record<string, unknown>, actorMemberId?: string | null) {
+  const subject = typeof body.subject === "string" ? body.subject.trim() : "";
+  const targetRefs = Array.isArray(body.targetRefs) ? body.targetRefs as BootstrapPayload["qaRequests"][number]["targetRefs"] : [];
+  if (subject.length < 2 || !Array.isArray(body.targetRefs)) {
+    throw localCommandError("QA request details are incomplete or invalid.", 400);
+  }
+  if (targetRefs.length !== 1 || targetRefs[0]?.kind !== "task") {
+    throw localCommandError("Local QA requests must target exactly one task.", 400);
+  }
+  const taskIds = [...new Set(targetRefs.filter((ref) => ref.kind === "task").map((ref) => ref.id))];
+  if (taskIds.length > 1) throw localCommandError("Request QA for one task at a time.", 400);
+  const task = taskIds.length ? snapshot.tasks.find((candidate) => candidate.id === taskIds[0]) : undefined;
+  if (taskIds.length && !task) throw localCommandError("The selected task does not exist.", 404);
+  const projectId = task?.projectId ?? (typeof body.projectId === "string" ? body.projectId : "");
+  const project = snapshot.projects.find((candidate) => candidate.id === projectId);
+  if (task && !project) throw localCommandError("The selected task project does not exist.", 400);
+  if (task && typeof body.projectId === "string" && body.projectId !== task.projectId) {
+    throw localCommandError("The QA request project must match its task.", 400);
+  }
+
+  const requestedBy = snapshot.members.find((member) => member.id === actorMemberId);
+  if (!requestedBy) throw localCommandError("A roster member is required to request task QA.", 403);
+  const isActiveForTask = (member: typeof snapshot.members[number]) =>
+    Boolean(project && [...new Set([...(member.activeSeasonIds ?? []), member.seasonId])].includes(project.seasonId));
+  const assignedRequester = task && (task.ownerId === requestedBy.id || task.assigneeIds.includes(requestedBy.id));
+  if (!task || !isActiveForTask(requestedBy) || !assignedRequester || !(requestedBy.role === "student" || requestedBy.role === "lead")) {
+    throw localCommandError("Only assigned students and leads in the task season can request QA.", 403);
+  }
+
+  const mentorId = typeof body.mentorId === "string" ? body.mentorId : task?.mentorId ?? null;
+  const mentor = mentorId ? snapshot.members.find((member) => member.id === mentorId) : undefined;
+  if (task && (!mentor || mentor.role !== "mentor" || !isActiveForTask(mentor))) {
+    throw localCommandError("Select an active mentor in the task's season.", 400);
+  }
+  if (task) {
+    const pending = snapshot.qaRequests.find((request) =>
+      (request.status === "requested" || request.status === "in-review") &&
+      request.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id),
+    );
+    if (pending) {
+      if (task.status === "waiting-for-qa" && pending.mentorId === mentorId) return { item: pending };
+      throw localCommandError("This task already has a pending QA request.", 409);
+    }
+    const waitingOnHardDependency = snapshot.taskDependencies.some((dependency) =>
+      dependency.taskId === task.id && dependency.dependencyType === "hard" && !isTaskDependencySatisfied(dependency, snapshot),
+    );
+    if (task.status !== "in-progress" || task.isBlocked || task.isWaitingOnDependency || hasLocalBlockingRisk(snapshot, task) || waitingOnHardDependency) {
+      throw localCommandError("QA requires an in-progress task with no blocking risks or unfinished dependencies.", 409);
+    }
+  }
+
+  const request: BootstrapPayload["qaRequests"][number] = {
+    id: newLocalId(),
+    projectId,
+    targetRefs: targetRefs.map((ref) => ({ ...ref })),
+    subject,
+    mentorId,
+    requestedById: requestedBy.id,
+    createdAt: new Date().toISOString(),
+    status: "requested",
+  };
+  validateRosterReferences(snapshot, request as unknown as Row);
+  snapshot.qaRequests = [request, ...snapshot.qaRequests];
+  if (task) {
+    snapshot.tasks = snapshot.tasks.map((candidate) => candidate.id === task.id
+      ? { ...candidate, mentorId, status: "waiting-for-qa" }
+      : candidate);
+  }
+  return { item: request };
+}
+
+function updateLocalQaRequest(snapshot: BootstrapPayload, requestId: string, body: Record<string, unknown>) {
+  const request = snapshot.qaRequests.find((candidate) => candidate.id === requestId);
+  if (!request) throw localCommandError("The QA request no longer exists in this local workspace.", 404);
+  if (Object.keys(body).length !== 1 || body.status !== "cancelled") {
+    throw localCommandError("Local QA requests only support cancellation; request details are read-only.", 400);
+  }
+  if (request.status !== "requested" && request.status !== "in-review") {
+    throw localCommandError("Only an active QA request can be cancelled.", 409);
+  }
+  const taskId = request.targetRefs.find((ref) => ref.kind === "task")?.id;
+  const task = taskId ? snapshot.tasks.find((candidate) => candidate.id === taskId) : undefined;
+  request.status = "cancelled";
+  if (task?.status === "waiting-for-qa" && !snapshot.qaRequests.some((candidate) =>
+    (candidate.status === "requested" || candidate.status === "in-review") &&
+    candidate.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id))) {
+    task.status = "in-progress";
+    refreshLocalTaskState(snapshot);
+  }
+  return { item: request };
 }
 
 function retestLocalFinding(snapshot: BootstrapPayload, findingId: string, body: Record<string, unknown>, actorMemberId?: string | null) {
@@ -170,7 +297,7 @@ export function refreshLocalTaskState(snapshot: BootstrapPayload) {
   for (const log of snapshot.workLogs) loggedHours.set(log.taskId, (loggedHours.get(log.taskId) ?? 0) + log.hours);
   for (const task of snapshot.tasks) {
     task.actualHours = loggedHours.get(task.id) ?? 0;
-    task.isBlocked = snapshot.risks.some((risk) => risk.projectId === task.projectId && risk.blocksWork && risk.status !== "resolved" && risk.relatedTargets.some((target) => target.kind === "task" && target.id === task.id));
+    task.isBlocked = hasLocalBlockingRisk(snapshot, task);
     task.isWaitingOnDependency = task.status !== "complete" && snapshot.taskDependencies.some((dependency) =>
       dependency.taskId === task.id && dependency.dependencyType === "hard" && !isTaskDependencySatisfied(dependency, snapshot),
     );
@@ -278,6 +405,11 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   const resource = parts[0] === "manufacturing" && parts[1] === "processes" ? "manufacturing/processes" : parts[0];
   const encodedId = resource === "manufacturing/processes" ? parts[2] : parts[1];
   const extra = resource === "manufacturing/processes" ? parts[3] : parts[2];
+  if (resource === "qa-requests" && !encodedId && parts.length === 1 && method === "POST") return submitLocalQaRequest(snapshot, body, actorMemberId);
+  if (resource === "qa-requests" && encodedId && parts.length === 2 && method === "PATCH") return updateLocalQaRequest(snapshot, decodeURIComponent(encodedId), body);
+  if (resource === "qa-requests" && encodedId && parts.length === 2 && method === "DELETE") {
+    throw localCommandError("QA requests are retained as workflow history; cancel an active request instead of deleting it.", 405);
+  }
   if (resource === "qa-reports" && encodedId === "submit" && parts.length === 2 && method === "POST") return submitLocalQaReport(snapshot, body, actorMemberId);
   if (resource === "report-findings" && encodedId && extra === "retest" && parts.length === 3 && method === "POST") return retestLocalFinding(snapshot, decodeURIComponent(encodedId), body, actorMemberId);
   if (resource === "purchases" && encodedId && extra === "receipts" && parts.length === 3 && method === "POST") return receiveLocalPurchase(snapshot, decodeURIComponent(encodedId), body);

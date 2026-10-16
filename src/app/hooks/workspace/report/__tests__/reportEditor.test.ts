@@ -95,7 +95,7 @@ it("hands an eligible assigned student to the assigned mentor through one QA req
   const request = render().requestTaskQa;
   await Promise.all([request(task.id), request(task.id)]);
   expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
-  expect(createQaRequestRecord).toHaveBeenCalledWith({ projectId: task.projectId, targetRefs: [{ kind: "task", id: task.id }], subject: `${task.title} — QA request`, mentorId: "mentor-1" }, state.handleUnauthorized);
+  expect(createQaRequestRecord).toHaveBeenCalledWith({ projectId: task.projectId, targetRefs: [{ kind: "task", id: task.id }], subject: `${task.title} — QA request`, mentorId: "mentor-1" }, state.handleUnauthorized, "lead-1");
   expect(state.loadWorkspace).toHaveBeenCalledTimes(1);
 });
 
