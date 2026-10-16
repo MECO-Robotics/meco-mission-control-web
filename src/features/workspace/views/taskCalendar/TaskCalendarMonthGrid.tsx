@@ -136,7 +136,17 @@ export function TaskCalendarMonthGrid({
                             type="button"
                           >{event.title}</button>
                         ) : (
-                          <div className={className} key={event.id} title={event.title}>{event.title}</div>
+                          <button
+                            aria-label={`View day details for ${event.title}`}
+                            className={className}
+                            key={event.id}
+                            onClick={(click) => {
+                              click.stopPropagation();
+                              onOpenDay(cellDateKey);
+                            }}
+                            title={event.title}
+                            type="button"
+                          >{event.title}</button>
                         );
                       })}
                       {hiddenEventCount > 0 ? (

@@ -2,6 +2,7 @@ import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { requestApi } from "@/lib/auth/core/request";
 import { createQaRequestRecord } from "@/lib/auth/records/reporting";
+import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
 import { enterLocalDemo, getLocalWorkspaceMode, leaveLocalWorkspace, resetLocalDemo } from "../session";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -32,6 +33,27 @@ it("saves demo edits locally across reopening and never sends mutation or refres
   expect((await read()).materials[0].name).toBe("Local edit");
   expect(fetch).toHaveBeenCalledTimes(calls);
   expect(jest.mocked(fetch).mock.calls.every(([, options]) => !options?.method || options.method === "GET")).toBe(true);
+});
+
+it("restores a schema-2 saved demo without the later actions collection before workspace scoping", async () => {
+  const withoutActions = (payload: BootstrapPayload) => {
+    const saved = structuredClone(payload) as Partial<BootstrapPayload>;
+    delete saved.actions;
+    return saved;
+  };
+  const baseline = withoutActions(seed);
+  const savedSnapshot = withoutActions({
+    ...seed,
+    materials: seed.materials.map((material) => ({ ...material, name: "Kept from older saved demo" })),
+  });
+  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 2, baseline, snapshot: savedSnapshot }));
+
+  const restored = await read();
+  const scoped = scopeBootstrapBySelection(restored, null, null);
+
+  expect(scoped.actions).toEqual([]);
+  expect(scoped.materials[0].name).toBe("Kept from older saved demo");
+  expect(fetch).not.toHaveBeenCalled();
 });
 
 it("isolates tutorial changes, resets its baseline, and restores demo edits on exit", async () => {

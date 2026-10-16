@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { TaskCalendarMonthStack } from "../TaskCalendarMonthStack";
 import { TaskCalendarMonthGrid } from "../TaskCalendarMonthGrid";
 import { createContinuousCalendarDates, getCalendarMonthWeekCount } from "../taskCalendarLayout";
+import type { TaskCalendarEvent } from "../taskCalendarEvents";
 
 function findDayCell(element: React.ReactNode, dateKey: string): React.ReactElement<{
   children?: React.ReactNode;
@@ -19,6 +20,29 @@ function findDayCell(element: React.ReactNode, dateKey: string): React.ReactElem
   for (const child of React.Children.toArray(candidate.props.children)) {
     const cell = findDayCell(child, dateKey);
     if (cell) return cell;
+  }
+  return null;
+}
+
+function findElementWithClass(element: React.ReactNode, className: string): React.ReactElement<{
+  children?: React.ReactNode;
+  className?: string;
+  "aria-label"?: string;
+  type?: string;
+  onClick?: (event: { stopPropagation: () => void }) => void;
+}> | null {
+  if (!React.isValidElement(element)) return null;
+  const candidate = element as React.ReactElement<{
+    children?: React.ReactNode;
+    className?: string;
+    "aria-label"?: string;
+    type?: string;
+    onClick?: (event: { stopPropagation: () => void }) => void;
+  }>;
+  if (candidate.props.className?.includes(className)) return candidate;
+  for (const child of React.Children.toArray(candidate.props.children)) {
+    const match = findElementWithClass(child, className);
+    if (match) return match;
   }
   return null;
 }
@@ -96,5 +120,28 @@ describe("TaskCalendarMonthStack", () => {
     expect(activeDay?.props.tabIndex).toBe(0);
     activeDay?.props.onKeyDown?.({ key: "ArrowRight", target: activeDay, currentTarget: activeDay, preventDefault: jest.fn() });
     expect(onMoveFocus).toHaveBeenCalledWith("2040-04-01", 1);
+  });
+
+  it.each(["meeting", "event"] as const)("opens day details from a single read-only %s chip", (type) => {
+    const dateKey = "2026-10-16";
+    const scheduleEvent: TaskCalendarEvent = {
+      id: `${type}:readonly`, start: dateKey, title: `${type} details`,
+      extendedProps: { contextLabel: null, recordId: "readonly", status: "scheduled", type },
+    };
+    const onOpenDay = jest.fn();
+    const onOpenEvent = jest.fn();
+    const grid = TaskCalendarMonthGrid({
+      eventsByDateKey: new Map([[dateKey, [scheduleEvent]]]),
+      monthCells: createContinuousCalendarDates(new Date(2026, 9, 1), 1),
+      onOpenDay, onOpenEvent, onMoveFocus: jest.fn(), eventCapacity: 4,
+      activeDateKey: dateKey, selectedDateKey: null, todayDateKey: dateKey,
+    });
+    const chip = findElementWithClass(grid, `task-calendar-day-event-${type}`);
+
+    expect(chip?.type).toBe("button");
+    expect(chip?.props["aria-label"]).toBe(`View day details for ${scheduleEvent.title}`);
+    chip?.props.onClick?.({ stopPropagation: jest.fn() });
+    expect(onOpenDay).toHaveBeenCalledWith(dateKey);
+    expect(onOpenEvent).not.toHaveBeenCalled();
   });
 });

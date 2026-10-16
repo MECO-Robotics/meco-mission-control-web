@@ -19,6 +19,7 @@ function getUniqueValidMemberIds(candidateIds: string[] | null | undefined, mode
 }
 
 export type AppWorkspaceReportEditor = ReturnType<typeof useAppWorkspaceReportEditor>;
+type AcknowledgedQaRequest = { taskId: string; requestId: string };
 
 export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const lifecycle = useCatalogEditorLifecycle(model);
@@ -28,7 +29,10 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const qaRequestLocks = useRef(new Set<string>());
   const qaRequestContext = useRef(0);
   const qaRequestMount = useRef(0);
-  const [requestedQaTaskIds, setRequestedQaTaskIds] = useState<string[]>([]);
+  const latestBootstrap = useRef(model.bootstrap);
+  latestBootstrap.current = model.bootstrap;
+  const [acknowledgedQaRequests, setAcknowledgedQaRequests] = useState<AcknowledgedQaRequest[]>([]);
+  const requestedQaTaskIds = acknowledgedQaRequests.map(({ taskId }) => taskId);
   const accountId = model.sessionUser?.accountId;
   const qaRequestAccountId = useRef(accountId);
   qaRequestAccountId.current = accountId;
@@ -39,13 +43,15 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const reportIsOpen = Boolean(model.workLogModalMode || model.qaReportModalMode || model.milestoneReportModalMode);
 
   useEffect(() => {
-    setRequestedQaTaskIds((current) => current.filter((taskId) =>
-      !model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === taskId)),
+    setAcknowledgedQaRequests((current) => current.filter(({ taskId, requestId }) =>
+      !model.bootstrap.tasks.some((task) => task.id === taskId && task.status === "complete") &&
+        !model.bootstrap.qaRequests.some((request) => request.id === requestId &&
+          request.targetRefs.some((ref) => ref.kind === "task" && ref.id === taskId)),
     ));
-  }, [model.bootstrap.qaRequests]);
+  }, [model.bootstrap.qaRequests, model.bootstrap.tasks]);
 
   useEffect(() => {
-    setRequestedQaTaskIds([]);
+    setAcknowledgedQaRequests([]);
   }, [accountId, model.isPublicDemoSession]);
 
   useEffect(() => {
@@ -110,7 +116,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     if (!task.assigneeIds.includes(member.id) && task.ownerId !== member.id) return;
     const mentor = model.bootstrap.members.find((candidate) => candidate.id === task.mentorId && candidate.role === "mentor");
     if (!mentor || task.status === "not-started" || task.status === "complete" || task.status === "waiting-for-qa" || task.isBlocked || task.isWaitingOnDependency) return;
-    if (requestedQaTaskIds.includes(taskId) || model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id) && ["requested", "in-review"].includes(request.status))) return;
+    if (acknowledgedQaRequests.some((request) => request.taskId === taskId) || model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id) && ["requested", "in-review"].includes(request.status))) return;
     const context = qaRequestContext.current;
     const mount = qaRequestMount.current;
     const workspace = lifecycle.captureWorkspace();
@@ -119,13 +125,24 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     if (qaRequestLocks.current.has(lockId)) return;
     qaRequestLocks.current.add(lockId);
     model.setDataMessage(null);
+    const rememberAcceptedRequest = (requestId: string) => {
+      setAcknowledgedQaRequests((current) => {
+        const bootstrap = latestBootstrap.current;
+        const alreadyReconciled = bootstrap.tasks.some((candidate) => candidate.id === taskId && candidate.status === "complete") ||
+          bootstrap.qaRequests.some((request) => request.id === requestId && request.targetRefs.some((ref) => ref.kind === "task" && ref.id === taskId));
+        if (alreadyReconciled || current.some((request) => request.requestId === requestId)) return current;
+        return [...current, { taskId, requestId }];
+      });
+    };
+    let acceptedRequestId: string;
     try {
-      await createQaRequestRecord({
+      const acceptedRequest = await createQaRequestRecord({
         projectId: task.projectId,
         targetRefs: [{ kind: "task", id: task.id }],
         subject: `${task.title} — QA request`,
         mentorId: mentor.id,
       }, model.handleUnauthorized, localActorMemberId);
+      acceptedRequestId = acceptedRequest.id;
     } catch (error) {
       if (isCurrent()) model.setDataMessage(toErrorMessage(error));
       qaRequestLocks.current.delete(lockId);
@@ -133,12 +150,12 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     }
     if (!isCurrent()) {
       if (qaRequestMount.current === mount && qaRequestAccountId.current === accountId) {
-        setRequestedQaTaskIds((current) => current.includes(taskId) ? current : [...current, taskId]);
+        rememberAcceptedRequest(acceptedRequestId);
       }
       qaRequestLocks.current.delete(lockId);
       return;
     }
-    setRequestedQaTaskIds((current) => current.includes(taskId) ? current : [...current, taskId]);
+    rememberAcceptedRequest(acceptedRequestId);
     try {
       if (!await workspace.refresh(isCurrent) && isCurrent()) model.setDataMessage("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
     } catch {
@@ -146,7 +163,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     } finally {
       qaRequestLocks.current.delete(lockId);
     }
-  }, [model, requestedQaTaskIds, lifecycle, qaRequestLockScope, accountId, localActorMemberId]);
+  }, [model, acknowledgedQaRequests, lifecycle, qaRequestLockScope, accountId, localActorMemberId]);
 
   const closeQaReportModal = useCallback(() => { resetEditor(); model.setQaReportModalMode(null); }, [model, resetEditor]);
 

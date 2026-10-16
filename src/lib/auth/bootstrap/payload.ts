@@ -16,6 +16,7 @@ function normalizeScheduleTimes<T extends ScheduleRecord>(record: T) {
 export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload {
   return {
     ...payload,
+    actions: payload.actions ?? [],
     artifacts: payload.artifacts.map((artifact) => {
       return { ...artifact, uri: artifact.uri ?? "" };
     }),

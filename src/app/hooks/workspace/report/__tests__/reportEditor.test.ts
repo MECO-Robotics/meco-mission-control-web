@@ -72,6 +72,14 @@ function setup() {
   return { state, render: Render, task, milestone, unmount };
 }
 
+function acceptedQaRequest(task: { id: string; projectId: string }, id: string) {
+  return {
+    id, projectId: task.projectId, targetRefs: [{ kind: "task" as const, id: task.id }],
+    subject: "QA request", mentorId: "mentor-1", requestedById: "student-1",
+    createdAt: "2026-10-16T12:00:00Z", status: "requested" as const,
+  };
+}
+
 it("opens work logging for the chosen task, removes its overlay, and restores details on dismissal", () => {
   const { state, render, task } = setup();
   render().openCreateWorkLogModal(task.id);
@@ -91,7 +99,7 @@ it("hands an eligible assigned student to the assigned mentor through one QA req
   task.status = "in-progress";
   task.assigneeIds = ["student-1"];
   task.mentorId = "mentor-1";
-  jest.mocked(createQaRequestRecord).mockResolvedValueOnce({} as never);
+  jest.mocked(createQaRequestRecord).mockResolvedValueOnce(acceptedQaRequest(task, "accepted-request") as never);
   const request = render().requestTaskQa;
   await Promise.all([request(task.id), request(task.id)]);
   expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
@@ -106,7 +114,7 @@ it("keeps the same account-task request locked while project and season context 
   task.assigneeIds = ["student-1"];
   task.mentorId = "mentor-1";
   let resolve!: () => void;
-  jest.mocked(createQaRequestRecord).mockImplementationOnce(() => new Promise((yes) => { resolve = () => yes({} as never); }));
+  jest.mocked(createQaRequestRecord).mockImplementationOnce(() => new Promise((yes) => { resolve = () => yes(acceptedQaRequest(task, "qa-request-1") as never); }));
   const pending = render().requestTaskQa(task.id);
 
   state.selectedProjectId = "another-project";
@@ -149,8 +157,8 @@ it("does not acknowledge a late QA request success in a different account", asyn
   task.mentorId = "mentor-1";
   let resolveOld!: () => void;
   jest.mocked(createQaRequestRecord)
-    .mockImplementationOnce(() => new Promise((yes) => { resolveOld = () => yes({} as never); }))
-    .mockResolvedValueOnce({} as never);
+    .mockImplementationOnce(() => new Promise((yes) => { resolveOld = () => yes(acceptedQaRequest(task, "old-account-request") as never); }))
+    .mockResolvedValueOnce(acceptedQaRequest(task, "new-account-request") as never);
   const oldRequest = render().requestTaskQa(task.id);
   state.sessionUser = { ...state.sessionUser!, accountId: "account-next" };
   render();
@@ -168,7 +176,8 @@ it("allows retry after a failed QA request", async () => {
   task.status = "in-progress";
   task.assigneeIds = ["student-1"];
   task.mentorId = "mentor-1";
-  jest.mocked(createQaRequestRecord).mockRejectedValueOnce(new Error("Temporary failure")).mockResolvedValueOnce({} as never);
+  jest.mocked(createQaRequestRecord).mockRejectedValueOnce(new Error("Temporary failure"))
+    .mockResolvedValueOnce(acceptedQaRequest(task, "retry-request") as never);
   await render().requestTaskQa(task.id);
   await render().requestTaskQa(task.id);
   expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
@@ -204,7 +213,7 @@ it("ignores a delayed QA request success after unmount without acknowledging or 
   task.assigneeIds = ["student-1"];
   task.mentorId = "mentor-1";
   let resolve!: () => void;
-  jest.mocked(createQaRequestRecord).mockImplementationOnce(() => new Promise((yes) => { resolve = () => yes({} as never); }));
+  jest.mocked(createQaRequestRecord).mockImplementationOnce(() => new Promise((yes) => { resolve = () => yes(acceptedQaRequest(task, "unmounted-request") as never); }));
   const pending = render().requestTaskQa(task.id);
   unmount();
   resolve();
@@ -220,7 +229,7 @@ it("keeps an acknowledged QA request in a waiting state when workspace refresh f
   task.assigneeIds = ["student-1"];
   task.mentorId = "mentor-1";
   state.loadWorkspace.mockResolvedValueOnce(false);
-  jest.mocked(createQaRequestRecord).mockResolvedValueOnce({} as never);
+  jest.mocked(createQaRequestRecord).mockResolvedValueOnce(acceptedQaRequest(task, "refresh-failed-request") as never);
   await render().requestTaskQa(task.id);
   expect(render().requestedQaTaskIds).toContain(task.id);
   expect(state.setDataMessage).toHaveBeenCalledWith("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
@@ -228,29 +237,112 @@ it("keeps an acknowledged QA request in a waiting state when workspace refresh f
   expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
 });
 
-it.each(["complete", "cancelled"] as const)("releases the temporary QA acknowledgment after a canonical %s request", async (terminalStatus) => {
+it("retires the acknowledgment when a successful refresh consumes the request and completes the task", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  state.loadWorkspace.mockImplementationOnce(async () => {
+    state.bootstrap = {
+      ...state.bootstrap,
+      tasks: state.bootstrap.tasks.map((candidate) => candidate.id === task.id ? { ...candidate, status: "complete" } : candidate),
+      qaRequests: [],
+    };
+    return true;
+  });
+  jest.mocked(createQaRequestRecord)
+    .mockResolvedValueOnce(acceptedQaRequest(task, "consumed-request") as never)
+    .mockResolvedValueOnce(acceptedQaRequest(task, "reopened-cycle-request") as never);
+
+  await render().requestTaskQa(task.id);
+  expect(state.loadWorkspace).toHaveBeenCalledTimes(1);
+  expect(state.bootstrap.tasks.find((candidate) => candidate.id === task.id)?.status).toBe("complete");
+  render();
+  expect(render().requestedQaTaskIds).not.toContain(task.id);
+
+  state.bootstrap = {
+    ...state.bootstrap,
+    tasks: state.bootstrap.tasks.map((candidate) => candidate.id === task.id ? { ...candidate, status: "in-progress" } : candidate),
+  };
+  render();
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
+});
+
+it("keeps the acknowledgment after a successful refresh that still lacks the accepted request and completion", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  state.loadWorkspace.mockResolvedValueOnce(true);
+  jest.mocked(createQaRequestRecord).mockResolvedValueOnce(acceptedQaRequest(task, "still-unobserved-request") as never);
+
+  await render().requestTaskQa(task.id);
+  expect(render().requestedQaTaskIds).toContain(task.id);
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
+});
+
+it("reconciles completion already visible before the accepted request response", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  let resolve!: () => void;
+  jest.mocked(createQaRequestRecord)
+    .mockImplementationOnce(() => new Promise((yes) => { resolve = () => yes(acceptedQaRequest(task, "late-consumed-request") as never); }))
+    .mockResolvedValueOnce(acceptedQaRequest(task, "next-cycle-request") as never);
+
+  const pending = render().requestTaskQa(task.id);
+  state.bootstrap = {
+    ...state.bootstrap,
+    tasks: state.bootstrap.tasks.map((candidate) => candidate.id === task.id ? { ...candidate, status: "complete" } : candidate),
+    qaRequests: [],
+  };
+  render();
+  resolve();
+  await pending;
+  expect(render().requestedQaTaskIds).not.toContain(task.id);
+
+  state.bootstrap = {
+    ...state.bootstrap,
+    tasks: state.bootstrap.tasks.map((candidate) => candidate.id === task.id ? { ...candidate, status: "in-progress" } : candidate),
+  };
+  render();
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
+});
+
+it.each(["complete", "cancelled"] as const)("releases the temporary QA acknowledgment when the first canonical record is already %s", async (terminalStatus) => {
   const { state, render, task } = setup();
   state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
   task.status = "in-progress";
   task.assigneeIds = ["student-1"];
   task.mentorId = "mentor-1";
   state.loadWorkspace.mockResolvedValueOnce(false);
-  jest.mocked(createQaRequestRecord).mockResolvedValue({} as never);
+  state.bootstrap.qaRequests = [{
+    ...acceptedQaRequest(task, "old-terminal-request"), status: terminalStatus,
+  }];
+  jest.mocked(createQaRequestRecord)
+    .mockResolvedValueOnce(acceptedQaRequest(task, "new-cycle-request") as never)
+    .mockResolvedValueOnce(acceptedQaRequest(task, "next-cycle-request") as never);
 
   await render().requestTaskQa(task.id);
   expect(render().requestedQaTaskIds).toContain(task.id);
 
-  const canonicalRequest = {
-    id: "qa-request-1", projectId: task.projectId, targetRefs: [{ kind: "task" as const, id: task.id }],
-    subject: "QA request", mentorId: "mentor-1", requestedById: "student-1", createdAt: "2026-10-16T12:00:00Z", status: "requested" as const,
-  };
-  state.bootstrap.qaRequests = [canonicalRequest];
+  // A terminal request from an earlier cycle cannot reconcile this acknowledgment.
   render();
-  expect(render().requestedQaTaskIds).not.toContain(task.id);
+  expect(render().requestedQaTaskIds).toContain(task.id);
   await render().requestTaskQa(task.id);
   expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
 
-  state.bootstrap.qaRequests = [{ ...canonicalRequest, status: terminalStatus }];
+  // The exact accepted ID is authoritative even if it is terminal on first observation.
+  const canonicalRequest = acceptedQaRequest(task, "new-cycle-request");
+  const oldTerminalRequest = state.bootstrap.qaRequests[0];
+  state.bootstrap.qaRequests = [{ ...canonicalRequest, status: terminalStatus }, oldTerminalRequest];
   render();
   expect(render().requestedQaTaskIds).not.toContain(task.id);
   await render().requestTaskQa(task.id);

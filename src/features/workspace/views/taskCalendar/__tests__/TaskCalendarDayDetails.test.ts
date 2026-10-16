@@ -157,13 +157,19 @@ describe("TaskCalendarMonthGrid day selection", () => {
     });
     const dayButton = findButtonByClass(grid, "task-calendar-day-open");
     const eventButton = findButtonByTitle(grid, taskEvent.title);
+    const meetingButton = findButtonByTitle(grid, meetingEvent.title);
 
     eventButton?.props.onClick?.({ stopPropagation: jest.fn() });
 
     expect(dayButton).toBeNull();
     expect(onOpenDay).not.toHaveBeenCalled();
     expect(onOpenEvent).toHaveBeenCalledWith(taskEvent);
-    expect(findButtonByTitle(grid, meetingEvent.title)).toBeNull();
+
+    meetingButton?.props.onClick?.({ stopPropagation: jest.fn() });
+
+    expect(onOpenDay).toHaveBeenCalledWith("2026-05-07");
+    expect(onOpenDay).toHaveBeenCalledTimes(1);
+    expect(onOpenEvent).toHaveBeenCalledTimes(1);
   });
 
   it("reserves room for an actionable overflow count and lists all items in the drawer", () => {
