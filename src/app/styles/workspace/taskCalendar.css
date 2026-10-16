@@ -81,7 +81,7 @@
 
 @media (max-width: 760px) {
   .workspace-schedule-scroll.is-calendar-workspace {
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: hidden;
   }
 

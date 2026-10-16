@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type UIEvent } from "react";
 
+import { formatLocalDate } from "@/lib/dateUtils";
 import { createContinuousCalendarDates, getCalendarMonthWeekCount, moveTaskCalendarDate } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
@@ -89,6 +90,13 @@ export function TaskCalendarMonthStack({
     ),
     [cursorMonth, cursorYear, monthsAfter, monthsBefore],
   );
+  const activeDateIsRendered = calendarDates.some((date) => formatLocalDate(date) === activeDateKey);
+  const renderedActiveDateKey = activeDateIsRendered
+    ? activeDateKey
+    : formatLocalDate(new Date(cursorYear, cursorMonth, 1));
+  useEffect(() => {
+    if (!activeDateIsRendered) setActiveDateKey(renderedActiveDateKey);
+  }, [activeDateIsRendered, renderedActiveDateKey]);
   useLayoutEffect(() => {
     if (!focusDateAfterRenderRef.current) return;
     const element = dayElementsRef.current.get(activeDateKey);
@@ -197,7 +205,7 @@ export function TaskCalendarMonthStack({
         onOpenDay={onOpenDay}
         onOpenEvent={onOpenEvent}
         onMoveFocus={moveFocus}
-        activeDateKey={activeDateKey}
+        activeDateKey={renderedActiveDateKey}
         eventCapacity={eventCapacity}
         selectedDateKey={selectedDateKey}
         todayDateKey={todayDateKey}

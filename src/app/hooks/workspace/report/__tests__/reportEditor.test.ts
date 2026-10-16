@@ -165,6 +165,35 @@ it("keeps an acknowledged QA request in a waiting state when workspace refresh f
   expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
 });
 
+it.each(["complete", "cancelled"] as const)("releases the temporary QA acknowledgment after a canonical %s request", async (terminalStatus) => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  state.loadWorkspace.mockResolvedValueOnce(false);
+  jest.mocked(createQaRequestRecord).mockResolvedValue({} as never);
+
+  await render().requestTaskQa(task.id);
+  expect(render().requestedQaTaskIds).toContain(task.id);
+
+  const canonicalRequest = {
+    id: "qa-request-1", projectId: task.projectId, targetRefs: [{ kind: "task" as const, id: task.id }],
+    subject: "QA request", mentorId: "mentor-1", requestedById: "student-1", createdAt: "2026-10-16T12:00:00Z", status: "requested" as const,
+  };
+  state.bootstrap.qaRequests = [canonicalRequest];
+  render();
+  expect(render().requestedQaTaskIds).not.toContain(task.id);
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
+
+  state.bootstrap.qaRequests = [{ ...canonicalRequest, status: terminalStatus }];
+  render();
+  expect(render().requestedQaTaskIds).not.toContain(task.id);
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
+});
+
 it("seeds QA with the chosen task as a typed evidence target and returns after submission", () => {
   const { state, render, task } = setup();
   render().openCreateQaReportModal(task.id);
