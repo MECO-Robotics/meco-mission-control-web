@@ -7,7 +7,8 @@ import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsV
 export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps) {
   const {
     bootstrap,
-    workspaceOperationScope,
+    receiptOperationScope,
+    receiptViewScope,
     disablePanelAnimations = false,
     effectiveInventoryView,
     inventorySwipeDirection,
@@ -73,7 +74,8 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
         <PurchasesView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
-          receiptOperationScope={workspaceOperationScope}
+          receiptOperationScope={receiptOperationScope}
+          receiptViewScope={receiptViewScope}
           openCreatePurchaseModal={openCreatePurchaseModal}
           openEditPurchaseModal={openEditPurchaseModal}
           canReceivePurchases={canReceivePurchases}

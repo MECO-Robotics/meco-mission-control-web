@@ -235,6 +235,8 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
         evidenceNotes: model.qaReportDraft.evidenceNotes?.trim() || "",
         photoUrl: model.qaReportDraft.photoUrl ?? "",
         status: requestedStatus,
+        reviewedById: null,
+        reviewedAt: null,
       };
 
       await createQaReportRecord(payload, model.handleUnauthorized);

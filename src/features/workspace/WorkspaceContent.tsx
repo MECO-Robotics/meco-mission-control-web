@@ -46,6 +46,8 @@ function getSwipeDirection<T extends string>(
 
 export interface WorkspaceContentProps {
   workspaceOperationScope?: string;
+  receiptOperationScope?: string;
+  receiptViewScope?: string;
   canReviewQa?: boolean;
   canCreateQaReport?: boolean;
   activePersonFilter: FilterSelection;

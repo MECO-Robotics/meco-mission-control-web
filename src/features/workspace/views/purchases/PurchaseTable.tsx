@@ -32,10 +32,10 @@ interface PurchaseTableProps {
   onSort: (field: string) => void;
   canReceivePurchases: boolean;
   onReceive: (item: PurchaseItemRecord) => void;
-  acknowledgedReceiptId: string | null;
+  acknowledgedReceiptIds: Set<string>;
 }
 
-export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass, hasPurchaseFilters, context, openEditPurchaseModal, pagination, columnFilters, columnOptions, setColumnFilter, sortField, sortDirection, onSort, canReceivePurchases, onReceive, acknowledgedReceiptId }: PurchaseTableProps) {
+export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass, hasPurchaseFilters, context, openEditPurchaseModal, pagination, columnFilters, columnOptions, setColumnFilter, sortField, sortDirection, onSort, canReceivePurchases, onReceive, acknowledgedReceiptIds }: PurchaseTableProps) {
   const header = (field: PurchaseColumn, label: string, allLabel: string) => (
     <ResourceColumnHeader field={field} label={label} onSort={onSort} sortDirection={sortDirection} sortField={sortField}>
       <ColumnFilterDropdown allLabel={allLabel} ariaLabel={`Filter purchases by ${label.toLowerCase()}`} onChange={(value) => setColumnFilter(field, value)} options={columnOptions[field]} value={columnFilters[field] ?? []} />
@@ -62,7 +62,7 @@ export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass,
         const receipts = item.receipts ?? [];
         const received = sumReceiptQuantities(receipts.map((receipt) => receipt.quantity));
         const remaining = Math.max(0, sumReceiptQuantities([item.quantity - received]));
-        const canReceive = canReceivePurchases && item.id !== acknowledgedReceiptId && remaining > 0 && ["ordered", "shipped", "delivered"].includes(item.orderStatus);
+        const canReceive = canReceivePurchases && !acknowledgedReceiptIds.has(item.id) && remaining > 0 && ["ordered", "shipped", "delivered"].includes(item.orderStatus);
         return (
           <Fragment key={item.id}>
           <button className="ops-table ops-row materials-table editable-hover-target editable-hover-target-row" data-tutorial-target="edit-purchase-row" onClick={() => openEditPurchaseModal(item)} style={{ "--workspace-grid-template": PURCHASE_GRID_TEMPLATE } as CSSProperties} title={`Edit ${item.title}`} type="button">

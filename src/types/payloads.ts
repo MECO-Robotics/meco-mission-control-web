@@ -56,6 +56,8 @@ interface ReportPayloadBase {
 export type QaReportPayload = ReportPayloadBase & {
   reportType: "qa";
   result: "pass" | "minor-fix" | "iteration-worthy";
+  reviewedById?: null;
+  reviewedAt?: null;
 };
 
 export interface TestResultPayload extends ReportPayloadBase {

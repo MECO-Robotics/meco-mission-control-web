@@ -57,16 +57,17 @@ export function createStableReceiptOperation(createId: () => string, restored?: 
 export interface ReceiptAttemptStorage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
+  removeItem?(key: string): void;
 }
 
 export function receiptOperationStorageKey(scope: string, itemId: string) {
   return `mission-control:receipt:v1:${encodeURIComponent(scope)}:${encodeURIComponent(itemId)}`;
 }
 
-export function persistReceiptOperation(storage: ReceiptAttemptStorage | undefined, scope: string, itemId: string, payload: StableReceiptPayload) {
+export function persistReceiptOperation(storage: ReceiptAttemptStorage | undefined, scope: string, itemId: string, payload: StableReceiptPayload, status: "pending" | "acknowledged" = "pending") {
   if (!storage) return false;
   const key = receiptOperationStorageKey(scope, itemId);
-  const value = JSON.stringify({ version: 1, scope, itemId, status: "pending", payload });
+  const value = JSON.stringify({ version: 1, scope, itemId, status, payload });
   try {
     storage.setItem(key, value);
     return storage.getItem(key) === value;
@@ -78,6 +79,7 @@ export function persistReceiptOperation(storage: ReceiptAttemptStorage | undefin
 export type RestoredReceiptOperation =
   | { kind: "none" }
   | { kind: "valid"; payload: StableReceiptPayload }
+  | { kind: "acknowledged"; payload: StableReceiptPayload }
   | { kind: "invalid" };
 
 export function restoreReceiptOperation(storage: Pick<Storage, "getItem"> | undefined, scope: string, itemId: string): RestoredReceiptOperation {
@@ -87,14 +89,23 @@ export function restoreReceiptOperation(storage: Pick<Storage, "getItem"> | unde
     if (value === null) return { kind: "none" };
     const record = JSON.parse(value) as { version?: unknown; scope?: unknown; itemId?: unknown; status?: unknown; payload?: Partial<StableReceiptPayload> };
     const payload = record.payload;
-    if (record.version !== 1 || record.scope !== scope || record.itemId !== itemId || !["pending", "unknown"].includes(String(record.status)) ||
+    if (record.version !== 1 || record.scope !== scope || record.itemId !== itemId || !["pending", "unknown", "acknowledged"].includes(String(record.status)) ||
       !payload || typeof payload.operationId !== "string" || !payload.operationId.trim() || payload.operationId.length > 200 ||
       typeof payload.quantity !== "number" || !Number.isFinite(payload.quantity) || payload.quantity <= 0 || payload.quantity > 1000 ||
       typeof payload.location !== "string" || !payload.location.trim() || payload.location.length > 200) return { kind: "invalid" };
-    return { kind: "valid", payload: { operationId: payload.operationId, quantity: payload.quantity, location: payload.location } };
+    const stablePayload = { operationId: payload.operationId, quantity: payload.quantity, location: payload.location };
+    return record.status === "acknowledged" ? { kind: "acknowledged", payload: stablePayload } : { kind: "valid", payload: stablePayload };
   } catch {
     return { kind: "invalid" };
   }
+}
+
+export function reconcileAcknowledgedReceiptOperation(storage: ReceiptAttemptStorage | undefined, scope: string, itemId: string, receipts: Array<{ operationId?: string }> | undefined) {
+  const restored = restoreReceiptOperation(storage, scope, itemId);
+  if (restored.kind !== "acknowledged") return false;
+  if (!(receipts ?? []).some((receipt) => receipt.operationId === restored.payload.operationId)) return true;
+  try { storage?.removeItem?.(receiptOperationStorageKey(scope, itemId)); } catch { /* The bootstrap already confirms this operation. */ }
+  return false;
 }
 
 function isAmbiguous(error: unknown) {

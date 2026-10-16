@@ -4,7 +4,7 @@ import { PurchasesView } from "@/features/workspace/views/PurchasesView";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { createClientOperationId } from "@/lib/appUtils/clientOperationId";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
-import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceiptQuantity, persistReceiptOperation, receiptOperationStorageKey, restoreReceiptOperation, submitPersistedPurchaseReceipt, submitPurchaseReceipt, sumReceiptQuantities } from "@/features/workspace/views/purchases/submitPurchaseReceipt";
+import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceiptQuantity, persistReceiptOperation, receiptOperationStorageKey, reconcileAcknowledgedReceiptOperation, restoreReceiptOperation, submitPersistedPurchaseReceipt, submitPurchaseReceipt, sumReceiptQuantities } from "@/features/workspace/views/purchases/submitPurchaseReceipt";
 import { PurchaseTable } from "@/features/workspace/views/purchases/PurchaseTable";
 import { receivePurchaseItemRecord } from "@/lib/auth/records/production";
 import { requestItem } from "@/lib/auth/records/common";
@@ -89,15 +89,63 @@ describe("purchase receiving UI", () => {
     expect(sumReceiptQuantities([0.1, 0.2])).toBe(0.3);
   });
 
-  it("restores only a validated receipt operation within its account and workspace scope", () => {
+  it("restores a validated receipt operation by account and purchase, independent of view filters", () => {
     const values = new Map<string, string>();
     const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value) };
     const payload = { operationId: "stable", quantity: 1.5, location: "Shelf A" };
-    expect(persistReceiptOperation(storage, "account-a/project-a/season-a", item.id, payload)).toBe(true);
-    expect(restoreReceiptOperation(storage, "account-a/project-a/season-a", item.id)).toEqual({ kind: "valid", payload });
-    expect(restoreReceiptOperation(storage, "account-b/project-a/season-a", item.id)).toEqual({ kind: "none" });
-    values.set(receiptOperationStorageKey("account-a/project-a/season-a", item.id), JSON.stringify({ version: 1, scope: "account-a/project-a/season-a", itemId: item.id, status: "pending", payload: { ...payload, quantity: "1.5" } }));
-    expect(restoreReceiptOperation(storage, "account-a/project-a/season-a", item.id)).toEqual({ kind: "invalid" });
+    expect(persistReceiptOperation(storage, "account:account-a", item.id, payload)).toBe(true);
+    expect(restoreReceiptOperation(storage, "account:account-a", item.id)).toEqual({ kind: "valid", payload });
+    expect(restoreReceiptOperation(storage, "account:account-b", item.id)).toEqual({ kind: "none" });
+    values.set(receiptOperationStorageKey("account:account-a", item.id), JSON.stringify({ version: 1, scope: "account:account-a", itemId: item.id, status: "pending", payload: { ...payload, quantity: "1.5" } }));
+    expect(restoreReceiptOperation(storage, "account:account-a", item.id)).toEqual({ kind: "invalid" });
+  });
+
+  it("keeps a successful receipt locked across a failed refresh and remount until bootstrap confirms its operation", async () => {
+    const values = new Map<string, string>();
+    const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value), removeItem: (key: string) => values.delete(key) };
+    const scope = "account:account-a";
+    const payload = { operationId: "accepted-receipt", quantity: 1, location: "Shelf A" };
+    const reportError = jest.fn();
+    const outcome = await submitPersistedPurchaseReceipt({
+      storage, scope, itemId: item.id, payload,
+      write: async () => undefined,
+      refresh: async () => { throw new Error("Refresh failed"); },
+      acknowledge: () => { persistReceiptOperation(storage, scope, item.id, payload, "acknowledged"); },
+      hasReceipt: () => false,
+      reportError,
+    });
+    expect(outcome).toBe("recorded");
+    expect(reportError).toHaveBeenCalledWith(expect.stringContaining("Receipt recorded"));
+    const previousStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+    Object.defineProperty(globalThis, "localStorage", { configurable: true, value: storage });
+    try {
+      const bootstrap = createBootstrap();
+      bootstrap.purchaseItems = [{ ...item }];
+      let viewScope = "all-projects/all-seasons";
+      const render = () => renderToStaticMarkup(React.createElement(PurchasesView, { activePersonFilter: [], bootstrap, receiptOperationScope: scope, receiptViewScope: viewScope, openCreatePurchaseModal: jest.fn(), openEditPurchaseModal: jest.fn(), canReceivePurchases: true }));
+      expect(render()).not.toContain(">Receive</button>");
+      expect(reconcileAcknowledgedReceiptOperation(storage, scope, item.id, item.receipts)).toBe(true);
+      viewScope = "purchase-project/current-season";
+      expect(render()).not.toContain(">Receive</button>");
+
+      bootstrap.purchaseItems = [{ ...item, receipts: [...(item.receipts ?? []), { ...item.receipts![0]!, id: "accepted-receipt-row", operationId: payload.operationId, quantity: payload.quantity }] }];
+      expect(render()).toContain(">Receive</button>");
+      expect(restoreReceiptOperation(storage, scope, item.id)).toEqual({ kind: "none" });
+      expect(createStableReceiptOperation(() => "next-receipt").payloadFor(1, "Shelf B").operationId).toBe("next-receipt");
+    } finally {
+      if (previousStorage) Object.defineProperty(globalThis, "localStorage", previousStorage);
+      else Reflect.deleteProperty(globalThis, "localStorage");
+    }
+  });
+
+  it("isolates acknowledged receipt locks by account and keeps the same operation identity across project filters", () => {
+    const values = new Map<string, string>();
+    const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value), removeItem: (key: string) => values.delete(key) };
+    const payload = { operationId: "same-operation", quantity: 1, location: "Shelf A" };
+    persistReceiptOperation(storage, "account:account-a", item.id, payload, "acknowledged");
+    expect(reconcileAcknowledgedReceiptOperation(storage, "account:account-a", item.id, item.receipts)).toBe(true);
+    expect(reconcileAcknowledgedReceiptOperation(storage, "account:account-b", item.id, item.receipts)).toBe(false);
+    expect(restoreReceiptOperation(storage, "account:account-a", item.id)).toEqual({ kind: "acknowledged", payload });
   });
 
   it("requires durable storage before the receipt API flow may write", () => {
@@ -147,6 +195,40 @@ describe("purchase receiving UI", () => {
     expect(write).not.toHaveBeenCalled();
     expect(requestItem).not.toHaveBeenCalled();
     expect(reportError).toHaveBeenCalledWith(expect.stringContaining("save this receipt safely"));
+  });
+
+  it("reuses the accepted operation and immutable payload when acknowledgment storage and refresh both fail", async () => {
+    const values = new Map<string, string>();
+    let writes = 0;
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        writes += 1;
+        if (writes === 2) throw new Error("acknowledgment storage failed");
+        values.set(key, value);
+      },
+    };
+    const payload = { operationId: "accepted-but-pending", quantity: 1.5, location: "Shelf A" };
+    const write = jest.fn().mockResolvedValue(undefined);
+    const reportError = jest.fn();
+    const outcome = await submitPersistedPurchaseReceipt({
+      storage, scope: "account:account-a", itemId: item.id, payload,
+      write,
+      refresh: async () => { throw new Error("Refresh failed"); },
+      acknowledge: () => { persistReceiptOperation(storage, "account:account-a", item.id, payload, "acknowledged"); },
+      hasReceipt: () => false,
+      reportError,
+    });
+    expect(outcome).toBe("recorded");
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(reportError).toHaveBeenCalledWith(expect.stringContaining("Receipt recorded"));
+
+    const restored = restoreReceiptOperation(storage, "account:account-a", item.id);
+    expect(restored).toEqual({ kind: "valid", payload });
+    const createId = jest.fn(() => "different-operation");
+    const remountedOperation = createStableReceiptOperation(createId, { payload: restored.kind === "valid" ? restored.payload : payload, outcomeUnknown: true });
+    expect(remountedOperation.payloadFor(3, "Different shelf")).toEqual(payload);
+    expect(createId).not.toHaveBeenCalled();
   });
 
   it("retains an uncertain operation and its original details when the receive form is reopened", () => {
@@ -219,7 +301,7 @@ describe("purchase receiving UI", () => {
       onSort: jest.fn(),
       canReceivePurchases: true,
       onReceive: jest.fn(),
-      acknowledgedReceiptId: item.id,
+      acknowledgedReceiptIds: new Set([item.id]),
     }));
     expect(lockedHtml).not.toContain('>Receive</button>');
   });

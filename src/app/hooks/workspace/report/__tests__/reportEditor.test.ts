@@ -294,7 +294,7 @@ it("keeps the newer report save busy when an older save finishes", async () => {
   expect(state.workLogModalMode).toBeNull();
 });
 
-it("submits lead QA evidence as submitted without client-owned review identity or approval time", async () => {
+it("submits QA evidence with null review metadata for the strict contract", async () => {
   const { state, render, task } = setup();
   render().openCreateQaReportModal(task.id);
   jest.mocked(createQaReportRecord).mockResolvedValueOnce({} as never);
@@ -304,7 +304,7 @@ it("submits lead QA evidence as submitted without client-owned review identity o
     createdByMemberId: state.bootstrap.members[0].id, requestedById: null, mentorId: null,
     result: "pass", summary: "", notes: "", participantIds: [state.bootstrap.members[0].id],
     createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
-    evidenceNotes: "", photoUrl: "", status: "submitted",
+    evidenceNotes: "", photoUrl: "", status: "submitted", reviewedById: null, reviewedAt: null,
   }, state.handleUnauthorized);
   expect(state.qaReportModalMode).toBeNull();
 });
@@ -319,8 +319,7 @@ it("sends an explicit reviewed transition only for the linked signed-in mentor",
   await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "reviewed");
   const payload = jest.mocked(createQaReportRecord).mock.calls.at(-1)?.[0];
   expect(payload).toEqual(expect.objectContaining({ status: "reviewed" }));
-  expect(payload).not.toHaveProperty("reviewedById");
-  expect(payload).not.toHaveProperty("reviewedAt");
+  expect(payload).toEqual(expect.objectContaining({ reviewedById: null, reviewedAt: null }));
 });
 
 it("keeps a QA draft as draft when that submit mode is selected", async () => {
