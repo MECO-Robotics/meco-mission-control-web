@@ -36,7 +36,7 @@ interface AppSidebarProps {
   notificationCount: number;
   onCreateMilestone: () => void;
   onCreatePart: () => void;
-  onCreateQaReport: () => void;
+  onCreateQaReport?: () => void;
   onCreateSeason: () => void;
   onCreateTask: () => void;
   onRefreshWorkspace: () => void;

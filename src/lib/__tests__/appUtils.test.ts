@@ -86,6 +86,66 @@ describe("appUtils", () => {
     expect(payload.status).toBe("not-started");
   });
 
+  it.each([
+    ["mentor-only roster", [{ id: "mentor-1", role: "mentor" }], null, "mentor-1"],
+    ["external-only roster", [{ id: "external-1", role: "external" }], null, null],
+    ["empty roster", [], null, null],
+  ])("does not assign ineligible fallback owners for a %s", (_label, members, expectedOwner, expectedMentor) => {
+    const bootstrap = createBootstrap();
+    bootstrap.members = members.map((member) => ({
+      id: member.id,
+      name: member.id,
+      email: `${member.id}@meco.test`,
+      role: member.role,
+      elevated: false,
+      seasonId: "season-2026",
+    })) as typeof bootstrap.members;
+
+    const payload = buildEmptyTaskPayload(bootstrap);
+    expect(payload.ownerId).toBe(expectedOwner);
+    expect(payload.assigneeIds).toEqual([]);
+    expect(payload.mentorId).toBe(expectedMentor);
+  });
+
+  it("retains collapsed manufacturing fields when an existing task enters edit", () => {
+    const bootstrap = createBootstrap();
+    const manufacturingDetails = {
+      part: { kind: "provisional" as const, partNumber: "FRC-42", revision: "B" },
+      quantity: 3,
+      processId: "process-lathe",
+      fulfillmentSource: "outsourced" as const,
+      material: { kind: "specified-material" as const, name: "7075 aluminum" },
+      fileArtifactIds: ["drawing-1"],
+      tolerances: ["0.2 mm"],
+      qaRequirements: ["Measure bore"],
+    };
+    const task = { ...bootstrap.tasks[0], manufacturingDetails, requiresDocumentation: true };
+
+    expect(taskToPayload(task, bootstrap)).toMatchObject({ manufacturingDetails, requiresDocumentation: true });
+  });
+
+  it("omits server-owned completion scope metadata from task edit payloads", () => {
+    const bootstrap = createBootstrap();
+    const task = { ...bootstrap.tasks[0], completionScopeReviewOrder: 3 };
+
+    expect(taskToPayload(task, bootstrap)).not.toHaveProperty("completionScopeReviewOrder");
+  });
+
+  it("uses the selected project for a new task and keeps its area within that project", () => {
+    const bootstrap = createBootstrap();
+    const payload = buildEmptyTaskPayload(bootstrap, "project-b");
+
+    expect(payload.projectId).toBe("project-b");
+    expect(payload.workTypeId).toBe("outreach:planning");
+    expect(payload.subsystemIds).toEqual([]);
+
+    const robotBootstrap = createBootstrap({
+      projects: bootstrap.projects.map((project) => project.id === "project-b" ? { ...project, projectType: "robot" } : project),
+      subsystems: [...bootstrap.subsystems, createSubsystem({ id: "subsystem-b-core", projectId: "project-b", isCore: true })],
+    });
+    expect(buildEmptyTaskPayload(robotBootstrap, "project-b").subsystemIds).toEqual(["subsystem-b-core"]);
+  });
+
   it("buildEmptySubsystemPayload defaults new subsystems to unplaced layout", () => {
     const payload = buildEmptySubsystemPayload(createBootstrap());
 

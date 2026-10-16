@@ -45,6 +45,12 @@ function getSwipeDirection<T extends string>(
 }
 
 export interface WorkspaceContentProps {
+  workspaceOperationScope?: string;
+  receiptOperationScope?: string;
+  receiptViewScope?: string;
+  canReviewQa?: boolean;
+  canCreateQaReport?: boolean;
+  localActorMemberId?: string | null;
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;
@@ -120,6 +126,7 @@ export interface WorkspaceContentProps {
   ) => Promise<boolean>;
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
+  canReceivePurchases: boolean;
   openTimelineTaskDetailsModal: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: Partial<RiskPayload>) => Promise<void>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;

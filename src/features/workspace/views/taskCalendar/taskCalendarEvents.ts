@@ -29,6 +29,12 @@ export interface TaskCalendarEvent {
   title: string;
 }
 
+export function canOpenTaskCalendarEvent(event: TaskCalendarEvent) {
+  return event.extendedProps.type === "milestone" ||
+    event.extendedProps.type === "task-due" ||
+    event.extendedProps.type === "qa-due";
+}
+
 interface BuildTaskCalendarEventsArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;

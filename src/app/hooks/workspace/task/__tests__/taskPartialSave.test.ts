@@ -12,7 +12,7 @@ jest.mock("@/lib/auth/records/reporting");
 
 // Command tests retain state between calls; real React lifecycle behavior is
 // exercised separately in the browser, including scope effects and cleanup.
-function setup() {
+function setup(selectedProjectId: string | null = null) {
   const slots: unknown[] = [];
   let cursor = 0;
   jest.mocked(useState).mockImplementation((initial?: unknown) => {
@@ -24,7 +24,7 @@ function setup() {
   jest.mocked(useCallback).mockImplementation((callback) => callback);
   const bootstrap = createBootstrap();
   const dependencies: Parameters<typeof useTaskEditor>[0] = {
-    bootstrap, scopedBootstrap: bootstrap, selectedProjectId: null, selectedSeasonId: null,
+    bootstrap, scopedBootstrap: bootstrap, selectedProjectId, selectedSeasonId: null,
     setBootstrap: (next) => {
       dependencies.bootstrap = typeof next === "function" ? next(dependencies.bootstrap) : next;
       dependencies.scopedBootstrap = dependencies.bootstrap;
@@ -117,6 +117,15 @@ it("preserves create contexts, edit intent, and report return without stacking d
   const staleRestore = render().leaveTaskDetails(task.id);
   beginSessionChange(); staleRestore();
   expect(render().activeTimelineTaskDetailId).toBeNull();
+});
+
+it("starts task creation in the selected project and seeds an area from that project", () => {
+  const { render } = setup("project-b");
+  render().openCreateTaskModal();
+
+  expect(render().taskDraft.projectId).toBe("project-b");
+  expect(render().taskDraft.workTypeId).toBe("outreach:planning");
+  expect(render().taskDraft.subsystemIds).toEqual([]);
 });
 
 it("does not restore an old report's task over a newer editor or details selection", () => {

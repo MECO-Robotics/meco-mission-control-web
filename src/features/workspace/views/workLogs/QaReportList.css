@@ -14,3 +14,18 @@
 .qa-report-details {
   padding: 0.5rem 0.75rem 0.75rem;
 }
+
+.qa-finding-details {
+  border-top: 1px solid var(--border-base);
+  padding: 0.5rem 0;
+}
+
+.qa-finding-details > p {
+  margin: 0.35rem 0;
+}
+
+.qa-review-order-note {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}

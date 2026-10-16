@@ -2,10 +2,10 @@
   "version": 1,
   "platform": {
     "branch": "development",
-    "revision": "df917415407c7fa9687b1f3b6407e656a7f430fd"
+    "revision": "4d7026fe32dd40e68107618034d40c789ba439aa"
   },
   "mobile": {
-    "branch": "main",
-    "revision": "d5e3fad9b6169af36eb4f1109d103202504db97a"
+    "branch": "development",
+    "revision": "7ab74baa5fb1cb85fddadd6375cd767e841d5126"
   }
 }

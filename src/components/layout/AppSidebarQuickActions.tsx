@@ -9,7 +9,7 @@ interface AppSidebarQuickActionsProps {
   isCollapsed: boolean;
   onCreateMilestone: () => void;
   onCreatePart: () => void;
-  onCreateQaReport: () => void;
+  onCreateQaReport?: () => void;
   onCreateTask: () => void;
   onToggleSidebar: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   onOpenProfileEditor: () => void;

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type UIEvent } from "react";
 
-import { createContinuousCalendarDates, getCalendarMonthWeekCount } from "./taskCalendarLayout";
+import { formatLocalDate } from "@/lib/dateUtils";
+import { createContinuousCalendarDates, getCalendarMonthWeekCount, moveTaskCalendarDate } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
 
@@ -12,7 +13,6 @@ export function TaskCalendarMonthStack({
   monthCursor,
   onOpenDay,
   onOpenEvent,
-  onCloseSelectedDay,
   onVisibleMonthChange,
   selectedDateKey,
   todayDateKey,
@@ -21,7 +21,6 @@ export function TaskCalendarMonthStack({
   monthCursor: Date;
   onOpenDay: (dateKey: string) => void;
   onOpenEvent: (event: TaskCalendarEvent) => void;
-  onCloseSelectedDay: () => void;
   onVisibleMonthChange: (month: Date) => void;
   selectedDateKey: string | null;
   todayDateKey: string;
@@ -38,7 +37,10 @@ export function TaskCalendarMonthStack({
   const monthsAfter = monthWindow.cursorKey === cursorKey ? monthWindow.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
   const stackRef = useRef<HTMLDivElement>(null);
   const [stackHeight, setStackHeight] = useState(0);
-  const selectedDayRef = useRef<HTMLElement>(null);
+  const [eventCapacity, setEventCapacity] = useState(4);
+  const [activeDateKey, setActiveDateKey] = useState(todayDateKey);
+  const focusDateAfterRenderRef = useRef(false);
+  const dayElementsRef = useRef(new Map<string, HTMLElement>());
   const cursorDayRef = useRef<HTMLElement>(null);
   const scrollUpdatedCursorKeyRef = useRef<string | null>(null);
   const previousStackHeightRef = useRef<number | null>(null);
@@ -46,7 +48,15 @@ export function TaskCalendarMonthStack({
     const stack = stackRef.current;
     if (!stack) return;
 
-    const updateHeight = () => setStackHeight(stack.clientHeight);
+    const eventArea = stack.querySelector<HTMLElement>(".task-calendar-day-events");
+    const updateHeight = () => {
+      setStackHeight(stack.clientHeight);
+      if (!eventArea) return;
+      const style = getComputedStyle(eventArea);
+      const gap = parseFloat(style.rowGap);
+      const available = eventArea.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      setEventCapacity(Math.max(1, Math.floor((available + gap) / (parseFloat(style.gridAutoRows) + gap))));
+    };
     updateHeight();
     if (typeof ResizeObserver === "undefined") {
       window.addEventListener("resize", updateHeight);
@@ -55,18 +65,16 @@ export function TaskCalendarMonthStack({
 
     const observer = new ResizeObserver(updateHeight);
     observer.observe(stack);
+    if (eventArea) observer.observe(eventArea);
     return () => observer.disconnect();
-  }, []);
+  }, [cursorKey, monthsBefore]);
   useEffect(() => {
     if (scrollUpdatedCursorKeyRef.current === cursorKey) {
       scrollUpdatedCursorKeyRef.current = null;
       return;
     }
-    if (!selectedDateKey) cursorDayRef.current?.scrollIntoView({ block: "start" });
-  }, [cursorKey, selectedDateKey]);
-  useEffect(() => {
-    if (selectedDateKey) selectedDayRef.current?.scrollIntoView({ block: "nearest" });
-  }, [selectedDateKey]);
+    cursorDayRef.current?.scrollIntoView({ block: "start" });
+  }, [cursorKey]);
   useLayoutEffect(() => {
     const stack = stackRef.current;
     const previousHeight = previousStackHeightRef.current;
@@ -82,6 +90,21 @@ export function TaskCalendarMonthStack({
     ),
     [cursorMonth, cursorYear, monthsAfter, monthsBefore],
   );
+  const activeDateIsRendered = calendarDates.some((date) => formatLocalDate(date) === activeDateKey);
+  const renderedActiveDateKey = activeDateIsRendered
+    ? activeDateKey
+    : formatLocalDate(new Date(cursorYear, cursorMonth, 1));
+  useEffect(() => {
+    if (!activeDateIsRendered) setActiveDateKey(renderedActiveDateKey);
+  }, [activeDateIsRendered, renderedActiveDateKey]);
+  useLayoutEffect(() => {
+    if (!focusDateAfterRenderRef.current) return;
+    const element = dayElementsRef.current.get(activeDateKey);
+    if (!element) return;
+    focusDateAfterRenderRef.current = false;
+    element.scrollIntoView({ block: "nearest" });
+    element.focus({ preventScroll: true });
+  }, [activeDateKey, calendarDates]);
   const weekHeight = stackHeight > 0
     ? `${Math.max(0, (stackHeight * 0.95 - 32) / getCalendarMonthWeekCount(monthCursor))}px`
     : undefined;
@@ -147,6 +170,25 @@ export function TaskCalendarMonthStack({
     }
   };
 
+  const moveFocus = (dateKey: string, days: -7 | -1 | 1 | 7) => {
+    const nextDateKey = moveTaskCalendarDate(dateKey, days);
+    focusDateAfterRenderRef.current = true;
+    setActiveDateKey(nextDateKey);
+    if (dayElementsRef.current.has(nextDateKey)) return;
+
+    const firstDate = calendarDates[0];
+    const lastDate = calendarDates.at(-1);
+    const firstDateKey = firstDate ? `${firstDate.getFullYear()}-${String(firstDate.getMonth() + 1).padStart(2, "0")}-${String(firstDate.getDate()).padStart(2, "0")}` : "";
+    const lastDateKey = lastDate ? `${lastDate.getFullYear()}-${String(lastDate.getMonth() + 1).padStart(2, "0")}-${String(lastDate.getDate()).padStart(2, "0")}` : "";
+    setMonthWindow((current) => ({
+      cursorKey,
+      monthsBefore: (current.cursorKey === cursorKey ? current.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION)
+        + (nextDateKey < firstDateKey ? MONTHS_PER_APPEND : 0),
+      monthsAfter: (current.cursorKey === cursorKey ? current.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION)
+        + (nextDateKey > lastDateKey ? MONTHS_PER_APPEND : 0),
+    }));
+  };
+
   return (
     <div
       aria-label="Calendar"
@@ -162,11 +204,14 @@ export function TaskCalendarMonthStack({
         monthCells={calendarDates}
         onOpenDay={onOpenDay}
         onOpenEvent={onOpenEvent}
+        onMoveFocus={moveFocus}
+        activeDateKey={renderedActiveDateKey}
+        eventCapacity={eventCapacity}
         selectedDateKey={selectedDateKey}
         todayDateKey={todayDateKey}
-        onCloseSelectedDay={onCloseSelectedDay}
         dayRef={(dateKey, element) => {
-          if (dateKey === selectedDateKey) selectedDayRef.current = element;
+          if (element) dayElementsRef.current.set(dateKey, element);
+          else dayElementsRef.current.delete(dateKey);
           if (dateKey === `${cursorYear}-${String(cursorMonth + 1).padStart(2, "0")}-01`) {
             cursorDayRef.current = element;
           }

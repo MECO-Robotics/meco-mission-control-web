@@ -19,6 +19,23 @@ export function buildTaskById(tasks: BootstrapPayload["tasks"]) {
   >;
 }
 
+export function filterTestResultsForHistory(
+  testResults: BootstrapPayload["testResults"],
+  activePersonFilter: FilterSelection,
+  search: string,
+  taskById: Record<string, BootstrapPayload["tasks"][number]>,
+) {
+  const query = search.trim().toLowerCase();
+  return testResults.filter((result) => {
+    const tasks = result.targetRefs.flatMap((ref) => ref.kind === "task" && taskById[ref.id] ? [taskById[ref.id]] : []);
+    const searchable = [result.title, result.status, ...tasks.flatMap((task) => [task.title, task.summary])].join(" ").toLowerCase();
+    const matchesPerson = activePersonFilter.length === 0 || tasks.some((task) =>
+      [task.requestedById, task.ownerId, task.mentorId, ...task.assigneeIds].some((memberId) => memberId && filterSelectionIncludes(activePersonFilter, memberId)),
+    );
+    return (!query || searchable.includes(query)) && matchesPerson;
+  });
+}
+
 function workLogMatchesPersonFilter(workLog: WorkLogRecord, activePersonFilter: FilterSelection) {
   return activePersonFilter.length === 0 ||
     workLog.participantIds.some((participantId) =>

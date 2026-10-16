@@ -28,9 +28,9 @@
 
 .modal-card .icon-button.task-details-close-button,
 .risk-review-context .icon-button.task-details-close-button {
-  color: #fff !important;
-  border: 1px solid color-mix(in srgb, var(--official-red) 72%, black) !important;
-  background: linear-gradient(135deg, #ea1c2d, #b81d2c) !important;
+  color: var(--official-red);
+  border: 0;
+  background: transparent;
   font-weight: 900;
   border-radius: 999px;
   width: 2rem;
@@ -40,16 +40,15 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-  box-shadow: 0 0 0 1px rgba(234, 28, 45, 0.12);
+  box-shadow: none;
 }
 
 .modal-card .icon-button.task-details-close-button:hover,
 .modal-card .icon-button.task-details-close-button:focus-visible,
 .risk-review-context .icon-button.task-details-close-button:hover,
 .risk-review-context .icon-button.task-details-close-button:focus-visible {
-  background: linear-gradient(135deg, #f02c3d, #8f1320) !important;
-  color: #fff !important;
-  border-color: color-mix(in srgb, var(--official-red) 85%, black) !important;
+  background: transparent;
+  color: var(--official-red);
 }
 
 .task-details-header {

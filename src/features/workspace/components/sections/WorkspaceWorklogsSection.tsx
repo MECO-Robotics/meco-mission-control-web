@@ -26,6 +26,16 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
         <WorkLogsView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
+          canReviewFindings={props.canReviewQa}
+          localActorMemberId={props.localActorMemberId}
+          canCreateQaReport={props.canCreateQaReport}
+          operationScope={props.receiptOperationScope}
+          viewScope={props.workspaceOperationScope}
+          selectedSeasonId={props.selectedSeasonId}
+          selectedProjectId={props.selectedProject?.id ?? null}
+          handleUnauthorized={props.handleUnauthorized}
+          loadWorkspace={props.loadWorkspace}
+          setDataMessage={props.setDataMessage}
           membersById={membersById}
           openCreateMilestoneReportModal={openCreateMilestoneReportModal}
           openCreateQaReportModal={openCreateQaReportModal}

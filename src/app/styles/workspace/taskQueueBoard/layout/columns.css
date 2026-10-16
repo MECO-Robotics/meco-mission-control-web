@@ -8,6 +8,35 @@
   background: var(--kanban-lane-surface);
 }
 
+.kanban-draggable-card:hover,
+.kanban-draggable-card:focus-within {
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.kanban-draggable-card.is-kanban-drag-source-active {
+  transform: none;
+}
+
+.task-queue-board-column:has(.is-kanban-drop-target) {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-queue-board-column,
+  .kanban-draggable-card {
+    transition: none;
+  }
+
+  .task-queue-board-column:is(:hover, :focus-within),
+  .kanban-draggable-card:hover,
+  .kanban-draggable-card:focus-within,
+  .kanban-draggable-card.is-kanban-drag-source-active,
+  .task-queue-board-column:has(.is-kanban-drop-target) {
+    transform: none;
+  }
+}
+
 /* Status labels stay above the lane content; the rules define the lane edges. */
 .kanban-status-column {
   align-content: start;
@@ -192,6 +221,11 @@
 
 .kanban-draggable-card[draggable="false"] {
   cursor: default;
+}
+
+.kanban-draggable-card:focus-within {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 2px;
 }
 
 .task-queue-board-column-header[role="button"] {

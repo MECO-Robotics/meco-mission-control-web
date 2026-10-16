@@ -137,7 +137,7 @@ When adding a backend-backed feature:
 - Add tests for empty payloads, scoped season/project payloads, unauthorized
   responses, and API failure states when the flow depends on them.
 
-Reports use only `reports` and `reportFindings` in web state. QA history selects `reportType === "QA"`; milestone history selects non-QA reports. Do not recreate the former `qaReports`, `testResults`, `qaFindings` or `testFindings` mirrors. The current platform supplies canonical collections; legacy-only report snapshots are no longer imported. No current-state reset is required.
+`BootstrapPayload` currently supplies `reports`, `qaFindings`, `testResults`, and `testFindings` as separate collections, along with `qaRequests`. QA report payloads use the lowercase discriminator `reportType: "qa"`; do not assume a reports/reportFindings-only shape or uppercase QA discriminator. Any report collection consolidation requires an explicit coordinated contract change; this guidance does not imply a schema migration.
 
 Do not duplicate platform validation rules in UI code except where immediate
 client-side feedback improves the workflow. The platform remains the source of

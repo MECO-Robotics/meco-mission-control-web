@@ -20,6 +20,9 @@ export interface ReportRecord {
   result: string | null;
   reviewedById?: string | null;
   reviewedAt?: string | null;
+  inspectedPartInstanceIds?: string[];
+  reviewOrder?: number;
+  needsReverification?: boolean;
 }
 
 export interface QaFindingRecord {
@@ -33,6 +36,27 @@ export interface QaFindingRecord {
   status: "open" | "in-progress" | "resolved";
   createdAt: string;
   updatedAt: string;
+  correctiveTaskId?: string | null;
+  riskId?: string | null;
+  /** Server-owned retest records. The platform owns reviewer attribution and other fields. */
+  retests?: FindingRetestRecord[];
+}
+
+export interface FindingRetestRecord {
+  /** Present on retries supported by the current API; omitted on older history. */
+  operationId?: string;
+  sourceType?: "qa" | "test";
+  result: "pass" | "fail";
+  notes: string;
+  evidenceNotes?: string;
+  observedAt?: string;
+  reviewedAt: string;
+  reviewedById: string;
+  order: number;
+  verificationOrder?: number;
+  targetRevisions?: Record<string, string>;
+  inspectedPartInstanceIds?: string[];
+  supersedesId?: string;
 }
 
 export interface TestResultRecord {

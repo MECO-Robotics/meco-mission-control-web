@@ -236,6 +236,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
     meetings: [],
     attendanceRecords: [],
     milestoneRequirements: [],
+    actions: [],
     qaFindings: [],
     testFindings: [],
     testResults: [],

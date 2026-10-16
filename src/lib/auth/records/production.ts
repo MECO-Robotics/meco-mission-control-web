@@ -56,3 +56,7 @@ export function transitionPurchaseItemRecord(itemId: string, payload: Pick<Purch
 export function approvePurchaseItemRecord(itemId: string, approvalStatus: PurchaseItemPayload["approvalStatus"], onUnauthorized?: () => void) {
   return requestItem<PurchaseItemRecord, { approvalStatus: typeof approvalStatus }>(`/purchases/${itemId}/approval`, "PUT", { approvalStatus }, onUnauthorized);
 }
+
+export function receivePurchaseItemRecord(itemId: string, payload: { operationId: string; quantity: number; location: string }, onUnauthorized?: () => void) {
+  return requestItem<PurchaseItemRecord, typeof payload>(`/purchases/${itemId}/receipts`, "POST", payload, onUnauthorized);
+}

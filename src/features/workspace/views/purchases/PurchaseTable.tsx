@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { Fragment, type CSSProperties } from "react";
 
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -8,6 +8,7 @@ import { EditableHoverIndicator, PaginationControls, TableCell, type useWorkspac
 import { formatCurrency } from "@/lib/appUtils/common";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
+import { sumReceiptQuantities } from "./submitPurchaseReceipt";
 import { ResourceRecordCell } from "@/features/workspace/shared/resourceList/ResourceRecordCell";
 import { ResourceColumnHeader, type ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
 import { getPurchaseVendorName, getSelectedPurchaseQuote, type PurchaseColumn, type PurchaseColumnFilters, type PurchaseListContext } from "./purchaseListModel";
@@ -29,9 +30,12 @@ interface PurchaseTableProps {
   sortField: PurchaseColumn | null;
   sortDirection: ResourceSortDirection;
   onSort: (field: string) => void;
+  canReceivePurchases: boolean;
+  onReceive: (item: PurchaseItemRecord) => void;
+  acknowledgedReceiptIds: Set<string>;
 }
 
-export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass, hasPurchaseFilters, context, openEditPurchaseModal, pagination, columnFilters, columnOptions, setColumnFilter, sortField, sortDirection, onSort }: PurchaseTableProps) {
+export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass, hasPurchaseFilters, context, openEditPurchaseModal, pagination, columnFilters, columnOptions, setColumnFilter, sortField, sortDirection, onSort, canReceivePurchases, onReceive, acknowledgedReceiptIds }: PurchaseTableProps) {
   const header = (field: PurchaseColumn, label: string, allLabel: string) => (
     <ResourceColumnHeader field={field} label={label} onSort={onSort} sortDirection={sortDirection} sortField={sortField}>
       <ColumnFilterDropdown allLabel={allLabel} ariaLabel={`Filter purchases by ${label.toLowerCase()}`} onChange={(value) => setColumnFilter(field, value)} options={columnOptions[field]} value={columnFilters[field] ?? []} />
@@ -55,8 +59,13 @@ export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass,
         const projectName = bootstrap.projects.find((project) => project.id === task?.projectId)?.name ?? "Unknown project";
         const quote = getSelectedPurchaseQuote(item);
         const finalCost = item.finalCost ? `${formatCurrency(item.finalCost.amount)} ${item.finalCost.currency ?? ""}`.trim() : "Pending";
+        const receipts = item.receipts ?? [];
+        const received = sumReceiptQuantities(receipts.map((receipt) => receipt.quantity));
+        const remaining = Math.max(0, sumReceiptQuantities([item.quantity - received]));
+        const canReceive = canReceivePurchases && !acknowledgedReceiptIds.has(item.id) && remaining > 0 && ["ordered", "shipped", "delivered"].includes(item.orderStatus);
         return (
-          <button className="ops-table ops-row materials-table editable-hover-target editable-hover-target-row" data-tutorial-target="edit-purchase-row" key={item.id} onClick={() => openEditPurchaseModal(item)} style={{ "--workspace-grid-template": PURCHASE_GRID_TEMPLATE } as CSSProperties} title={`Edit ${item.title}`} type="button">
+          <Fragment key={item.id}>
+          <button className="ops-table ops-row materials-table editable-hover-target editable-hover-target-row" data-tutorial-target="edit-purchase-row" onClick={() => openEditPurchaseModal(item)} style={{ "--workspace-grid-template": PURCHASE_GRID_TEMPLATE } as CSSProperties} title={`Edit ${item.title}`} type="button">
             <ResourceRecordCell label="Item" name={item.title} photoUrl={part?.photoUrl} subtitle={`${item.quantity} · ${item.kind === "cots-goods" ? "COTS goods" : "Manufacturing service"}`} />
             <ResourceRecordCell label="Procurement task" name={task?.title ?? "Missing procurement task"} subtitle={projectName} />
             <TableCell label="Vendor">{getPurchaseVendorName(item, context)}{quote?.amount ? <small>{formatCurrency(quote.amount.amount)} {quote.amount.currency ?? ""}</small> : null}</TableCell>
@@ -66,6 +75,8 @@ export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass,
             <TableCell label="Final">{finalCost}</TableCell>
             <EditableHoverIndicator />
           </button>
+          <div className="purchase-receipt-summary"><span>Received {received} of {item.quantity}</span><span>{remaining} remaining</span>{receipts.length ? <span>Receipts: {receipts.map((receipt) => `${receipt.location} · ${receipt.quantity} · ${new Date(receipt.receivedAt).toLocaleDateString()}`).join("; ")}</span> : <span>No receipts recorded</span>}{canReceive ? <button className="secondary-action" type="button" onClick={() => onReceive(item)}>Receive</button> : null}</div>
+          </Fragment>
         );
       })}
       {filteredPurchases.length === 0 ? <WorkspaceEmptyState reason={hasPurchaseFilters ? "The current search, project, person, vendor, approval, or order filters hide every purchase line in this scope." : "No task-linked purchase lines have been captured for this project scope."} title={hasPurchaseFilters ? "No purchases match these filters" : "Track commercial acquisition here"} /> : null}

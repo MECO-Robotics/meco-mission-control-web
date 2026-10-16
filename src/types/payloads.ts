@@ -53,12 +53,12 @@ interface ReportPayloadBase {
   status: "draft" | "submitted" | "reviewed";
 }
 
-export interface QaReportPayload extends ReportPayloadBase {
+export type QaReportPayload = ReportPayloadBase & {
   reportType: "qa";
   result: "pass" | "minor-fix" | "iteration-worthy";
-  reviewedById: string | null;
-  reviewedAt: string | null;
-}
+  reviewedById?: null;
+  reviewedAt?: null;
+};
 
 export interface TestResultPayload extends ReportPayloadBase {
   reportType: "practice" | "competition" | "review";

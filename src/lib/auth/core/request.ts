@@ -72,11 +72,13 @@ export function requestApi<T>(
   path: string,
   options: RequestInit = {},
   onUnauthorized?: () => void,
+  localActorMemberId?: string | null,
 ) {
   if (shouldHandleLocally(path)) {
     return requestLocalWorkspace<T>(path, options, () =>
       fetch(buildApiUrl("/bootstrap?seasonId=default-season"), { credentials: "omit" })
         .then((response) => readJson<BootstrapPayload>(response)),
+      localActorMemberId,
     );
   }
   const generation = getSessionGeneration();

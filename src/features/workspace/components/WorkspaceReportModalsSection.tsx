@@ -22,9 +22,10 @@ export function WorkspaceReportModalsSection(props: WorkspaceModalHostViewProps)
         />
       ) : null}
 
-      {props.qaReportModalMode ? (
+      {props.qaReportModalMode && props.canCreateQaReport !== false ? (
         <QaReportEditorModal
           bootstrap={props.bootstrap}
+          canReviewQa={props.canReviewQa}
           closeQaReportModal={props.closeQaReportModal}
           handleQaReportSubmit={props.handleQaReportSubmit}
           isSavingQaReport={props.isSavingQaReport}

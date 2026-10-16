@@ -7,6 +7,8 @@ import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsV
 export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps) {
   const {
     bootstrap,
+    receiptOperationScope,
+    receiptViewScope,
     disablePanelAnimations = false,
     effectiveInventoryView,
     inventorySwipeDirection,
@@ -23,6 +25,10 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
     tabSwitchDirection,
     subsystemsById,
     activePersonFilter,
+    canReceivePurchases,
+    handleUnauthorized,
+    loadWorkspace,
+    setDataMessage,
   } = props;
 
   return (
@@ -68,8 +74,14 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
         <PurchasesView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
+          receiptOperationScope={receiptOperationScope}
+          receiptViewScope={receiptViewScope}
           openCreatePurchaseModal={openCreatePurchaseModal}
           openEditPurchaseModal={openEditPurchaseModal}
+          canReceivePurchases={canReceivePurchases}
+          handleUnauthorized={handleUnauthorized}
+          loadWorkspace={loadWorkspace}
+          setDataMessage={setDataMessage}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

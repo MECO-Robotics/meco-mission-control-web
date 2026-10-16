@@ -44,6 +44,21 @@
   box-shadow: 0 8px 18px rgba(15, 28, 52, 0.05);
 }
 
+.task-queue-board-card:is(:hover, :focus-visible) {
+  position: relative;
+  z-index: 3;
+  outline: 2px solid color-mix(in srgb, var(--official-blue) 58%, transparent);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--official-blue) 16%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-queue-board-card {
+    transition: none;
+  }
+
+}
+
 .task-queue-board-card-priority-accented {
   border-color: color-mix(
     in srgb,

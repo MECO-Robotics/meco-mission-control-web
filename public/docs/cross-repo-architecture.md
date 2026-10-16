@@ -13,7 +13,7 @@ flowchart TB
     Mobile["meco-mission-control-mobile\nExpo / React Native app"]
   end
 
-  subgraph Edge["Production edge"]
+  subgraph Edge["Intended production edge"]
     Nginx["nginx on VPS\nstatic files + /api proxy"]
   end
 
@@ -63,8 +63,8 @@ flowchart TB
 
 `meco-mission-control-web` owns the broad-screen Mission Control workspace. It
 serves dense planning, review, robot configuration, inventory, roster, reports,
-help, and mentor/admin workflows. In production it is built into static assets
-and served by nginx on the VPS.
+help, and mentor/admin workflows. The intended production deployment builds it
+into static assets served by nginx on the VPS; this prototype is not deployed.
 
 `meco-mission-control-mobile` owns the faster in-shop update surface. It consumes
 the same platform bootstrap and mutation contracts for task, worklog,
@@ -72,9 +72,9 @@ attendance, manufacturing, inventory, QA, and auth flows. It ships through the
 mobile release/EAS path, not through the production VPS web deploy.
 
 `meco-mission-control-platform` owns persistence, auth, validation, API routes,
-bootstrap payloads, integrations, and production database behavior. The platform
-is the source of truth for permissions and data contracts even when a client
-hides or pre-validates a control.
+bootstrap payloads, integrations, and intended production database behavior. The
+platform is the source of truth for permissions and data contracts even when a
+client hides or pre-validates a control.
 
 ## Branch And Promotion Architecture
 
@@ -96,8 +96,8 @@ branch/audit concept only and does not imply a second live VPS or mobile runtime
 
 The web app uses `/api` as its default API base. Local development proxies that
 path through Vite to a platform instance, usually `http://localhost:8080`.
-Production nginx serves the web bundle and proxies `/api/*` and `/health` to the
-platform service on `127.0.0.1:8080`.
+The intended production nginx setup serves the web bundle and proxies `/api/*`
+and `/health` to the platform service on `127.0.0.1:8080`.
 
 The mobile app resolves its platform base URL from Expo public configuration and
 talks directly to the platform API. Android emulator development may use
@@ -110,9 +110,9 @@ platform-confirmed state.
 
 ## Platform To Persistence And Integrations
 
-The platform stores durable production data in Postgres through Prisma. Runtime
-stores still exist for selected tests and compatibility paths, but production
-features that must survive restart should use persisted models.
+The platform is designed to store durable data in Postgres through Prisma.
+Runtime stores still exist for selected tests and compatibility paths; features
+that must survive restart should use persisted models.
 
 S3-compatible storage is used for media upload flows through presigned URLs.
 Bucket naming is derived from configured bucket prefix/team context, and clients
@@ -129,11 +129,11 @@ preview, and finalization state without handling Onshape secrets.
 
 ## Deployment Paths
 
-The web deploy path builds the Vite app, snapshots the production static bundle,
+The intended web deploy path builds the Vite app, snapshots the static bundle,
 syncs files to `/opt/pm-web/site`, and reloads nginx. Rollback uses retained web
 bundle backups under `/opt/pm-backups/web`.
 
-The platform deploy path builds and tests the Fastify API, syncs source to
+The intended platform deploy path builds and tests the Fastify API, syncs source to
 `/opt/pm-server`, writes production environment content from GitHub secrets,
 starts Docker Compose, applies Prisma state, and checks `/health`. Platform
 deploys create file, env, and database backup artifacts under
