@@ -124,6 +124,13 @@ describe("appUtils", () => {
     expect(taskToPayload(task, bootstrap)).toMatchObject({ manufacturingDetails, requiresDocumentation: true });
   });
 
+  it("omits server-owned completion scope metadata from task edit payloads", () => {
+    const bootstrap = createBootstrap();
+    const task = { ...bootstrap.tasks[0], completionScopeReviewOrder: 3 };
+
+    expect(taskToPayload(task, bootstrap)).not.toHaveProperty("completionScopeReviewOrder");
+  });
+
   it("uses the selected project for a new task and keeps its area within that project", () => {
     const bootstrap = createBootstrap();
     const payload = buildEmptyTaskPayload(bootstrap, "project-b");

@@ -63,8 +63,13 @@ describe("purchase receiving UI", () => {
     expect(isDiscretePurchaseReceipt(service)).toBe(false);
     expect(isValidReceiptQuantity(1.5, 2, false)).toBe(true);
     expect(isValidReceiptQuantity(2, 2, false)).toBe(true);
+    const linkedService = { ...service, partDefinitionId: "bearing", materialId: "steel" };
+    expect(isDiscretePurchaseReceipt(linkedService)).toBe(false);
+    expect(isValidReceiptQuantity(1.5, 2, isDiscretePurchaseReceipt(linkedService))).toBe(true);
     expect(isDiscretePurchaseReceipt({ ...item, partDefinitionId: "bearing" })).toBe(true);
-    expect(isDiscretePurchaseReceipt({ ...item, partDefinitionId: "bearing", materialId: "steel" })).toBe(true);
+    const linkedCotsPart = { ...item, partDefinitionId: "bearing", materialId: "steel" };
+    expect(isDiscretePurchaseReceipt(linkedCotsPart)).toBe(true);
+    expect(isValidReceiptQuantity(1.5, 2, isDiscretePurchaseReceipt(linkedCotsPart))).toBe(false);
     expect(isValidReceiptQuantity(1, 2, true)).toBe(true);
     expect(isValidReceiptQuantity(1.5, 2, true)).toBe(false);
     expect(isValidReceiptQuantity(2.01, 2, false)).toBe(false);

@@ -40,6 +40,7 @@ export interface MilestoneRequirementRecord {
 
 export interface TaskRecord {
   id: string;
+  completionScopeReviewOrder?: number;
   createdAt?: string;
   serialNumber?: number;
   serial?: string;

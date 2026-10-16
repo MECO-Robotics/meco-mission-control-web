@@ -9,7 +9,7 @@ interface SubmitPurchaseReceiptOptions {
 }
 
 export function isDiscretePurchaseReceipt(item: PurchaseItemRecord) {
-  return item.partDefinitionId !== null;
+  return item.kind !== "manufacturing-service" && item.partDefinitionId !== null;
 }
 
 export function normalizeReceiptQuantity(quantity: number) {
