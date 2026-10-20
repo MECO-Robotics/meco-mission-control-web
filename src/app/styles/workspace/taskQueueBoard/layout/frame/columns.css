@@ -85,6 +85,25 @@
   border-bottom: 1px solid var(--border-base);
 }
 
+.has-swimlanes .kanban-swimlane {
+  position: relative;
+}
+
+.has-swimlanes .kanban-swimlane::after,
+.has-swimlanes .kanban-swimlane-statuses::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(to right, var(--border-base) 1px, transparent 1px);
+  background-size: calc(var(--task-queue-board-mobile-column-width, var(--task-queue-board-column-width, 15.5rem)) + 0.7rem * var(--task-queue-zoom, 1)) 100%;
+  background-position: calc(var(--task-queue-board-mobile-column-width, var(--task-queue-board-column-width, 15.5rem)) + 0.35rem * var(--task-queue-zoom, 1)) 0;
+}
+
+.has-swimlanes .kanban-swimlane-statuses::after {
+  left: var(--kanban-project-label-width);
+}
+
 .workspace-kanban-scroll-view .task-queue-board.has-swimlanes .task-queue-board-column {
   grid-template-rows: auto;
   background: transparent;
