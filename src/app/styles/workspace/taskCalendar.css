@@ -73,6 +73,15 @@
   font-size: 0.78rem;
 }
 
+@media (min-width: 761px) {
+  .schedule-agenda-list li > :not(:first-child) {
+    align-self: stretch;
+    align-content: center;
+    border-inline-start: 1px solid var(--border-base);
+    padding-inline-start: 0.75rem;
+  }
+}
+
 @media (max-width: 760px) {
   .schedule-agenda-list li {
     grid-template-columns: 1fr;

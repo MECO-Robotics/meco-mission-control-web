@@ -105,7 +105,7 @@ export function SubsystemsTableSection({
                 aria-controls={`subsystem-${subsystem.id}-details`}
                 style={{
                   gridTemplateColumns: "minmax(220px, 2.2fr) 1fr 1.1fr 0.8fr 0.8fr 0.8fr",
-                  padding: "12px 16px",
+                  paddingBlock: "12px",
                   borderBottom: "1px solid var(--border-base)",
                   color: "var(--text-copy)",
                   background: isSelected
