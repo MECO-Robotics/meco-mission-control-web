@@ -112,7 +112,7 @@ export function WorkspaceTopbarAddMenu({
         title={title}
         type="button"
       >
-        <Plus aria-hidden="true" size={14} strokeWidth={2} />
+        <Plus aria-hidden="true" size={14} strokeWidth={3} />
       </button>
 
       {hasMenu ? (
