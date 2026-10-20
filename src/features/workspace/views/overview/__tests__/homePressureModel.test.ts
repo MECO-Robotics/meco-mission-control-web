@@ -77,9 +77,11 @@ test("multi-group records overlap honestly, deduplicate links, and sort by count
     .toEqual(["Build · Media", "Build · Robot"]);
 });
 
-test("subsystems use supplied area associations and qualify duplicate names across projects", () => {
+test("subsystems use canonical task targets and qualify duplicate names across projects", () => {
   const bootstrap = fixture();
   bootstrap.subsystems.push({ ...bootstrap.subsystems[0], id: "other-drive", projectId: "project-2" });
+  bootstrap.tasks[0].subsystemIds = ["subsystem-1", "subsystem-1"];
+  bootstrap.tasks[1].subsystemIds = ["other-drive"];
   const groups = buildHomePressureGroups([
     row("one", { areaIds: ["subsystem-1", "subsystem-1"] }),
     row("two", { areaIds: ["other-drive"] }), row("none"),
@@ -121,4 +123,25 @@ test("risk subsystem pressure retains direct subsystem and mechanism context, in
   const risk = row(bootstrap.risks[0].id, { source: "risk", affectedTaskIds: [] });
   expect(buildHomePressureGroups([risk], "subsystem", bootstrap).map(group => group.label))
     .toEqual(["Unknown mechanism (lost)", "Unknown subsystem (missing)"]);
+});
+
+test("individual groups retain explicit risk owner and scoped affected-task participants, never mentor or mitigation", () => {
+  const bootstrap = fixture();
+  bootstrap.tasks[0].assigneeIds = ["person-1", "assistant", "assistant"];
+  bootstrap.tasks[0].mentorId = "mentor";
+  bootstrap.tasks[0].requestedById = "requester";
+  bootstrap.risks[0].mitigationTaskId = "two";
+  const risk = row(bootstrap.risks[0].id, { source: "risk", ownerMemberId: "owner", affectedTaskIds: ["one", "two", "elsewhere"] });
+  const groups = buildHomePressureGroups([risk], "individual", bootstrap, { activePersonFilter: ["person-1"] });
+  expect(groups.map(group => group.id).sort()).toEqual(["individual:assistant", "individual:owner", "individual:person-1"]);
+  expect(groups.every(group => group.items.length === 1)).toBe(true);
+});
+
+test("task subsystem grouping retains unavailable canonical targets discarded by queue area metadata", () => {
+  const bootstrap = fixture();
+  bootstrap.tasks[0].subsystemIds = ["missing", "missing"];
+  bootstrap.tasks[0].mechanismIds = ["lost"];
+  bootstrap.tasks[0].partInstanceIds = ["gone"];
+  const groups = buildHomePressureGroups([row("one", { areaIds: ["unassigned:project-1"], areaLabels: ["No subsystem"] })], "subsystem", bootstrap);
+  expect(groups.map(group => group.label)).toEqual(["Unknown mechanism (lost)", "Unknown part instance (gone)", "Unknown subsystem (missing)"]);
 });

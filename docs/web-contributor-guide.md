@@ -86,6 +86,14 @@ inline substitutes. Each control must act on the current view's data. If a
 control does not apply to a destination, do not show a dead or decorative
 placeholder.
 
+Home dashboard exception (explicit user direction): the top-left Work and
+pressure chart owns one Group by selector in its chart header. Team, individual,
+project, subsystem, workstream and urgency group the same unfinished tasks and
+active risks. Task pressure is highlighted inside workload stacks; risk counts
+remain alongside them with separate drilldowns. Keep dashboard search,
+project/person scope and creation actions in the shared shell. This exception
+does not authorize a dashboard-wide local toolbar or additional page header.
+
 Before changing view chrome, check `AppTopbar` and existing slot consumers. Add
 view guidance to Help/tutorial content instead of duplicating it above the data.
 

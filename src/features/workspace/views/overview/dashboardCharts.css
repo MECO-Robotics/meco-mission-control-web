@@ -1,3 +1,8 @@
+.home-chart-heading { flex-wrap: wrap; gap: 0.5rem 0.75rem; }
+.home-chart-heading > h2 { margin-right: auto; }
+.home-chart-controls.workspace-presentation-controls { padding: 0; font-size: 0.75rem; }
+.home-chart-controls label { gap: 0.35rem; }
+
 .home-dashboard-secondary-grid,
 .home-dependency-tree {
   border-top: 1px solid var(--border-base);
@@ -8,6 +13,7 @@
 .home-deadline-chart,
 .home-workload-chart { min-width: 0; }
 
+.home-workload-risks,
 .home-deadline-overdue,
 .home-workload-label,
 .home-workload-segment,
@@ -54,6 +60,10 @@
 .home-deadline-milestones { color: var(--status-warning-text); }
 .home-deadline-date { line-height: 1.5; }
 
+.home-workload-totals { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.8rem; font-size: 0.78rem; color: var(--text-copy); }
+.home-workload-risks { min-height: 2.75rem; font-size: 0.75rem; color: var(--text-link); white-space: nowrap; }
+.home-workload-risks:disabled { color: var(--text-muted); cursor: default; }
+
 .home-workload-legend {
   display: flex;
   flex-wrap: wrap;
@@ -65,7 +75,7 @@
 
 .home-workload-legend > span { display: inline-flex; align-items: center; gap: 0.3rem; }
 .home-workload-rows { display: grid; gap: 0.4rem; max-height: 13rem; overflow-y: auto; }
-.home-workload-row { display: grid; grid-template-columns: 8rem minmax(0, 1fr) 2rem; align-items: center; gap: 0.6rem; }
+.home-workload-row { display: grid; grid-template-columns: 7rem minmax(0, 1fr) 1.8rem 3.4rem; align-items: center; gap: 0.6rem; }
 .home-workload-label { min-width: 0; min-height: 2.75rem; text-align: left; font-size: 0.8rem; overflow-wrap: anywhere; }
 .home-workload-track { display: flex; height: 1.8rem; }
 .home-workload-segment { flex-basis: 0; min-width: 0; background: var(--home-chart-color); font-size: 0; }
@@ -110,7 +120,7 @@ button.home-dependency-node:hover { background: var(--bg-row-alt); border-color:
 }
 
 @media (max-width: 540px) {
-  .home-workload-row { grid-template-columns: 6rem minmax(0, 1fr) 1.5rem; gap: 0.4rem; }
+  .home-workload-row { grid-template-columns: 5rem minmax(0, 1fr) 1.2rem 3rem; gap: 0.4rem; }
   .home-deadline-overdue { text-align: left; }
   .home-dependency-canvas { width: 100%; height: var(--home-mobile-height); }
   .home-tree-horizontal { display: none; }

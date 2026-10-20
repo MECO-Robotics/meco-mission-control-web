@@ -1,68 +1,62 @@
-import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { getTaskOpenBlockersForTask, getTaskWaitingOnDependencyRecords } from "@/features/workspace/shared/task/taskPlanning";
+import type { AttentionQueueRow } from "../attention/attentionQueue";
+import type { HomePressureGroup } from "./homePressureModel";
 
-export type HomeWorkloadMode = "team" | "individual";
-export type HomeWorkloadState = "blocked" | "waiting-on-dependency" | "not-started" | "in-progress" | "waiting-for-qa";
-
+export type HomeWorkloadState = "attention" | "not-started" | "in-progress" | "waiting-for-qa";
 export const HOME_WORKLOAD_STATES: readonly { id: HomeWorkloadState; label: string; tone: string }[] = [
-  { id: "blocked", label: "Blocked", tone: "danger" },
-  { id: "waiting-on-dependency", label: "Waiting on dependency", tone: "warning" },
+  { id: "attention", label: "Needs attention", tone: "danger" },
   { id: "not-started", label: "Not started", tone: "neutral" },
   { id: "in-progress", label: "In progress", tone: "info" },
   { id: "waiting-for-qa", label: "Waiting for QA", tone: "warning" },
 ];
+const attentionSignals = new Set(["blocked", "overdue", "waiting-qa", "due-soon"]);
 
 export interface HomeWorkloadRow {
   id: string;
   label: string;
   tasks: TaskRecord[];
   tasksByState: Record<HomeWorkloadState, TaskRecord[]>;
+  risks: AttentionQueueRow[];
 }
-
 export interface HomeWorkloadModel {
   rows: HomeWorkloadRow[];
   taskCount: number;
+  attentionCount: number;
+  risks: AttentionQueueRow[];
   hasSharedAssignments: boolean;
 }
 
-export function buildHomeWorkloadModel({ tasks, bootstrap, mode }: {
+export function buildHomeWorkloadModel({ tasks, groups }: {
   tasks: readonly TaskRecord[];
-  bootstrap: BootstrapPayload;
-  mode: HomeWorkloadMode;
+  groups: readonly HomePressureGroup[];
 }): HomeWorkloadModel {
-  const groups = new Map(bootstrap.responsibleGroups.map(group => [group.id, group]));
-  const members = new Map(bootstrap.members.map(member => [member.id, member]));
-  const rows = new Map<string, HomeWorkloadRow>();
-  const seen = new Set<string>();
-  let hasSharedAssignments = false;
-  for (const task of tasks) {
-    if (task.status === "complete" || seen.has(task.id)) continue;
-    seen.add(task.id);
-    const assignments = mode === "team"
-      ? (task.responsibleGroupId ? [task.responsibleGroupId] : [])
-      : [...new Set([task.ownerId, ...task.assigneeIds].filter((id): id is string => Boolean(id)))];
-    if (assignments.length > 1) hasSharedAssignments = true;
-    const state = task.isBlocked || getTaskOpenBlockersForTask(task.id, bootstrap).length
-      ? "blocked" : getTaskWaitingOnDependencyRecords(task.id, bootstrap).length
-        ? "waiting-on-dependency" : task.status;
-    for (const assignment of assignments.length ? assignments : [null]) {
-      const id = assignment ? `${mode === "team" ? "team" : "person"}:${assignment}` : `unassigned:${mode}`;
-      let row = rows.get(id);
-      if (!row) {
-        const label = !assignment ? "Unassigned" : mode === "team"
-          ? groups.get(assignment)?.name ?? `Unavailable team · ${assignment}`
-          : members.get(assignment)?.name ?? `Unavailable person · ${assignment}`;
-        row = { id, label, tasks: [], tasksByState: { blocked: [], "waiting-on-dependency": [], "not-started": [], "in-progress": [], "waiting-for-qa": [] } };
-        rows.set(id, row);
+  const taskById = new Map(tasks.filter(task => task.status !== "complete").map(task => [task.id, task]));
+  const taskIds = new Set<string>();
+  const attentionIds = new Set<string>();
+  const risks = new Map<string, AttentionQueueRow>();
+  const rows = groups.flatMap(group => {
+    const row: HomeWorkloadRow = { id: group.id, label: group.label, tasks: [], risks: [],
+      tasksByState: { attention: [], "not-started": [], "in-progress": [], "waiting-for-qa": [] } };
+    const seen = new Set<string>();
+    for (const item of group.items) {
+      if (seen.has(item.key)) continue;
+      seen.add(item.key);
+      if (item.source === "risk") {
+        row.risks.push(item);
+        risks.set(item.key, item);
+        continue;
       }
+      const task = taskById.get(item.recordId);
+      if (!task || task.status === "complete") continue;
       row.tasks.push(task);
+      taskIds.add(task.id);
+      const state = item.signals.some(signal => attentionSignals.has(signal)) ? "attention" : task.status;
       row.tasksByState[state].push(task);
+      if (state === "attention") attentionIds.add(task.id);
     }
-  }
-  return {
-    rows: [...rows.values()].sort((left, right) => right.tasks.length - left.tasks.length || left.label.localeCompare(right.label) || left.id.localeCompare(right.id)),
-    taskCount: seen.size,
-    hasSharedAssignments,
-  };
+    return row.tasks.length || row.risks.length ? [row] : [];
+  }).sort((left, right) => right.tasks.length - left.tasks.length || right.risks.length - left.risks.length
+    || left.label.localeCompare(right.label) || left.id.localeCompare(right.id));
+  return { rows, taskCount: taskIds.size, attentionCount: attentionIds.size, risks: [...risks.values()],
+    hasSharedAssignments: rows.reduce((sum, row) => sum + row.tasks.length + row.risks.length, 0) > taskIds.size + risks.size };
 }
