@@ -1,20 +1,4 @@
-.task-queue-board-priority-label-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.5rem;
-  height: 1.25rem;
-  padding: 0 0.35rem;
-  border-radius: 999px;
-  background: var(--status-info-bg);
-  color: var(--status-info-text);
-  border: 1px solid transparent;
-  font-size: 0.7rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.task-queue-board-priority-grid {
+.task-queue-board-focused-lane-grid {
   display: grid;
   gap: 0.55rem;
   grid-template-columns: repeat(

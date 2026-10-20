@@ -17,7 +17,7 @@ import {
   type TaskQueueBoardState,
 } from "./taskQueueKanbanBoardState";
 import { TaskQueueCard } from "./state/taskQueueKanbanCardView";
-import { TaskPriorityBadge } from "./taskQueueKanbanCardMeta";
+import { groupTaskQueueSwimlanes } from "./taskQueueSwimlanes";
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
@@ -31,7 +31,6 @@ const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   complete: { signal: "complete", status: "complete" },
 };
 
-const PRIORITY_ORDER: TaskRecord["priority"][] = ["critical", "high", "medium", "low"];
 const TASK_QUEUE_DIRECT_STATUS_STATES: readonly TaskStatus[] = [
   "not-started",
   "in-progress",
@@ -88,17 +87,18 @@ export function TaskQueueKanbanBoard({
     [focusedState, tasksByState],
   );
 
-  const groupedFocusedTasks = useMemo(() => {
-    if (focusedState === null) {
-      return [];
-    }
-
-    return PRIORITY_ORDER.map((priority) => ({
-      label: priority[0].toUpperCase() + priority.slice(1),
-      tasks: focusedTasks.filter((task) => task.priority === priority),
-      priority,
-    })).filter((group) => group.tasks.length > 0);
-  }, [focusedState, focusedTasks]);
+  const swimlanes = useMemo(
+    () => groupTaskQueueSwimlanes(focusedState === null ? tasks : focusedTasks, cardProps.bootstrap),
+    [cardProps.bootstrap, focusedState, focusedTasks, tasks],
+  );
+  const boardSwimlanes = useMemo(
+    () => swimlanes.map((lane) => ({
+      id: lane.id,
+      header: <><strong>{lane.projectName}</strong><span>{lane.disciplineName}</span><span>{lane.tasks.length}</span></>,
+      itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
+    })),
+    [cardProps.bootstrap, swimlanes],
+  );
   const boardColumns = useMemo(
     () =>
       TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => ({
@@ -180,21 +180,15 @@ export function TaskQueueKanbanBoard({
           </header>
 
           <div className="task-queue-board-focused-groups">
-            {groupedFocusedTasks.length > 0 ? (
-              groupedFocusedTasks.map((group) => (
-                <section className="task-queue-board-priority-group" key={group.priority}>
-                  <header
-                    className={`task-queue-board-priority-label task-queue-board-priority-label-${group.priority}`}
-                  >
-                    <span aria-hidden="true" className="task-queue-board-priority-label-icon">
-                      <TaskPriorityBadge priority={group.priority} />
-                    </span>
-                    <span className="task-queue-board-priority-label-text">{group.label}</span>
-                    <span className="task-queue-board-priority-label-count">
-                      {group.tasks.length}
-                    </span>
+            {swimlanes.length > 0 ? (
+              swimlanes.map((group) => (
+                <section className="task-queue-board-focused-lane" key={group.id}>
+                  <header className="kanban-swimlane-label">
+                    <strong>{group.projectName}</strong>
+                    <span>{group.disciplineName}</span>
+                    <span>{group.tasks.length}</span>
                   </header>
-                  <div className="task-queue-board-priority-grid">
+                  <div className="task-queue-board-focused-lane-grid">
                     {group.tasks.map((task) => (
                       <TaskQueueCard
                         {...cardProps}
@@ -244,6 +238,7 @@ export function TaskQueueKanbanBoard({
       getItemDragLabel={(task) => task.title}
       getItemId={(task) => task.id}
       itemsByState={tasksByState}
+      swimlanes={boardSwimlanes}
       onColumnBodyClick={onFocusState}
       onItemDrop={(task, state) => {
         if (isTaskQueueDirectStatusState(state)) {
