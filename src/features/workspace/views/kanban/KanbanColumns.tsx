@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { KanbanColumnScrollArea } from "./KanbanColumnScrollArea";
+import { KanbanProjectGroup } from "./KanbanProjectGroup";
 
 import {
   useKanbanDrag,
@@ -36,10 +37,14 @@ interface KanbanColumnsProps<TState extends string, TItem> {
   renderItem: (item: TItem, state: TState, dragProps?: KanbanItemDragProps) => ReactNode;
   onColumnBodyClick?: (state: TState) => void;
   onItemDrop?: (item: TItem, targetState: TState, sourceState: TState) => void | Promise<void>;
-  swimlanes?: readonly {
+  swimlaneGroups?: readonly {
     id: string;
-    header: ReactNode;
-    itemsByState: Record<TState, readonly TItem[]>;
+    label: string;
+    lanes: readonly {
+      id: string;
+      header: ReactNode;
+      itemsByState: Record<TState, readonly TItem[]>;
+    }[];
   }[];
   style?: CSSProperties;
 }
@@ -63,7 +68,7 @@ export function KanbanColumns<TState extends string, TItem>({
   onColumnBodyClick,
   onItemDrop,
   style,
-  swimlanes,
+  swimlaneGroups,
 }: KanbanColumnsProps<TState, TItem>) {
   const drag = useKanbanDrag({
     canDropItem,
@@ -107,7 +112,7 @@ export function KanbanColumns<TState extends string, TItem>({
           {column.header}
           <span className={columnCountClassName}>{column.count}</span>
         </div> : null}
-        {(!swimlanes || !showHeader) ? <KanbanColumnScrollArea
+        {(!swimlaneGroups || !showHeader) ? <KanbanColumnScrollArea
           className={`${columnBodyClassName}${
             drag.hoveredDropState === column.state ? " is-kanban-drop-target" : ""
           }`}
@@ -154,19 +159,23 @@ export function KanbanColumns<TState extends string, TItem>({
   };
 
   return (
-    <div className={`${boardClassName}${swimlanes ? " has-swimlanes" : ""}`} style={style}>
-      {swimlanes ? (
+    <div className={`${boardClassName}${swimlaneGroups ? " has-swimlanes" : ""}`} style={style}>
+      {swimlaneGroups ? (
         <div className="kanban-swimlane-columns kanban-swimlane-statuses">
           {columns.map((column) => renderColumn(column, [], true))}
         </div>
       ) : columns.map((column) => renderColumn(column, itemsByState[column.state], true))}
-      {swimlanes?.map((lane) => (
-        <section className="kanban-swimlane" key={lane.id}>
-          <header className="kanban-swimlane-label">{lane.header}</header>
-          <div className="kanban-swimlane-columns">
-            {columns.map((column) => renderColumn(column, lane.itemsByState[column.state], false))}
-          </div>
-        </section>
+      {swimlaneGroups?.map((group) => (
+        <KanbanProjectGroup key={group.id} label={group.label}>
+          {group.lanes.map((lane) => (
+            <section className="kanban-swimlane" key={lane.id}>
+              <header className="kanban-swimlane-label">{lane.header}</header>
+              <div className="kanban-swimlane-columns">
+                {columns.map((column) => renderColumn(column, lane.itemsByState[column.state], false))}
+              </div>
+            </section>
+          ))}
+        </KanbanProjectGroup>
       ))}
     </div>
   );

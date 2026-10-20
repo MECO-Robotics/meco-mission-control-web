@@ -15,10 +15,4 @@
 
 .task-queue-board-focused-groups {
   display: grid;
-  gap: 0.7rem;
-}
-
-.task-queue-board-focused-lane {
-  display: grid;
-  gap: 0.45rem;
 }
