@@ -8,23 +8,20 @@ import { formatMilestoneReadinessLabel } from "../milestones/milestonesViewUtils
 import { HomeDependencyTree } from "./HomeDependencyTree";
 import type { HomeDependencyModel, HomeDependencySelection } from "./homeDependencyModel";
 import type { HomeDeadlineModel } from "./homeDeadlineModel";
-import type { HomePressureGroup } from "./homePressureModel";
 import { HOME_WORKLOAD_STATES, type HomeWorkloadModel, type HomeWorkloadState } from "./homeWorkloadModel";
 import { HOME_TASK_STATUSES, type HomeViewModel } from "./overviewViewModel";
 
 export type HomeDashboardSelection =
   | { kind: "tasks"; status: TaskStatus | null }
-  | { kind: "actions"; group: string | null }
+  | { kind: "risks"; rowId: string | null }
   | { kind: "workload"; rowId: string; state: HomeWorkloadState | null }
   | { kind: "deadline"; key: string }
   | { kind: "dependency"; key: string | null };
 
-export function HomeDashboardDetails({ selection, model, groups, actions, workload, deadlines, dependencies,
+export function HomeDashboardDetails({ selection, model, workload, deadlines, dependencies,
   bootstrap, scopeLabel, onClose, onOpenTask, onOpenSchedule, onOpenActionItem, onOpenAllActions, onSelectDependency }: {
   selection: HomeDashboardSelection;
   model: HomeViewModel;
-  groups: HomePressureGroup[];
-  actions: AttentionQueueRow[];
   workload: HomeWorkloadModel;
   deadlines: HomeDeadlineModel;
   dependencies: HomeDependencyModel;
@@ -40,15 +37,15 @@ export function HomeDashboardDetails({ selection, model, groups, actions, worklo
   let title: string;
   let tasks: TaskRecord[] = [];
   let milestones: MilestoneRecord[] = [];
-  let selectedActions: AttentionQueueRow[] = [];
+  let selectedRisks: AttentionQueueRow[] = [];
   const branch = selection.kind === "dependency" ? dependencies.branches.find(item => item.key === selection.key) : undefined;
   if (selection.kind === "tasks") {
     title = HOME_TASK_STATUSES.find(status => status.id === selection.status)?.label ?? "All tasks";
     tasks = selection.status ? model.tasksByStatus[selection.status] : model.tasks;
-  } else if (selection.kind === "actions") {
-    const group = groups.find(item => item.id === selection.group);
-    title = selection.group ? group?.label ?? "Selected pressure group" : "Action Required";
-    selectedActions = selection.group ? group?.items ?? [] : actions;
+  } else if (selection.kind === "risks") {
+    const row = workload.rows.find(item => item.id === selection.rowId);
+    title = selection.rowId ? `${row?.label ?? "Selected group"} · Risks` : "All risks";
+    selectedRisks = selection.rowId ? row?.risks ?? [] : workload.risks;
   } else if (selection.kind === "workload") {
     const row = workload.rows.find(item => item.id === selection.rowId);
     title = `${row?.label ?? "Selected workload"}${selection.state ? ` · ${HOME_WORKLOAD_STATES.find(state => state.id === selection.state)?.label}` : ""}`;
@@ -75,14 +72,14 @@ export function HomeDashboardDetails({ selection, model, groups, actions, worklo
           <dt>Readiness</dt><dd>{formatMilestoneReadinessLabel(part.readinessStatus)}</dd></dl> : null}
         <HomeDependencyTree model={dependencies} bootstrap={bootstrap} expanded selectedKey={selection.key ?? undefined}
           onSelect={onSelectDependency} onOpenTask={openTask} onOpenSchedule={openSchedule} />
-      </> : selection.kind === "actions" ? <>
-        <p>{selectedActions.length} actions</p>
-        <ul className="workspace-record-list home-drilldown-list">{selectedActions.map(item => <li key={item.key}>
+      </> : selection.kind === "risks" ? <>
+        <p>{selectedRisks.length} risks</p>
+        <ul className="workspace-record-list home-drilldown-list">{selectedRisks.map(item => <li key={item.key}>
           <button className="home-record-button" type="button" onClick={() => { onClose(); onOpenActionItem(item); }}>
-            <strong>{item.title}</strong><span>{item.source === "task" ? "Task" : "Risk"} · {item.context}</span><span>{item.reasons.join(" · ")}</span>
+            <strong>{item.title}</strong><span>Risk · {item.context}</span><span>{item.reasons.join(" · ")}</span>
           </button>
         </li>)}</ul>
-        {!selectedActions.length ? <p className="empty-state">No current action items match this selection.</p> : null}
+        {!selectedRisks.length ? <p className="empty-state">No active risks match this selection.</p> : null}
         <button className="secondary-action" type="button" onClick={() => { onClose(); onOpenAllActions(); }}>Open Risks</button>
       </> : <>
         <p>{tasks.length} tasks{selection.kind === "deadline" ? ` · ${milestones.length} milestones` : ""}</p>

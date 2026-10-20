@@ -1,68 +1,71 @@
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
-import type { TaskRecord } from "@/types/recordsExecution";
+import { buildAttentionQueue } from "../../attention/attentionQueue";
+import { buildHomePressureGroups } from "../homePressureModel";
 import { buildHomeWorkloadModel } from "../homeWorkloadModel";
 
+const today = new Date("2026-10-20T12:00:00");
 function setup() {
   const bootstrap = createBootstrap();
   bootstrap.risks = [];
   bootstrap.taskDependencies = [];
-  const task = (id: string, overrides: Partial<TaskRecord> = {}): TaskRecord => ({
-    ...bootstrap.tasks[0], id, status: "in-progress", ownerId: null, assigneeIds: [],
-    responsibleGroupId: null, mentorId: null, requestedById: null, isBlocked: false, ...overrides,
-  });
-  return { bootstrap, task };
+  const base = { ...bootstrap.tasks[0], ownerId: null, assigneeIds: [], responsibleGroupId: null,
+    status: "in-progress" as const, dueDate: "2026-12-01", isBlocked: false };
+  return { bootstrap, base };
 }
 
-it("uses explicit teams, retaining archived and unavailable teams without membership inference", () => {
-  const { bootstrap, task } = setup();
-  bootstrap.responsibleGroups = [{ id: "old", name: "Archived crew", seasonId: "season-2026", projectIds: [], workTypeIds: [], memberIds: ["person"], primaryMemberIds: [], isArchived: true }];
-  const tasks = [task("a", { responsibleGroupId: "old" }), task("b", { responsibleGroupId: "missing" }), task("c", { ownerId: "person" }), task("done", { status: "complete" })];
-  const model = buildHomeWorkloadModel({ tasks, bootstrap, mode: "team" });
-  expect(model.taskCount).toBe(3);
-  expect(model.hasSharedAssignments).toBe(false);
-  expect(model.rows.map(row => [row.id, row.label, row.tasks.map(item => item.id)])).toEqual([
-    ["team:old", "Archived crew", ["a"]],
-    ["unassigned:team", "Unassigned", ["c"]],
-    ["team:missing", "Unavailable team · missing", ["b"]],
-  ]);
+it("partitions pressure signals from ordinary unfinished work without treating unassigned alone as pressure", () => {
+  const { bootstrap, base } = setup();
+  bootstrap.tasks = [
+    { ...base, id: "blocked", isBlocked: true }, { ...base, id: "overdue", dueDate: "2026-10-19" },
+    { ...base, id: "soon", dueDate: "2026-10-25" }, { ...base, id: "qa", status: "waiting-for-qa" },
+    { ...base, id: "new", status: "not-started" }, { ...base, id: "ordinary" },
+    { ...base, id: "complete", status: "complete" },
+  ];
+  const items = buildAttentionQueue({ bootstrap, activePersonFilter: [], today, includeAllUnfinishedTasks: true });
+  const groups = buildHomePressureGroups(items, "team", bootstrap);
+  const model = buildHomeWorkloadModel({ tasks: bootstrap.tasks, groups });
+  expect(model.taskCount).toBe(6);
+  expect(model.attentionCount).toBe(4);
+  expect(model.rows[0].tasksByState.attention.map(task => task.id).sort()).toEqual(["blocked", "overdue", "qa", "soon"]);
+  expect(model.rows[0].tasksByState["in-progress"].map(task => task.id)).toEqual(["ordinary"]);
+  expect(model.rows[0].tasksByState["not-started"].map(task => task.id)).toEqual(["new"]);
 });
 
-it("attributes individuals to unique owners and assignees, excluding mentors and requesters", () => {
-  const { bootstrap, task } = setup();
-  bootstrap.members = [{ ...bootstrap.members[0], id: "alex", name: "Alex" }];
-  const tasks = [task("shared", { ownerId: "alex", assigneeIds: ["alex", "missing", "missing"], mentorId: "mentor", requestedById: "requester" }), task("none", { mentorId: "mentor" })];
-  const model = buildHomeWorkloadModel({ tasks, bootstrap, mode: "individual" });
-  expect(model.taskCount).toBe(2);
+it("keeps risk-only groups, separate unique record totals, overlapping attribution and exact drilldown subsets", () => {
+  const { bootstrap, base } = setup();
+  bootstrap.tasks = [{ ...base, id: "shared", ownerId: "alex", assigneeIds: ["alex", "lee", "lee"] }];
+  const items = buildAttentionQueue({ bootstrap, activePersonFilter: [], today, includeAllUnfinishedTasks: true });
+  const risk = { ...items[0], key: "risk:solo", recordId: "solo", source: "risk" as const,
+    action: "open-risk" as const, ownerMemberId: "risk-owner", affectedTaskIds: [] };
+  const groups = buildHomePressureGroups([...items, items[0], risk], "individual", bootstrap);
+  const model = buildHomeWorkloadModel({ tasks: [...bootstrap.tasks, bootstrap.tasks[0]], groups });
+  expect(model.taskCount).toBe(1);
+  expect(model.risks.map(item => item.recordId)).toEqual(["solo"]);
   expect(model.hasSharedAssignments).toBe(true);
-  expect(model.rows.map(row => [row.id, row.label, row.tasks.length])).toEqual([
-    ["person:alex", "Alex", 1], ["unassigned:individual", "Unassigned", 1], ["person:missing", "Unavailable person · missing", 1],
+  expect(model.rows.map(row => [row.id, row.tasks.length, row.risks.length])).toEqual([
+    ["individual:alex", 1, 0], ["individual:lee", 1, 0], ["individual:risk-owner", 0, 1],
   ]);
 });
 
-it("uses only supplied scoped tasks, counts each task identity once, and orders by workload", () => {
-  const { bootstrap, task } = setup();
-  const first = task("first", { ownerId: "z" });
-  const second = task("second", { ownerId: "z" });
-  bootstrap.tasks = [first, second, task("outside", { ownerId: "a" })];
-  const model = buildHomeWorkloadModel({ tasks: [first, first, second, task("third", { ownerId: "a" })], bootstrap, mode: "individual" });
-  expect(model.taskCount).toBe(3);
-  expect(model.rows.map(row => [row.id, row.tasks.map(item => item.id)])).toEqual([
-    ["person:z", ["first", "second"]], ["person:a", ["third"]],
-  ]);
+it("limits task totals and row subsets to supplied scoped task identities", () => {
+  const { bootstrap, base } = setup();
+  bootstrap.tasks = [{ ...base, id: "selected" }, { ...base, id: "outside" }];
+  const items = buildAttentionQueue({ bootstrap, activePersonFilter: [], today, includeAllUnfinishedTasks: true });
+  const groups = buildHomePressureGroups(items, "project", bootstrap);
+  const model = buildHomeWorkloadModel({ tasks: [bootstrap.tasks[0]], groups });
+  expect(model.taskCount).toBe(1);
+  expect(model.rows[0].tasks.map(task => task.id)).toEqual(["selected"]);
+  expect(model.hasSharedAssignments).toBe(false);
 });
 
-it("gives explicit blockers precedence over dependencies, then uses actual task status", () => {
-  const { bootstrap, task } = setup();
-  const tasks = [task("blocked", { isBlocked: true, status: "waiting-for-qa" }), task("dependency", { status: "waiting-for-qa" }), task("qa", { status: "waiting-for-qa" }), task("started"), task("new", { status: "not-started" })];
-  bootstrap.tasks = tasks;
-  bootstrap.taskDependencies = ["blocked", "dependency"].map(taskId => ({ id: taskId, taskId, kind: "task", refId: "unavailable", dependencyType: "hard", createdAt: "2026-10-19" }));
-  const row = buildHomeWorkloadModel({ tasks, bootstrap, mode: "team" }).rows[0];
-  expect(Object.fromEntries(Object.entries(row.tasksByState).map(([state, items]) => [state, items.map(item => item.id)]))).toEqual({
-    blocked: ["blocked"], "waiting-on-dependency": ["dependency"], "waiting-for-qa": ["qa"], "in-progress": ["started"], "not-started": ["new"],
-  });
-});
-
-it("returns an empty model when scoped tasks are empty or complete", () => {
-  const { bootstrap, task } = setup();
-  expect(buildHomeWorkloadModel({ tasks: [task("done", { status: "complete" })], bootstrap, mode: "team" })).toEqual({ rows: [], taskCount: 0, hasSharedAssignments: false });
+it("deduplicates records within groups and global attention totals across groups", () => {
+  const { bootstrap, base } = setup();
+  bootstrap.tasks = [{ ...base, id: "shared", ownerId: "alex", assigneeIds: ["lee"], isBlocked: true }];
+  const items = buildAttentionQueue({ bootstrap, activePersonFilter: [], today, includeAllUnfinishedTasks: true });
+  const groups = buildHomePressureGroups(items, "individual", bootstrap);
+  groups.forEach(group => group.items.push(...group.items));
+  const model = buildHomeWorkloadModel({ tasks: bootstrap.tasks, groups });
+  expect(model.attentionCount).toBe(1);
+  expect(model.rows.every(row => row.tasksByState.attention.length === 1)).toBe(true);
+  expect(buildHomeWorkloadModel({ tasks: [], groups: [] })).toEqual({ rows: [], taskCount: 0, attentionCount: 0, risks: [], hasSharedAssignments: false });
 });

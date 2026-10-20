@@ -171,11 +171,11 @@ describe("Workspace overview views", () => {
       scopeLabel: bootstrap.projects[0].name,
       today: fixedToday,
     }));
-    expect(markup.indexOf("Action Required")).toBeLessThan(markup.indexOf("Next 14 days"));
+    expect(markup.indexOf("Work and pressure")).toBeLessThan(markup.indexOf("Next 14 days"));
     expect(markup.indexOf("Task status")).toBeLessThan(markup.indexOf("Next 14 days"));
-    expect(markup).toContain("Work by team");
+    expect(markup).toContain('aria-label="Work grouped by"');
     expect(markup).toContain("What unlocks work");
-    expect(markup).toContain("Blocked");
+    expect(markup).toContain("Needs attention");
     expect(markup).not.toContain("Other project gate");
     expect(markup).not.toContain("Completed gate");
     expect(markup).toContain('aria-label="View tasks by status"');
@@ -183,12 +183,12 @@ describe("Workspace overview views", () => {
     expect(markup).not.toContain("Later media recap");
     expect(markup).not.toContain("Finish bellypan CAD");
     expect(markup).not.toContain("Battery cart not inspected");
-    expect(markup).toContain('aria-label="Overdue: 1 actions"');
+    expect(markup).toContain("3 unfinished tasks · 3 need attention");
     expect(markup).toContain('aria-label="Complete: 1 tasks"');
     expect(markup).toContain('aria-label="View all 4 tasks"');
   });
 
-  it("shows an empty action state and keeps task status counts explicit", () => {
+  it("shows an empty work state and keeps task status counts explicit", () => {
     const bootstrap = createOverviewBootstrap();
     bootstrap.tasks = bootstrap.tasks.map(task => ({
       ...task,
@@ -205,7 +205,7 @@ describe("Workspace overview views", () => {
       projectId: bootstrap.projects[0].id,
       today: fixedToday,
     }));
-    expect(markup).toContain("No current action items in this scope.");
+    expect(markup).toContain("No unfinished tasks or active risks in this scope.");
     expect(markup).toContain("Complete");
     expect(markup).toContain("4 tasks");
   });

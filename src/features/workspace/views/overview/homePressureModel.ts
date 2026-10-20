@@ -2,11 +2,11 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { AttentionQueueRow } from "../attention/attentionQueue";
 import { filterSelectionMatchesTaskPeople, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
-export type HomePressureBucket = "urgency" | "project" | "subsystem" | "team" | "workstream";
+export type HomePressureBucket = "urgency" | "project" | "subsystem" | "team" | "individual" | "workstream";
 export const HOME_PRESSURE_BUCKETS: readonly { id: HomePressureBucket; label: string }[] = [
-  { id: "urgency", label: "Urgency" }, { id: "project", label: "Project" },
-  { id: "subsystem", label: "Subsystem" }, { id: "team", label: "Team" },
-  { id: "workstream", label: "Workstream" },
+  { id: "team", label: "Team" }, { id: "individual", label: "Individual" },
+  { id: "project", label: "Project" }, { id: "subsystem", label: "Subsystem" },
+  { id: "workstream", label: "Workstream" }, { id: "urgency", label: "Urgency" },
 ];
 export interface HomePressureGroup { id: string; label: string; tone: string; items: AttentionQueueRow[] }
 export const HOME_ACTION_GROUPS = [
@@ -15,7 +15,7 @@ export const HOME_ACTION_GROUPS = [
   { id: "high-risk", label: "High priority risks", tone: "warning" },
   { id: "waiting-qa", label: "Waiting for QA", tone: "info" },
   { id: "due-soon", label: "Due within 7 days", tone: "warning" },
-  { id: "other", label: "Other active risks", tone: "neutral" },
+  { id: "other", label: "Other work", tone: "neutral" },
 ] as const;
 
 export function groupHomeActions(items: AttentionQueueRow[]): HomePressureGroup[] {
@@ -31,6 +31,7 @@ export function buildHomePressureGroups(items: AttentionQueueRow[], bucket: Home
   const projects = new Map(bootstrap.projects.map(project => [project.id, project.name]));
   const tasks = new Map(bootstrap.tasks.map(task => [task.id, task]));
   const risks = new Map(bootstrap.risks.map(risk => [risk.id, risk]));
+  const members = new Map(bootstrap.members.map(member => [member.id, member.name]));
   const teams = new Map(bootstrap.responsibleGroups.map(team => [team.id, team.name]));
   const areas = new Map(bootstrap.subsystems.map(area => [area.id, area]));
   const mechanisms = new Map(bootstrap.mechanisms.map(mechanism => [mechanism.id, mechanism]));
@@ -61,7 +62,7 @@ export function buildHomePressureGroups(items: AttentionQueueRow[], bucket: Home
       });
     if (bucket === "subsystem") {
       const mechanismArea = (id: string) => mechanisms.get(id)?.subsystemId ?? `mechanism:${id}`;
-      const riskAreas = item.source === "risk" ? [
+      const targetAreas = [
         ...linkedTasks.flatMap(task => [
           ...task.subsystemIds, ...task.mechanismIds.map(mechanismArea),
           ...task.partInstanceIds.flatMap(id => {
@@ -73,18 +74,27 @@ export function buildHomePressureGroups(items: AttentionQueueRow[], bucket: Home
             return [...(area ? [area] : []), ...(mechanism ? [mechanismArea(mechanism)] : [])];
           }),
         ]),
-        ...(risks.get(item.recordId)?.relatedTargets.flatMap(ref => ref.kind === "subsystem"
-          ? [ref.id] : ref.kind === "mechanism" ? [mechanismArea(ref.id)] : []) ?? []),
-      ] : item.areaIds ?? [];
-      const ids = riskAreas.length ? [...new Set(riskAreas)] : [item.source === "risk" && item.projectId ? `unassigned:${item.projectId}` : "unassigned"];
-      ids.forEach((id, index) => {
+        ...(item.source === "risk" ? risks.get(item.recordId)?.relatedTargets.flatMap(ref => ref.kind === "subsystem"
+          ? [ref.id] : ref.kind === "mechanism" ? [mechanismArea(ref.id)] : []) ?? [] : []),
+      ];
+      const ids = targetAreas.length ? [...new Set(targetAreas)] : [item.source === "risk" && item.projectId ? `unassigned:${item.projectId}` : "unassigned"];
+      ids.forEach(id => {
         const area = areas.get(id);
         add(id, area ? namedArea(area, areas.values()) : id.startsWith("unassigned:")
           ? `No subsystem · ${projectLabel(id.slice("unassigned:".length))}` : id === "unassigned"
             ? "No subsystem" : id.startsWith("mechanism:") ? `Unknown mechanism (${id.slice("mechanism:".length)})`
               : id.startsWith("part-instance:") ? `Unknown part instance (${id.slice("part-instance:".length)})`
-                : (item.source === "task" ? item.areaLabels?.[index] : undefined) ?? `Unknown subsystem (${id})`);
+                : `Unknown subsystem (${id})`);
       });
+      continue;
+    }
+    if (bucket === "individual") {
+      const ids = [...new Set([
+        ...(item.source === "risk" && item.ownerMemberId ? [item.ownerMemberId] : []),
+        ...linkedTasks.flatMap(task => [task.ownerId, ...task.assigneeIds].filter((id): id is string => Boolean(id))),
+      ])];
+      if (linkedTasks.some(task => !task.ownerId && !task.assigneeIds.length) || !ids.length) add("unassigned", "Unassigned");
+      ids.forEach(id => add(id, members.get(id) ?? `Unknown person (${id})`));
       continue;
     }
     if (bucket === "team") {
