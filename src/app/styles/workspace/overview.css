@@ -11,7 +11,6 @@
 }
 
 .home-action-required,
-.home-milestone-timeline,
 .home-task-status {
   min-width: 0;
 }
@@ -27,11 +26,12 @@
 .home-pressure-chart {
   display: grid;
   gap: 0.3rem;
+  max-height: 17rem;
+  overflow-y: auto;
 }
 
 .home-pressure-row,
 .home-task-status-choice,
-.home-milestone-row,
 .home-record-button,
 .home-donut-button {
   min-width: 0;
@@ -80,7 +80,6 @@
 
 .home-pressure-row:hover:not(:disabled),
 .home-task-status-choice:hover:not(:disabled),
-.home-milestone-row:hover,
 .home-record-button:hover {
   background: var(--bg-row-alt);
 }
@@ -146,79 +145,12 @@
   border-radius: 2px;
 }
 
-.home-milestone-timeline {
-  border-top: 1px solid var(--border-base);
-  padding-top: 1rem;
-}
-
-.home-milestone-axis {
-  display: flex;
-  justify-content: space-between;
-  margin-left: calc(35% + 1rem);
-  padding-inline: 1.25rem;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-}
-
-.home-milestone-row {
-  display: grid;
-  grid-template-columns: 35% minmax(0, 1fr);
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  min-height: 4rem;
-  padding: 0.5rem 0;
-}
-
-.home-milestone-copy,
-.home-record-button {
-  display: grid;
-  gap: 0.35rem;
-  overflow-wrap: anywhere;
-}
-
-.home-milestone-copy strong,
-.home-record-button strong { color: var(--text-title); font-size: 0.88rem; }
-.home-milestone-copy > span,
-.home-record-button > span { color: var(--text-copy); font-size: 0.78rem; }
-
-.home-milestone-track {
-  position: relative;
-  height: 1px;
-  margin-inline: 1.25rem;
-  background: var(--border-strong);
-}
-
-.home-milestone-point {
-  position: absolute;
-  display: grid;
-  justify-items: center;
-  gap: 0.3rem;
-  transform: translate(-50%, -0.3rem);
-  color: var(--text-copy);
-  font-size: 0.72rem;
-  white-space: nowrap;
-}
-
-.home-milestone-point i {
-  width: 0.65rem;
-  height: 0.65rem;
-  border: 1px solid var(--text-copy);
-  background: var(--bg-panel);
-  transform: rotate(45deg);
-}
-
-.home-milestone-point[data-readiness="ready"] i { background: var(--status-success-chart); }
-.home-milestone-point[data-readiness="blocked"] i { background: var(--status-danger-text); }
-.home-milestone-point[data-readiness="qa"] i,
-.home-milestone-point[data-readiness="not-ready"] i { background: var(--status-warning-chart); }
-
 .home-drilldown { width: min(42rem, 100%); max-height: 85dvh; overflow-y: auto; }
 .home-drilldown .panel-header > div > span { font-size: 0.82rem; }
 .home-drilldown-list { margin-bottom: 1rem; }
 .home-record-button { width: 100%; min-height: 2.75rem; padding: 0.6rem 0; }
-.home-milestone-details { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem 1.5rem; }
-.home-milestone-details dd { margin: 0; color: var(--text-title); }
+.home-record-details { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem 1.5rem; }
+.home-record-details dd { margin: 0; color: var(--text-title); }
 
 @media (max-width: 1000px) {
   .home-dashboard-lead-grid { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -228,7 +160,5 @@
 @media (max-width: 540px) {
   .home-pressure-row { grid-template-columns: 7.5rem minmax(0, 1fr) 1.5rem; gap: 0.4rem; }
   .home-status-chart { grid-template-columns: minmax(6rem, 0.8fr) minmax(0, 1.2fr); gap: 0.5rem; }
-  .home-milestone-row { grid-template-columns: 1fr; gap: 1rem; padding-bottom: 1.8rem; }
-  .home-milestone-axis { margin-left: 0; }
   .home-view .workspace-section-heading { flex-wrap: wrap; }
 }

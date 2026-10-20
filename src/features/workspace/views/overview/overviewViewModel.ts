@@ -6,7 +6,8 @@ import { filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/fi
 import { getMilestoneProjectIds } from "@/features/workspace/shared/events/eventProjectUtils";
 
 export interface HomeViewModel {
-  upcomingMilestones: MilestoneRecord[];
+  tasks: TaskRecord[];
+  milestones: MilestoneRecord[];
   tasksByStatus: Record<TaskStatus, TaskRecord[]>;
 }
 
@@ -16,10 +17,6 @@ export const HOME_TASK_STATUSES: readonly { id: TaskStatus; label: string; tone:
   { id: "waiting-for-qa", label: "Waiting for QA", tone: "warning" },
   { id: "complete", label: "Complete", tone: "success" },
 ] as const;
-
-function startOfLocalDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-}
 
 function milestoneIsVisible(milestone: MilestoneRecord, projectId: string | null) {
   if (!projectId) return true;
@@ -31,29 +28,23 @@ export function buildHomeViewModel({
   activePersonFilter = [],
   bootstrap,
   projectId = null,
-  today = new Date(),
+  search = "",
 }: {
   activePersonFilter?: FilterSelection;
   bootstrap: BootstrapPayload;
   projectId?: string | null;
-  today?: Date;
+  search?: string;
 }): HomeViewModel {
+  const query = search.trim().toLocaleLowerCase();
+  const matches = (value: string) => value.toLocaleLowerCase().includes(query);
   const scopedTasks = bootstrap.tasks.filter((task) =>
-    (!projectId || task.projectId === projectId) && filterSelectionMatchesTaskPeople(activePersonFilter, task),
+    (!projectId || task.projectId === projectId) && filterSelectionMatchesTaskPeople(activePersonFilter, task) && matches(`${task.title} ${task.summary}`),
   );
   const tasksByStatus = Object.fromEntries(HOME_TASK_STATUSES.map(({ id }) => [
     id,
     scopedTasks.filter((task) => task.status === id),
   ])) as Record<TaskStatus, TaskRecord[]>;
-  const todayStart = startOfLocalDay(today);
-  const upcomingMilestones = bootstrap.milestones
-    .filter((milestone) => milestone.status !== "complete" && milestoneIsVisible(milestone, projectId))
-    .filter((milestone) => {
-      const start = new Date(`${milestone.startAt.slice(0, 10)}T00:00:00`).getTime();
-      return Number.isFinite(start) && start >= todayStart;
-    })
-    .sort((left, right) => left.startAt.localeCompare(right.startAt))
-    .slice(0, 4);
-
-  return { upcomingMilestones, tasksByStatus };
+  const milestones = bootstrap.milestones.filter(milestone => milestoneIsVisible(milestone, projectId)
+    && matches(`${milestone.title} ${milestone.description}`));
+  return { tasks: scopedTasks, milestones, tasksByStatus };
 }

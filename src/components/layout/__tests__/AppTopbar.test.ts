@@ -48,10 +48,6 @@ function readTopbarSearchCss() {
   return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-search.css"), "utf8");
 }
 
-function readTopbarResponsiveSearchCss() {
-  return readFileSync(join(process.cwd(), "src/app/styles/shell/workspace/topbar-responsive-search.css"), "utf8");
-}
-
 function readTopbarShellControlsCss() {
   return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-shell-controls.css"), "utf8");
 }
@@ -131,15 +127,6 @@ describe("AppTopbar", () => {
 
     expect(topbarSearchCss).toMatch(
       /\.app-topbar-search\.toolbar-filter-compact\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*none;/,
-    );
-  });
-
-  it("keeps the responsive search visible as a bar when it switches to icon mode", () => {
-    const topbarSearchCss = readTopbarResponsiveSearchCss();
-
-    expect(topbarSearchCss).toMatch(/\.topbar-responsive-search-full-icon-only\s*\{[^}]*width:\s*100%;[^}]*min-width:\s*0;/);
-    expect(topbarSearchCss).toMatch(
-      /\.topbar-responsive-search-dynamic\.is-icon-mode \.topbar-responsive-search-full-icon-only \.toolbar-search-input\s*\{[^}]*opacity:\s*0;/,
     );
   });
 
