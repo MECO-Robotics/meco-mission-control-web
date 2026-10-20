@@ -120,7 +120,7 @@
 .workspace-presentation-controls button:hover, .workspace-record-list .ghost-button:hover, .people-member-context .ghost-button:hover { background: var(--bg-row-alt); }
 .workspace-presentation-controls button:disabled { opacity: .55; cursor: default; }
 .workspace-presentation-controls button:focus-visible, .workspace-record-list button:focus-visible, .workspace-disclosure summary:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
-@media (max-width: 700px) { .task-queue-view .task-queue-board-column { min-width: min(18rem, calc(100vw - 3rem)); max-width: min(18rem, calc(100vw - 3rem)); } .task-queue-view .task-queue-board-card { white-space: normal; } }
+@media (max-width: 700px) { .task-queue-view { --task-queue-board-mobile-column-width: min(18rem, calc(100vw - 3rem)); } .task-queue-view .task-queue-board-column { min-width: var(--task-queue-board-mobile-column-width); max-width: var(--task-queue-board-mobile-column-width); } .task-queue-view .task-queue-board-card { white-space: normal; } }
 
 .people-workload-details { margin-top: .5rem; color: var(--text-copy); }
 .people-workload-details summary { cursor: pointer; font-size: .875rem; }
