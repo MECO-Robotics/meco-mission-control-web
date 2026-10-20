@@ -52,3 +52,61 @@
 .task-queue-board-shell {
   touch-action: auto;
 }
+
+.workspace-kanban-scroll-view .task-queue-board.has-swimlanes {
+  display: grid;
+  height: auto;
+  min-height: 0;
+}
+
+.workspace-kanban-scroll-view .task-queue-board-shell:has(.has-swimlanes) {
+  max-height: calc(100dvh - var(--kanban-board-viewport-offset, 8rem));
+  overflow-y: auto;
+}
+
+.kanban-swimlane-columns {
+  display: flex;
+  gap: calc(0.7rem * var(--task-queue-zoom, 1));
+  align-items: stretch;
+}
+
+.kanban-swimlane-statuses {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-panel);
+}
+
+.task-queue-board.has-swimlanes .kanban-swimlane .task-queue-board-column {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.kanban-swimlane-label {
+  position: sticky;
+  left: var(--task-queue-edge-pad, 1rem);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  width: fit-content;
+  max-width: calc(100vw - 5rem);
+  padding: 0.8rem 0 0.45rem;
+  color: var(--text-copy);
+  font-size: calc(0.8rem * var(--task-queue-zoom, 1));
+  overflow-wrap: anywhere;
+}
+
+.kanban-swimlane-label strong {
+  color: var(--text-title);
+}
+
+.has-swimlanes .task-queue-board-column {
+  grid-template-rows: auto;
+}
+
+.has-swimlanes .task-queue-board-column-body {
+  min-height: calc(4rem * var(--task-queue-zoom, 1));
+  overflow-y: visible;
+}

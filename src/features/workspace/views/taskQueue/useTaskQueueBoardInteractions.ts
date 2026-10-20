@@ -94,57 +94,11 @@ export function useTaskQueueBoardLazyLoading({
       );
     };
 
-    const maybePrefetchMore = () => {
-      const sentinelRect = sentinel.getBoundingClientRect();
-      if (sentinelRect.top <= window.innerHeight + 240) {
-        loadMore();
-      }
-    };
-
-    const ensureScrollableLane = () => {
-      const laneBodies = shell.querySelectorAll<HTMLElement>(".task-queue-board-column-body");
-      if (![...laneBodies].some((laneBody) => laneBody.scrollHeight > laneBody.clientHeight + 1)) {
-        loadMore();
-      }
-    };
-
-    const handleColumnScroll = (event: Event) => {
-      const columnBody = event.target;
-      if (
-        columnBody instanceof HTMLElement &&
-        columnBody.classList.contains("task-queue-board-column-body") &&
-        columnBody.scrollTop + columnBody.clientHeight >= columnBody.scrollHeight - 240
-      ) {
-        loadMore();
-      }
-    };
-
-    let rafId: number | undefined;
-    const handleScroll = () => {
-      if (rafId !== undefined) {
-        return;
-      }
-
-      rafId = window.requestAnimationFrame(() => {
-        rafId = undefined;
-        maybePrefetchMore();
-      });
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", ensureScrollableLane);
-    shell.addEventListener("scroll", handleColumnScroll, true);
-    ensureScrollableLane();
-
-    return () => {
-      if (rafId !== undefined) {
-        window.cancelAnimationFrame(rafId);
-      }
-
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", ensureScrollableLane);
-      shell.removeEventListener("scroll", handleColumnScroll, true);
-    };
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) loadMore();
+    }, { rootMargin: "240px" });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, [
     boardShellRef,
     isFocused,

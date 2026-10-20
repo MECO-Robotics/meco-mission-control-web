@@ -25,6 +25,8 @@ Task details use a drawer on desktop and fill the narrow viewport. Logging work 
 
 The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
 
+Task Queue Kanban groups tasks into project swim lanes, subdivided by discipline (WorkType), with aligned status columns. Only populated lanes appear; tasks retain the active sort within each lane. Focused status views use the same grouping. Dragging between cells changes status only; it does not reassign the project or discipline. Blocked and waiting-on-dependency drops open the existing task editor.
+
 ### Home dashboard signals
 
 Home uses the selected project (or all projects) and current bootstrap data. The active person filter also scopes tasks and task-linked risks. Each signal answers a separate project-lead decision:
