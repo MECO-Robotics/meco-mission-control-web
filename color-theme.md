@@ -258,6 +258,11 @@ Use `--text-copy` and `--text-muted` for neutral text, `--border-base` and
 surfaces. Keep neutral UI cool slate; do not introduce local grey values where
 one of these shared roles applies.
 
+Use 1px `--border-base` rules between adjacent columns in workspace lists and
+tables. Align headers with row fields, including reserved edit-action space.
+When table rows stack on narrow screens, separate field labels from values;
+single-column lists keep their existing stacking.
+
 ## Shell And Navigation
 
 The shell has a fixed top bar and a fixed left sidebar. The top bar height is 58px. The expanded sidebar and brand area are 156px wide; the collapsed sidebar is 64px wide.

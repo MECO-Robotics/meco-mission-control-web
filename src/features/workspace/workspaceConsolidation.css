@@ -125,3 +125,9 @@
 .people-workload-details { margin-top: .5rem; color: var(--text-copy); }
 .people-workload-details summary { cursor: pointer; font-size: .875rem; }
 .people-workload-details[open] { display: flex; flex-direction: column; gap: .4rem; }
+
+@media (min-width: 701px) {
+  .workspace-record-list > li > :not(:first-child) { position: relative; }
+  .workspace-record-list > li > :not(:first-child)::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: -.5rem; border-inline-start: 1px solid var(--border-base); pointer-events: none; }
+  .team-member-load > :is(.team-member-task-metrics, .team-member-capacity) { border-inline-start: 1px solid var(--border-base); padding-inline-start: .5rem; }
+}

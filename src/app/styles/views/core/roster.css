@@ -97,6 +97,8 @@
   justify-content: flex-end;
   gap: 0.32rem;
   min-width: 2.3rem;
+  border-inline-start: 1px solid var(--border-base);
+  padding-inline-start: 0.35rem;
 }
 
 .member-role-badge {
