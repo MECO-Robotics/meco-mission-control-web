@@ -93,7 +93,7 @@ button.ops-row {
 }
 
 .editable-hover-target-row,
-.table-shell:has(> .ops-row.editable-hover-target-row) > .ops-table-header {
+.table-shell:has(.ops-row.editable-hover-target-row) > .ops-table-header {
   padding-inline-end: 3.25rem !important;
 }
 
