@@ -93,7 +93,7 @@ describe("normalizeBootstrapPayload", () => {
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.milestones[0]).toMatchObject({ startAt: "2026-09-28T00:00:00.000Z", endAt: null });
-    expect(buildHomeViewModel({ bootstrap: normalized, today: new Date("2026-09-27T12:00:00") }).upcomingMilestones).toMatchObject([
+    expect(buildHomeViewModel({ bootstrap: normalized }).milestones).toMatchObject([
       { id: "milestone-1", title: "Robot checkpoint" },
     ]);
     expect(normalized.artifacts[0]?.uri).toBe("https://example.org/build-notes");
