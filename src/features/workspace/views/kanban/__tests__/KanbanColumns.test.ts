@@ -22,10 +22,14 @@ describe("KanbanColumns", () => {
         getItemId: (item) => item.id,
         onItemDrop: jest.fn(),
         itemsByState: { open: [{ id: "first" }, { id: "second" }] },
-        swimlanes: [
-          { id: "a", header: "Robot / Design", itemsByState: { open: [{ id: "first" }] } },
-          { id: "b", header: "Robot / Software", itemsByState: { open: [{ id: "second" }] } },
-          { id: "c", header: "Outreach / Design", itemsByState: { open: [] } },
+        swimlaneGroups: [
+          { id: "robot", label: "Robot", lanes: [
+            { id: "a", header: "Design", itemsByState: { open: [{ id: "first" }] } },
+            { id: "b", header: "Software", itemsByState: { open: [{ id: "second" }] } },
+          ] },
+          { id: "outreach", label: "Outreach", lanes: [
+            { id: "c", header: "Design", itemsByState: { open: [] } },
+          ] },
         ],
         renderItem: (item) => React.createElement("article", null, item.id),
       }),
@@ -35,7 +39,9 @@ describe("KanbanColumns", () => {
     expect(markup.match(/<article>first<\/article>/g)).toHaveLength(1);
     expect(markup.match(/<article>second<\/article>/g)).toHaveLength(1);
     expect(markup).toContain("No items");
-    expect(markup).toContain("Robot / Software");
+    expect(markup).toContain("Software");
+    expect(markup.match(/class="kanban-project-label"><span>Robot<\/span><\/h3>/g)).toHaveLength(1);
+    expect(markup.match(/class="kanban-project-group"/g)).toHaveLength(2);
   });
 
   it("assigns stable keys to rendered items when drag identifiers are unavailable", () => {

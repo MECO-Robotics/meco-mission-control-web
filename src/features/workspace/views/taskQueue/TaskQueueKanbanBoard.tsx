@@ -6,6 +6,7 @@ import type { OpenEditTaskModalOptions, TaskEditIntentState } from "@/types/task
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { KanbanProjectGroup } from "@/features/workspace/views/kanban/KanbanProjectGroup";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
 import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
@@ -92,10 +93,14 @@ export function TaskQueueKanbanBoard({
     [cardProps.bootstrap, focusedState, focusedTasks, tasks],
   );
   const boardSwimlanes = useMemo(
-    () => swimlanes.map((lane) => ({
-      id: lane.id,
-      header: <><strong>{lane.projectName}</strong><span>{lane.disciplineName}</span><span>{lane.tasks.length}</span></>,
-      itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
+    () => swimlanes.map((project) => ({
+      id: project.id,
+      label: project.projectName,
+      lanes: project.lanes.map((lane) => ({
+        id: lane.id,
+        header: <><span>{lane.disciplineName}</span><span>{lane.tasks.length}</span></>,
+        itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
+      })),
     })),
     [cardProps.bootstrap, swimlanes],
   );
@@ -105,7 +110,7 @@ export function TaskQueueKanbanBoard({
         state,
         count: tasksByState[state].length,
         header: (
-          <span className={getStatusPillClassName(state)}>
+          <span className="task-queue-board-state-label">
             <span aria-hidden="true" className="task-queue-board-column-header-icon">
               <TimelineTaskStatusLogo
                 compact
@@ -181,23 +186,22 @@ export function TaskQueueKanbanBoard({
 
           <div className="task-queue-board-focused-groups">
             {swimlanes.length > 0 ? (
-              swimlanes.map((group) => (
-                <section className="task-queue-board-focused-lane" key={group.id}>
-                  <header className="kanban-swimlane-label">
-                    <strong>{group.projectName}</strong>
-                    <span>{group.disciplineName}</span>
-                    <span>{group.tasks.length}</span>
-                  </header>
-                  <div className="task-queue-board-focused-lane-grid">
-                    {group.tasks.map((task) => (
-                      <TaskQueueCard
-                        {...cardProps}
-                        key={task.id}
-                        task={task}
-                      />
-                    ))}
-                  </div>
-                </section>
+              swimlanes.map((project) => (
+                <KanbanProjectGroup key={project.id} label={project.projectName}>
+                  {project.lanes.map((lane) => (
+                    <section className="kanban-swimlane" key={lane.id}>
+                      <header className="kanban-swimlane-label">
+                        <span>{lane.disciplineName}</span>
+                        <span>{lane.tasks.length}</span>
+                      </header>
+                      <div className="task-queue-board-focused-lane-grid">
+                        {lane.tasks.map((task) => (
+                          <TaskQueueCard {...cardProps} key={task.id} task={task} />
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </KanbanProjectGroup>
               ))
             ) : (
               <p className="empty-state">No tasks match the current filters.</p>
@@ -238,7 +242,7 @@ export function TaskQueueKanbanBoard({
       getItemDragLabel={(task) => task.title}
       getItemId={(task) => task.id}
       itemsByState={tasksByState}
-      swimlanes={boardSwimlanes}
+      swimlaneGroups={boardSwimlanes}
       onColumnBodyClick={onFocusState}
       onItemDrop={(task, state) => {
         if (isTaskQueueDirectStatusState(state)) {

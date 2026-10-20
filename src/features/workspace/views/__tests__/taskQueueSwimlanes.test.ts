@@ -13,15 +13,16 @@ describe("Task Queue swim lanes", () => {
       createTask(4),
     ];
 
-    const lanes = groupTaskQueueSwimlanes(tasks, bootstrap);
-    expect(lanes.map(({ projectName, disciplineName, tasks: laneTasks }) => [
-      projectName, disciplineName, laneTasks.map(({ id }) => id),
+    const projects = groupTaskQueueSwimlanes(tasks, bootstrap);
+    expect(projects.map(({ projectName, lanes }) => [
+      projectName, lanes.map(({ disciplineName, tasks: laneTasks }) => [
+        disciplineName, laneTasks.map(({ id }) => id),
+      ]),
     ])).toEqual([
-      ["Robot", "Design", ["task-3", "task-4"]],
-      ["Robot", "Software", ["task-2"]],
-      ["Outreach", "Design", ["task-1"]],
+      ["Robot", [["Design", ["task-3", "task-4"]], ["Software", ["task-2"]]]],
+      ["Outreach", [["Design", ["task-1"]]]],
     ]);
-    expect(new Set(lanes.map(({ id }) => id)).size).toBe(3);
+    expect(projects.map(({ id }) => id)).toEqual(["project-1", "other"]);
   });
 
   it("omits empty groups after filtering and keeps unavailable references visible", () => {
@@ -31,7 +32,7 @@ describe("Task Queue swim lanes", () => {
       createTask(1, { projectId: "deleted", workTypeId: "" }),
     ], bootstrap);
     expect(lane.projectName).toBe("Unavailable project");
-    expect(lane.disciplineName).toBe("Unassigned discipline");
-    expect(lane.tasks).toHaveLength(1);
+    expect(lane.lanes[0].disciplineName).toBe("Unassigned discipline");
+    expect(lane.lanes[0].tasks).toHaveLength(1);
   });
 });

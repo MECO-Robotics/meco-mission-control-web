@@ -57,11 +57,17 @@
   display: grid;
   height: auto;
   min-height: 0;
+  gap: 0;
 }
 
 .workspace-kanban-scroll-view .task-queue-board-shell:has(.has-swimlanes) {
   max-height: calc(100dvh - var(--kanban-board-viewport-offset, 8rem));
   overflow-y: auto;
+}
+
+.has-swimlanes,
+.task-queue-board-focused-groups {
+  --kanban-project-label-width: calc(2rem * var(--task-queue-zoom, 1));
 }
 
 .kanban-swimlane-columns {
@@ -73,40 +79,110 @@
 .kanban-swimlane-statuses {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 3;
+  padding-left: var(--kanban-project-label-width);
   background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-base);
 }
 
-.task-queue-board.has-swimlanes .kanban-swimlane .task-queue-board-column {
+.workspace-kanban-scroll-view .task-queue-board.has-swimlanes .task-queue-board-column {
+  grid-template-rows: auto;
   background: transparent;
   border-radius: 0;
   box-shadow: none;
 }
 
+.has-swimlanes .task-queue-board-column-header {
+  flex-wrap: nowrap;
+}
+
+.task-queue-board-state-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-title);
+  font-size: calc(0.76rem * var(--task-queue-zoom, 1));
+  font-weight: 700;
+}
+
+.workspace-kanban-scroll-view .task-queue-board.has-swimlanes .task-queue-board-column-count {
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--text-copy);
+  font-weight: 500;
+}
+
+.kanban-project-group {
+  display: grid;
+  grid-template-columns: var(--kanban-project-label-width) minmax(0, 1fr);
+  min-width: 0;
+}
+
+.kanban-project-label {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+  margin: 0;
+  padding: 0.75rem 0;
+  border-right: 1px solid var(--border-base);
+  border-top: 1px solid var(--border-base);
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  font-size: calc(0.8rem * var(--task-queue-zoom, 1));
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.kanban-project-label span {
+  position: sticky;
+  top: calc(3.5rem * var(--task-queue-zoom, 1));
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.kanban-project-lanes {
+  min-width: 0;
+}
+
+.kanban-swimlane {
+  border-top: 1px solid var(--border-base);
+  background: var(--bg-panel);
+}
+
+.kanban-swimlane:nth-child(even) {
+  background: var(--bg-row-alt);
+}
+
 .kanban-swimlane-label {
   position: sticky;
-  left: var(--task-queue-edge-pad, 1rem);
+  left: var(--kanban-project-label-width);
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.35rem 0.75rem;
   width: fit-content;
-  max-width: calc(100vw - 5rem);
-  padding: 0.8rem 0 0.45rem;
+  max-width: calc(100vw - 7rem);
+  padding: 0.65rem 0.7rem 0;
   color: var(--text-copy);
   font-size: calc(0.8rem * var(--task-queue-zoom, 1));
   overflow-wrap: anywhere;
 }
 
-.kanban-swimlane-label strong {
-  color: var(--text-title);
-}
-
-.has-swimlanes .task-queue-board-column {
-  grid-template-rows: auto;
-}
-
 .has-swimlanes .task-queue-board-column-body {
   min-height: calc(4rem * var(--task-queue-zoom, 1));
   overflow-y: visible;
+}
+
+.task-queue-board-focused-groups .kanban-swimlane {
+  padding: 0 0.7rem 0.7rem;
+}
+
+.task-queue-board-focused-groups .kanban-swimlane-label {
+  padding: 0.65rem 0 0.45rem;
 }

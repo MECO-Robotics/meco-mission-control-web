@@ -19,15 +19,19 @@ export function groupTaskQueueSwimlanes(tasks: TaskRecord[], bootstrap: Bootstra
     const disciplines = projects.get(projectId);
     if (!disciplines) return [];
     const disciplineOrder = [...new Set([...bootstrap.workTypes.map(({ id }) => id), ...disciplines.keys()])];
-    return disciplineOrder.flatMap((disciplineId) => {
+    const lanes = disciplineOrder.flatMap((disciplineId) => {
       const laneTasks = disciplines.get(disciplineId);
       if (!laneTasks) return [];
       return [{
-        id: JSON.stringify([projectId, disciplineId]),
-        projectName: bootstrap.projects.find(({ id }) => id === projectId)?.name ?? "Unavailable project",
+        id: disciplineId,
         disciplineName: bootstrap.workTypes.find(({ id }) => id === disciplineId)?.name ?? (disciplineId ? "Unavailable discipline" : "Unassigned discipline"),
         tasks: laneTasks,
       }];
     });
+    return [{
+      id: projectId,
+      projectName: bootstrap.projects.find(({ id }) => id === projectId)?.name ?? "Unavailable project",
+      lanes,
+    }];
   });
 }
