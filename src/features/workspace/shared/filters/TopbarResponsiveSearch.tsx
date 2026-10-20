@@ -82,7 +82,6 @@ export function TopbarResponsiveSearch({
   const legacyIconWidth = iconSwitchWidth ?? 86 + actionOverlayWidthPx;
   const legacyIconReleaseWidth = iconReleaseWidth ?? legacyIconWidth + 12;
   const shouldUseCollisionDetection = resolvedMode === "dynamic-label" && (collisionDetectionMode ?? "auto") === "auto";
-  const { compactRef, isCompactOpen, setIsCompactOpen } = useCompactSearchPopover();
   const { searchMode, searchWidth } = useTopbarResponsiveSearchMode({
     actionOverlayWidthPx,
     compactLabel,
@@ -101,6 +100,7 @@ export function TopbarResponsiveSearch({
     searchRef,
     shouldUseCollisionDetection,
   });
+  const { compactRef, isCompactOpen, setIsCompactOpen } = useCompactSearchPopover(resolvedMode !== "dynamic-label" || searchMode === "icon");
   const resolvedPlaceholder =
     resolvedMode === "dynamic-label" &&
     (searchMode === "compact" || (searchWidth !== null && searchWidth <= legacySwitchWidth))
