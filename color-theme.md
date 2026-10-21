@@ -46,6 +46,7 @@ before using it. A CSS fallback must not silently establish a competing theme.
 | `--official-white` | `#ffffff` | `#ffffff` | White brand artwork |
 | `--meco-soft-blue` | `rgba(22, 71, 142, 0.08)` | `rgba(22, 71, 142, 0.2)` | Active navigation and brand selection washes |
 | `--meco-soft-red` | `rgba(234, 28, 45, 0.08)` | `rgba(234, 28, 45, 0.2)` | Brand emphasis washes |
+| `--search-highlight-bg` / `--search-highlight-text` | `#fde68a` / `#713f12` | `#92400e` / `#fef3c7` | Literal workspace search matches and milestone suggestion marks |
 | `--row-tint` | `rgba(22, 71, 142, 0.14)` | `rgba(59, 130, 246, 0.18)` | Selected or highlighted rows |
 | `--bg-panel` | `#ffffff` | `#1e293b` | Cards, panels, and controls |
 | `--bg-row-alt` | `#f8fafc` | `#0f172a` | Secondary shell surfaces and neutral controls |
