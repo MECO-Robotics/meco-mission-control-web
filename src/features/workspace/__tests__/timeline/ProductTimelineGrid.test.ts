@@ -174,3 +174,8 @@ it("renders the effective status tone and full dates on short blocked bars", () 
   expect(markup).toContain('--timeline-task-bar-text-color:var(--status-danger-text)');
   expect(markup).toContain('Blocked');
 });
+
+it("defaults to compact layout and supports the expanded metadata column", () => {
+  expect(renderGrid()).toContain('class="product-timeline-shell is-compact"');
+  expect(renderGrid({ compact: false })).toContain('class="product-timeline-shell"');
+});

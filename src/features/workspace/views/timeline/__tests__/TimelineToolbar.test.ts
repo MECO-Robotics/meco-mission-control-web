@@ -8,6 +8,7 @@ import { createBootstrap } from "@/features/workspace/__tests__/timeline/timelin
 
 const props: React.ComponentProps<typeof TimelineToolbar> = {
   bootstrap: createBootstrap(), isAllProjectsView: false, activeFilterCount: 0,
+  compact: true, onCompactChange: jest.fn(),
   groupBy: "team", onGroupByChange: jest.fn(),
   activePersonFilter: [], workTypeFilter: [], workTypeFilterOptions: [], priorityFilter: [], projectFilter: [],
   responsibleGroupFilter: [], statusFilter: [], subsystemFilter: [], subsystemFilterOptions: [], searchFilter: "",
@@ -22,8 +23,8 @@ function agendaControl(isPhone: boolean) {
   const toolbar = TimelineToolbar({ ...props, isPhone }) as React.ReactElement<{ children: React.ReactElement[] }>;
   const menu = toolbar.props.children.find((child) => child.type === CompactFilterMenu)!;
   const items = (menu.props as React.ComponentProps<typeof CompactFilterMenu>).items;
-  expect(items.map((item) => item.label)).toEqual(["Agenda"]);
-  return items[0].content as React.ReactElement<{ onClick: () => void; children: React.ReactElement[] }>;
+  expect(items.map((item) => item.label)).toEqual(["Timeline", "Agenda"]);
+  return items[1].content as React.ReactElement<{ onClick: () => void; children: React.ReactElement[] }>;
 }
 
 it("opens phone Agenda from View without a competing timeline switch", () => {
@@ -76,4 +77,15 @@ it("offers Team and Subsystem grouping inside the shared search Sort action", ()
   expect(props.onGroupByChange).toHaveBeenLastCalledWith("subsystem");
   picker.props.onChange(["team"]);
   expect(props.onGroupByChange).toHaveBeenLastCalledWith("team");
+});
+
+it("allows compact timeline to be turned off to reveal task metadata", () => {
+  const toolbar = TimelineToolbar(props) as React.ReactElement<{ children: React.ReactElement[] }>;
+  const menu = toolbar.props.children.find((child) => child.type === CompactFilterMenu)!;
+  const items = (menu.props as React.ComponentProps<typeof CompactFilterMenu>).items;
+  const label = items[0].content as React.ReactElement<{ children: React.ReactElement[] }>;
+  const checkbox = label.props.children[0] as React.ReactElement<{ checked: boolean; onChange: (event: { target: { checked: boolean } }) => void }>;
+  expect(checkbox.props.checked).toBe(true);
+  checkbox.props.onChange({ target: { checked: false } });
+  expect(props.onCompactChange).toHaveBeenCalledWith(false);
 });

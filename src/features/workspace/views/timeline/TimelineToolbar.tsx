@@ -45,6 +45,8 @@ interface TimelineToolbarProps {
   timelinePeriodLabel: string;
   timelineZoom: number;
   viewInterval: TimelineViewInterval;
+  compact: boolean;
+  onCompactChange: (value: boolean) => void;
   showAgenda: boolean;
   onShowAgendaChange: (value: boolean) => void;
   isPhone: boolean;
@@ -82,6 +84,8 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   timelinePeriodLabel,
   timelineZoom,
   viewInterval,
+  compact,
+  onCompactChange,
   showAgenda,
   onShowAgendaChange,
   isPhone,
@@ -169,6 +173,10 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       buttonLabel="View"
       icon={<Settings2 size={14} />}
       items={[
+        {
+          label: "Timeline",
+          content: <label className="schedule-desktop-view-option"><input checked={compact} onChange={(event) => onCompactChange(event.target.checked)} type="checkbox" />Compact timeline</label>,
+        },
         {
           label: "Agenda",
           content: isPhone ? <button className="secondary-action" onClick={onOpenAgenda} type="button">Open agenda</button> : (

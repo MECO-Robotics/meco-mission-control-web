@@ -24,6 +24,7 @@ interface ProductTimelineGridProps {
   days: string[];
   groupBy: GroupBy;
   zoom?: number;
+  compact?: boolean;
   selectedDate: string | null;
   onSelectDate: (day: string) => void;
   onOpenTask: (task: TaskRecord) => void;
@@ -31,7 +32,7 @@ interface ProductTimelineGridProps {
   isAllProjectsView: boolean;
 }
 
-export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
+export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1, compact = true, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const workHeaderRef = useRef<HTMLDivElement | null>(null);
   const shellWidth = useTimelineShellSizing(shellRef);
@@ -46,7 +47,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   const inspectionTask = inspectedId ? tasks.find((task) => task.id === inspectedId) : undefined;
   const inspection = inspectionTask ? getProductTimelineInspection(inspectionTask, bootstrap) : null;
   const clampedZoom = Math.min(4, Math.max(1, zoom));
-  const gridWidth = shellWidth && workWidth ? workWidth + Math.max(1, shellWidth - workWidth) * clampedZoom : undefined;
+  const gridWidth = shellWidth ? workWidth + Math.max(1, shellWidth - workWidth) * clampedZoom : undefined;
   const style = { "--schedule-day-count": Math.max(1, days.length), "--schedule-zoom": clampedZoom, width: gridWidth } as CSSProperties;
   const toggle = (id: string) => setCollapsed((previous) => {
     const next = new Set(previous);
@@ -101,7 +102,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   };
 
   return <>
-    <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
+    <div ref={shellRef} className={`product-timeline-shell${compact ? " is-compact" : ""}`} data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
     <div className="product-timeline-grid" style={style}>
       {milestoneLane && <div className="product-timeline-milestone-lane">{milestoneLane}</div>}
       <div className="product-timeline-row product-timeline-header">

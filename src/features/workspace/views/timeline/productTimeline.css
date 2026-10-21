@@ -30,7 +30,7 @@
 .product-timeline-collapse span { min-width: 0; overflow-wrap: anywhere; }
 .product-timeline-count { display: block; padding-left: 1.2rem; margin-top: 0.15rem; color: var(--text-muted); font-size: 0.65rem; font-weight: 400; }
 .product-timeline-task .product-timeline-work { padding: 0.35rem 0.5rem; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; }
-.product-timeline-task { --schedule-row-background: var(--bg-panel); }
+.product-timeline-task { --schedule-row-background: var(--bg-panel); min-height: 44px; }
 .product-timeline-task:where(:nth-child(even of .product-timeline-task)) { --schedule-row-background: var(--bg-row-stripe); }
 .product-timeline-task > .product-timeline-work, .product-timeline-task > .product-timeline-track { background-color: var(--schedule-row-background); }
 .product-timeline-related-title { display: block; max-width: 100%; padding: 0; border: 0; background: transparent; color: var(--text-link); text-align: left; font: inherit; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; cursor: pointer; }
@@ -95,3 +95,11 @@
 .timeline-legend-list li { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
 .timeline-legend-list .timeline-task-status-logo { position: static; transform: none; flex: 0 0 18px; width: 18px; height: 18px; }
 .timeline-legend-list .timeline-task-overdue { color: var(--status-danger-text); }
+
+.product-timeline-shell.is-compact { --schedule-work-width: 0px; }
+.product-timeline-shell.is-compact .product-timeline-task > .product-timeline-work,
+.product-timeline-shell.is-compact .product-timeline-header > .product-timeline-work { display: none; }
+.product-timeline-shell.is-compact .product-timeline-task > .product-timeline-track,
+.product-timeline-shell.is-compact .product-timeline-dates { grid-column: 2; }
+.product-timeline-shell.is-compact .schedule-milestone-label { grid-column: 1 / -1; width: max-content; max-width: 100cqi; box-sizing: border-box; }
+.product-timeline-shell.is-compact .schedule-milestone-track { grid-column: 2; }
