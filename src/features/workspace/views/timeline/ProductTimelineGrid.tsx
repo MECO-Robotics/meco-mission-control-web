@@ -83,6 +83,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
           <span className="product-timeline-task-assignees">
             <TaskAssigneeSummary task={task} membersById={membersById} />
             {context.team && <span className="product-timeline-task-team" role="img" aria-label={`Team: ${context.team}`} title={`Team: ${context.team}`}><Network size={14} aria-hidden="true" /></span>}
+            <span>{task.actualHours}h logged / {task.estimatedHours}h allocated</span>
           </span>
           {context.unavailableTargets.length > 0 && <span className="product-timeline-task-meta">Unavailable target: {context.unavailableTargets.join(", ")}</span>}
           <div className="product-timeline-task-state">
