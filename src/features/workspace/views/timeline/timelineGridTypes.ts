@@ -1,3 +1,4 @@
+import type { MilestoneRecord } from "@/types/recordsExecution";
 import type React from "react";
 
 import type { TimelineDayHeaderCell, TimelineMonthGroup } from "./timelineViewModel";
@@ -5,10 +6,9 @@ import type { TimelineDayHeaderCell, TimelineMonthGroup } from "./timelineViewMo
 export type TimelineGridMotion = "left" | "right" | "neutral";
 
 export interface TimelineGridHeaderProps {
-  clearHoveredMilestonePopup: () => void;
+  onOpenMilestoneDetails: (milestone: MilestoneRecord) => void;
   firstDayGridColumn: number;
   gridMinWidth: number;
-  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   handleTimelineHeaderDayClick: (day: string) => void;
   handleTimelineZoomWheel: (milestone: React.WheelEvent<HTMLDivElement>) => void;
   hasProjectColumn: boolean;

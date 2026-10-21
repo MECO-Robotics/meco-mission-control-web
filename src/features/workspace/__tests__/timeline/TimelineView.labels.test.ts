@@ -1,10 +1,8 @@
 /// <reference types="jest" />
 import * as React from "react";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
-import { createBootstrap, createBootstrapWithDependency, readAppCss } from "./timelineTestFixtures";
+import { createBootstrap } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -19,8 +17,8 @@ describe("TimelineView", () => {
   });
 
   it.each([
-    [false, "2 / -1", "2 / -1"],
-    [true, "3 / -1", "3 / -1"],
+    [false, "3 / -1", "3 / -1"],
+    [true, "4 / -1", "4 / -1"],
   ])(
     "starts timeline row highlight anchors after sticky label columns when all-projects view is %s",
     (isAllProjectsView, expectedTaskAnchor, expectedSubsystemAnchor) => {
@@ -47,41 +45,4 @@ describe("TimelineView", () => {
     },
   );
 
-  it("keeps left timeline task labels title-only with tighter row height", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(TimelineView, {
-        bootstrap: createBootstrapWithDependency(),
-        isAllProjectsView: false,
-        activePersonFilter: [],
-        setActivePersonFilter: jest.fn(),
-        openTaskDetailModal: jest.fn(),
-        openCreateTaskModal: jest.fn(),
-        onDeleteTimelineMilestone: jest.fn(),
-        onSaveTimelineMilestone: jest.fn(),
-        triggerCreateMilestoneToken: 0,
-      }),
-    );
-    const css = readAppCss();
-    const daySlotsSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineGridDaySlots.tsx"),
-      "utf8",
-    );
-    const projectGroupSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineProjectGroup.tsx"),
-      "utf8",
-    );
-    const subsystemGroupSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineSubsystemGroup.tsx"),
-      "utf8",
-    );
-
-    expect(markup).not.toContain("timeline-task-label-owner");
-    expect(markup).not.toContain("Depends on");
-    expect(markup).not.toContain("Blocks");
-    expect(markup).toContain("min-height:38px");
-    expect(daySlotsSource).toContain('minHeight: "38px"');
-    expect(projectGroupSource).toContain('gridAutoRows: "var(--timeline-row-height, 38px)"');
-    expect(subsystemGroupSource).toContain('gridAutoRows: "var(--timeline-row-height, 38px)"');
-    expect(css).toMatch(/\.timeline-row-highlight-anchor\s*\{[\s\S]*min-height:\s*38px/);
-  });
 });

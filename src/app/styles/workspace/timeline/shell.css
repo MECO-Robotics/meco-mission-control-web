@@ -1,5 +1,5 @@
 .timeline-shell {
-  --timeline-row-height: 38px;
+  --timeline-row-height: 58px;
   overflow-x: auto;
   overflow-y: hidden;
   position: relative;

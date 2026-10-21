@@ -99,7 +99,7 @@ describe("TimelineView", () => {
         expect(style).toContain("z-index:0");
       });
       taskBarStyles.forEach((style) => {
-        expect(style).toContain("position:relative");
+        expect(style).toContain("--timeline-task-bar-background:var(--status-");
         expect(style).not.toContain("z-index:6");
       });
     },

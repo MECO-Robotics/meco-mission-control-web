@@ -1,295 +1,116 @@
-/// <reference types="jest" />
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { BootstrapPayload } from "@/types/bootstrap";
-import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
-import { TimelineTaskStatusCell } from "@/features/workspace/views/timeline/TimelineTaskStatusCell";
-import { resolveTimelineRowHighlightStyle } from "@/features/workspace/views/timeline/model/timelineTaskColors";
-import { TimelineSubsystemGroup } from "@/features/workspace/views/timeline/TimelineSubsystemGroup";
-import { createBootstrap } from "./timelineTestFixtures";
+import { TimelineGroupSummary } from "@/features/workspace/views/timeline/components/TimelineGroupSummary";
+import { TimelineTaskNameCell } from "@/features/workspace/views/timeline/TimelineTaskNameCell";
+import { buildTimelineTaskPresentations } from "@/features/workspace/views/timeline/model/timelineTaskPresentation";
+import { buildTimelineTaskToneStyle, resolveTimelineRowHighlightStyle } from "@/features/workspace/views/timeline/model/timelineTaskColors";
+import { buildTimelineDayMilestoneUnderlays } from "@/features/workspace/views/timeline/model/timelineMilestoneData";
+import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
+import { createBootstrap, createTimelineMilestone } from "./timelineTestFixtures";
 
-(globalThis as typeof globalThis & { React: typeof React }).React = React;
-
-describe("TimelineView", () => {
-  it("keeps collapsed subsystem task bars on their own project-grid row", () => {
+describe("timeline status and schedule presentation", () => {
+  it("keeps completed work complete, then gives blockers precedence over unmet prerequisites", () => {
     const bootstrap = createBootstrap();
-    const baseTask = bootstrap.tasks[0] as BootstrapPayload["tasks"][number];
-    const firstSubsystemTask = {
-      ...baseTask,
-      id: "task-first",
-      title: "First subsystem task",
-      offset: 0,
-      span: 2,
-      spillsLeft: false,
-      spillsRight: false,
-    };
-    const firstSubsystemSecondTask = {
-      ...baseTask,
-      id: "task-first-second",
-      title: "First subsystem second task",
-      offset: 1,
-      span: 2,
-      spillsLeft: false,
-      spillsRight: false,
-    };
-    const secondSubsystemTask = {
-      ...baseTask,
-      id: "task-second",
-      title: "Second collapsed task",
-      subsystemIds: ["subsystem-2"],
-      offset: 0,
-      span: 2,
-      spillsLeft: false,
-      spillsRight: false,
-    };
-    const secondSubsystemSecondTask = {
-      ...secondSubsystemTask,
-      id: "task-second-two",
-      title: "Second collapsed follow-up",
-      offset: 1,
-    };
-    const markup = renderToStaticMarkup(
-      React.createElement(TimelineProjectGroup, {
-        clearHoveredMilestonePopup: jest.fn(),
-        clearHoveredSubsystemRow: jest.fn(),
-        clearHoveredTaskRow: jest.fn(),
-        collapsedProjects: {},
-        collapsedSubsystems: { "subsystem-2": true },
-        workTypesById: {
-          "discipline-1": bootstrap.workTypes[0] as BootstrapPayload["workTypes"][number],
-        },
-        firstDayGridColumn: 3,
-        gridMinWidth: 420,
-        handleTimelineDayMouseEnter: jest.fn(),
-        hoveredSubsystemId: null,
-        hoverSubsystemRow: jest.fn(),
-        hoverTaskRow: jest.fn(),
-        openTaskDetailModal: jest.fn(),
-        project: {
-          id: "project-1",
-          name: "Robot",
-          completeCount: 0,
-          taskCount: 4,
-          tasks: [
-            firstSubsystemTask,
-            firstSubsystemSecondTask,
-            secondSubsystemTask,
-            secondSubsystemSecondTask,
-          ],
-          subsystems: [
-            {
-              id: "subsystem-1",
-              name: "Drivebase",
-              color: "#16478e",
-              projectId: "project-1",
-              projectName: "Robot",
-              index: 0,
-              completeCount: 0,
-              taskCount: 2,
-              tasks: [firstSubsystemTask, firstSubsystemSecondTask],
-            },
-            {
-              id: "subsystem-2",
-              name: "Controls",
-              color: "#246847",
-              projectId: "project-1",
-              projectName: "Robot",
-              index: 1,
-              completeCount: 0,
-              taskCount: 2,
-              tasks: [secondSubsystemTask, secondSubsystemSecondTask],
-            },
-          ],
-        },
-        projectIndex: 0,
-        selectSubsystemRow: jest.fn(),
-        selectTaskRow: jest.fn(),
-        selectedSubsystemId: null,
-        showProjectCol: true,
-        showSubsystemCol: true,
-        statusIconColumnIndex: 4,
-        statusIconColumnWidth: 36,
-        statusIconStickyRight: 0,
-        subsystemColumnIndex: 2,
-        subsystemStickyLeft: 112,
-        taskDependencyCountsById: {},
-        taskStatusSignalsById: {},
-        timelineDayHeaderCells: [
-          {
-            day: "2026-04-06",
-            weekdayLabel: "Mon",
-            weekdayNarrowLabel: "M",
-            dayNumberLabel: "6",
-            milestonesOnDay: [],
-            meetingsOnDay: [],
-            dayStyle: null,
-            primaryMilestoneStartDay: "",
-            primaryMilestoneEndDay: "",
-          },
-          {
-            day: "2026-04-07",
-            weekdayLabel: "Tue",
-            weekdayNarrowLabel: "T",
-            dayNumberLabel: "7",
-            milestonesOnDay: [],
-            meetingsOnDay: [],
-            dayStyle: null,
-            primaryMilestoneStartDay: "",
-            primaryMilestoneEndDay: "",
-          },
-        ],
-        timelineGridTemplate: "112px 128px repeat(2, 24px)",
-        toggleProject: jest.fn(),
-        toggleSubsystem: jest.fn(),
-      }),
-    );
-    const secondTaskBar = markup.match(
-      /<button(?=[^>]*title="Second collapsed task)[^>]*style="([^"]+)"/,
-    );
-
-    expect(markup.match(/data-timeline-grid-cell="true"/g)?.length).toBe(6);
-    expect(secondTaskBar?.[1]).toContain("grid-row:3");
-    expect(secondTaskBar?.[1]).not.toContain("grid-row:1");
+    const base = bootstrap.tasks[0];
+    bootstrap.tasks = [
+      { ...base, id: "complete", status: "complete", isBlocked: true },
+      { ...base, id: "blocked", isBlocked: true },
+      { ...base, id: "waiting", status: "in-progress" },
+    ];
+    bootstrap.taskDependencies = ["complete", "blocked", "waiting"].map((taskId) => ({
+      id: `dependency-${taskId}`, taskId, kind: "task", refId: "missing", dependencyType: "hard", createdAt: "2026-04-01",
+    }));
+    const result = buildTimelineTaskPresentations(bootstrap, "2026-04-15");
+    expect(result.complete.signal).toBe("complete");
+    expect(result.complete.overdueDays).toBe(0);
+    expect(result.blocked.signal).toBe("blocked");
+    expect(result.waiting.signal).toBe("waiting-on-dependency");
+    expect(result.waiting.dependencies[0]).toMatchObject({ label: "Unavailable task: missing", state: "Unavailable" });
   });
 
-  it("renders collapsed subsystem status icons as an overlay", () => {
+  it("marks only unfinished work before today overdue, including across DST", () => {
     const bootstrap = createBootstrap();
-    const baseTask = bootstrap.tasks[0] as BootstrapPayload["tasks"][number];
-    const makeTimelineTask = (id: string, title: string) => ({
-      ...baseTask,
-      id,
-      title,
-      offset: 0,
-      span: 1,
-      spillsLeft: false,
-      spillsRight: false,
+    bootstrap.tasks = [
+      { ...bootstrap.tasks[0], id: "yesterday", dueDate: "2026-03-08" },
+      { ...bootstrap.tasks[0], id: "today", dueDate: "2026-03-09" },
+      { ...bootstrap.tasks[0], id: "tomorrow", dueDate: "2026-03-10" },
+    ];
+    const result = buildTimelineTaskPresentations(bootstrap, "2026-03-09");
+    expect(result.yesterday.overdueLabel).toBe("Overdue · 1 day");
+    expect(result.today.overdueLabel).toBe("");
+    expect(result.tomorrow.overdueLabel).toBe("");
+  });
+
+  it("resolves dependency links from the full bootstrap, even when the referenced task is outside the visible range", () => {
+    const bootstrap = createBootstrap();
+    bootstrap.tasks.push({ ...bootstrap.tasks[0], id: "upstream", title: "Old prerequisite", status: "complete", dueDate: "2025-01-01" });
+    bootstrap.taskDependencies = [{ id: "dep", taskId: bootstrap.tasks[0].id, kind: "task", refId: "upstream", dependencyType: "hard", createdAt: "2026-04-01" }];
+    const result = buildTimelineTaskPresentations(bootstrap, "2026-04-15");
+    expect(result[bootstrap.tasks[0].id].dependencies[0]).toMatchObject({ direction: "Prerequisite", label: "Old prerequisite", state: "Satisfied", task: { id: "upstream" } });
+    expect(result.upstream.dependencies[0]).toMatchObject({ direction: "Dependent", task: { id: bootstrap.tasks[0].id } });
+  });
+
+  it("does not mistake non-task references with matching IDs for task dependents", () => {
+    const bootstrap = createBootstrap();
+    bootstrap.taskDependencies = [{ id: "part-dep", taskId: "other", kind: "part-instance", refId: bootstrap.tasks[0].id, dependencyType: "hard", createdAt: "2026-04-01" }];
+    expect(buildTimelineTaskPresentations(bootstrap)[bootstrap.tasks[0].id].dependencies).toEqual([]);
+  });
+
+  it("keeps sticky task names, status, and overdue text visible without hover", () => {
+    const bootstrap = createBootstrap();
+    const task = bootstrap.tasks[0];
+    const presentation = buildTimelineTaskPresentations(bootstrap, "2026-04-15")[task.id];
+    const markup = renderToStaticMarkup(React.createElement(TimelineTaskNameCell, {
+      task, presentation, gridRow: 1, taskColumnIndex: 3, taskColumnWidth: 240, taskStickyLeft: 240,
+      isHighlighted: true, onOpenTask: jest.fn(), onMouseEnter: jest.fn(), onMouseLeave: jest.fn(),
+    }));
+    expect(markup).toContain(task.title);
+    expect(markup).toContain(presentation.statusLabel);
+    expect(markup).toContain(presentation.overdueLabel);
+    expect(markup).toContain("left:240px");
+  });
+
+  it("replaces overlapping collapsed tasks with one neutral span and deduplicated counts", () => {
+    const bootstrap = createBootstrap();
+    const task = { ...bootstrap.tasks[0], offset: 2, span: 3, spillsLeft: false, spillsRight: false };
+    const presentations = buildTimelineTaskPresentations(bootstrap, "2026-04-15");
+    const markup = renderToStaticMarkup(React.createElement(TimelineGroupSummary, {
+      tasks: [task, task], presentations, gridRow: 3, firstDayGridColumn: 4,
+      taskColumnIndex: 3, taskColumnWidth: 240, taskStickyLeft: 240, onExpand: jest.fn(),
+    }));
+    expect(markup).toContain("Group span");
+    expect(markup).toContain("1 tasks · 0 complete · 0 blocked · 1 overdue");
+    expect(markup).toContain("grid-row:3;grid-column:6 / span 3");
+    expect(markup).not.toContain('class="timeline-bar');
+  });
+
+  it("uses shared status surfaces while selection stays independent of discipline", () => {
+    const bootstrap = createBootstrap();
+    const task = bootstrap.tasks[0];
+    const style = buildTimelineTaskToneStyle("blocked");
+    expect(style).toMatchObject({ "--timeline-task-bar-background": "var(--status-danger-bg)", "--timeline-task-bar-text-color": "var(--status-danger-text)" });
+    expect(resolveTimelineRowHighlightStyle(`task:${task.id}`, { [task.id]: task }, {})).toMatchObject({ "--timeline-row-highlight-selected-stroke": "var(--text-accent)" });
+  });
+
+  it("keeps coincident milestone guides on their actual dates and clamps ranged milestones", () => {
+    const resolveGeometry = jest.fn(() => ({ left: 100, width: 48, centerX: 124, centerY: 80, bodyTop: 40, bodyHeight: 80 }));
+    const underlays = buildTimelineDayMilestoneUnderlays({
+      milestones: [
+        createTimelineMilestone({ id: "one", startAt: "2026-04-08T09:00:00Z" }),
+        createTimelineMilestone({ id: "two", startAt: "2026-04-08T14:00:00Z" }),
+        createTimelineMilestone({ id: "range", startAt: "2026-04-01T09:00:00Z", endAt: "2026-04-09T09:00:00Z" }),
+      ], timelineDays: ["2026-04-08", "2026-04-09"], resolveGeometry,
     });
-    const markup = renderToStaticMarkup(
-      React.createElement(TimelineSubsystemGroup, {
-        clearHoveredMilestonePopup: jest.fn(),
-        clearHoveredSubsystemRow: jest.fn(),
-        clearHoveredTaskRow: jest.fn(),
-        collapsedSubsystems: { "subsystem-2": true },
-        workTypesById: {
-          "discipline-1": bootstrap.workTypes[0] as BootstrapPayload["workTypes"][number],
-        },
-        firstDayGridColumn: 2,
-        gridMinWidth: 420,
-        handleTimelineDayMouseEnter: jest.fn(),
-        hoveredSubsystemId: null,
-        hoverSubsystemRow: jest.fn(),
-        hoverTaskRow: jest.fn(),
-        openTaskDetailModal: jest.fn(),
-        selectSubsystemRow: jest.fn(),
-        selectTaskRow: jest.fn(),
-        selectedSubsystemId: null,
-        showSubsystemCol: true,
-        statusIconColumnIndex: 3,
-        statusIconColumnWidth: 36,
-        statusIconStickyRight: 0,
-        subsystem: {
-          id: "subsystem-2",
-          name: "Controls",
-          color: "#246847",
-          projectId: "project-1",
-          projectName: "Robot",
-          index: 1,
-          completeCount: 0,
-          taskCount: 2,
-          tasks: [
-            makeTimelineTask("task-second", "Second task"),
-            makeTimelineTask("task-third", "Third task"),
-          ],
-        },
-        subsystemColumnIndex: 2,
-        subsystemIndex: 1,
-        subsystemStickyLeft: 112,
-        rowIndex: 1,
-        taskDependencyCountsById: {},
-        taskStatusSignalsById: {},
-        timelineDayHeaderCells: [
-          {
-            day: "2026-04-06",
-            weekdayLabel: "Mon",
-            weekdayNarrowLabel: "M",
-            dayNumberLabel: "6",
-            milestonesOnDay: [],
-            meetingsOnDay: [],
-            dayStyle: null,
-            primaryMilestoneStartDay: "",
-            primaryMilestoneEndDay: "",
-          },
-          {
-            day: "2026-04-07",
-            weekdayLabel: "Tue",
-            weekdayNarrowLabel: "T",
-            dayNumberLabel: "7",
-            milestonesOnDay: [],
-            meetingsOnDay: [],
-            dayStyle: null,
-            primaryMilestoneStartDay: "",
-            primaryMilestoneEndDay: "",
-          },
-        ],
-        timelineGridTemplate: "128px repeat(2, 24px)",
-        toggleSubsystem: jest.fn(),
-      }),
-    );
-
-    const statusIndex = markup.indexOf('class="timeline-task-status-column"');
-    expect(statusIndex).toBeGreaterThanOrEqual(0);
-
-    const statusSnippet = markup.slice(statusIndex, statusIndex + 420);
-    expect(statusSnippet).toContain("grid-column:3");
-    expect(statusSnippet).toContain("width:36px");
-    expect(statusSnippet).toContain("justify-content:flex-end");
-    expect(statusSnippet).toContain("right:0px");
-    expect(statusSnippet).toContain("timeline-task-status-icon-button");
+    expect(underlays.map((item) => item.id)).toEqual(["range", "one", "two"]);
+    expect(underlays[0]).toMatchObject({ startDay: "2026-04-08", endDay: "2026-04-09" });
+    expect(underlays[1].geometry.left).toBe(underlays[2].geometry.left);
   });
 
-  it("marks the timeline status caption open when the row is highlighted", () => {
-    const bootstrap = createBootstrap();
-    const task = bootstrap.tasks[0] as BootstrapPayload["tasks"][number];
-    const markup = renderToStaticMarkup(
-      React.createElement(TimelineTaskStatusCell, {
-        clearHoveredMilestonePopup: jest.fn(),
-        clearHoveredTaskRow: jest.fn(),
-        gridRow: "1",
-        hoverTaskRow: jest.fn(),
-        isHighlighted: true,
-        onOpenTask: jest.fn(),
-        ownerId: "project-1",
-        statusIconColumnIndex: 3,
-        statusIconColumnWidth: 36,
-        statusIconStickyRight: 0,
-        task,
-        taskStatusSignalsById: {},
-      }),
-    );
-
-    expect(markup).toContain("is-row-highlighted");
-    expect(markup).toContain("timeline-task-status-caption");
+  it("reserves a smaller sticky task column on compact screens", () => {
+    const layout = buildTimelineGridLayout({ dayCount: 7, isAllProjectsView: false, isProjectColumnVisible: false,
+      isSubsystemColumnVisible: false, timelineShellWidth: 390, timelineZoom: 1, viewInterval: "week" });
+    expect(layout.taskColumnWidth).toBe(172);
+    expect(layout.fixedTimelineColumnWidth).toBe(172);
+    expect(layout.taskColumnIndex).toBe(layout.firstDayGridColumn - 1);
   });
-
-  it("keeps single-task subsystem highlights on the subsystem color", () => {
-    const bootstrap = createBootstrap();
-    const subsystem = bootstrap.subsystems[0] as BootstrapPayload["subsystems"][number];
-    const style = resolveTimelineRowHighlightStyle(
-      `subsystem:${subsystem.id}`,
-      Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task])),
-      Object.fromEntries(bootstrap.subsystems.map((row) => [row.id, row])),
-      Object.fromEntries(bootstrap.workTypes.map((discipline) => [discipline.id, discipline])),
-    );
-    const highlightStyle = style as Record<string, string | undefined> | null;
-    const selectedFill = highlightStyle?.["--timeline-row-highlight-selected-fill"];
-    const hoverFill = highlightStyle?.["--timeline-row-highlight-hover-fill"];
-    const subsystemColor = "#4F86C6";
-    const disciplineColor = "#c67b1f";
-
-    expect(selectedFill).toContain(subsystemColor);
-    expect(hoverFill).toContain(subsystemColor);
-    expect(selectedFill).not.toContain(disciplineColor);
-    expect(hoverFill).not.toContain(disciplineColor);
-  });
-
 });

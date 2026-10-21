@@ -139,3 +139,24 @@ Purchases show received and remaining quantities with receipt locations and hist
 New task drafts use the selected project and a subsystem from that project. Owner defaults and choices use leads/students; mentor defaults use mentors. Missing eligible people remain unassigned. Existing advanced and manufacturing details remain available and retain saved values when collapsed.
 
 Part readiness uses reviewed, revision-matched evidence. Historical results remain stored; stale results do not verify a changed part revision. Required milestone criteria must exist before readiness can be established.
+
+## Gantt timeline presentation
+
+Timeline bars encode effective status using shared semantic colors, with text
+and glyphs for grayscale use. Complete overrides stale blockers; open blockers
+precede unmet hard dependencies. Overdue labels count local calendar days past
+due for unfinished work without replacing its status. Sticky task names retain
+status and overdue text when short bars cannot fit a title. Dependency disclosures
+resolve prerequisites/dependents from the full scoped bootstrap and open task
+details; unavailable references stay visibly unavailable.
+
+Collapsed project/subsystem rows show one neutral Group span, unique task and
+completion counts, and blocked/overdue counts. Activating the summary expands
+the group. Header milestone markers open a list when dates coincide and retain
+each original date range, with thin guides in the chart. Legend, period, zoom,
+search, filters and creation remain in the single shared topbar. Date edits
+continue through the task editor. No schema migration or reseed is required.
+
+This replaces discipline-led bars and overlapping collapsed tasks because one
+status signal and persistent labels make schedule problems readable with less
+visual and implementation complexity.

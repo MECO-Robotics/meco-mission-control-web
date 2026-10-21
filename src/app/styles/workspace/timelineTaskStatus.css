@@ -1,191 +1,25 @@
 .timeline-task-status-logo {
-  --timeline-task-status-logo-background: rgba(255, 255, 255, 0.5);
-  --timeline-task-status-track-height: 2.2rem;
-  --timeline-task-status-size: 1.9rem;
-  position: absolute;
-  top: 50%;
-  right: var(
-    --timeline-task-status-right,
-    calc(
-      (var(--timeline-task-status-track-height) - var(--timeline-task-status-size)) / 2 -
-        var(--timeline-task-status-edge-padding)
-    )
-  );
-  left: var(--timeline-task-status-left, auto);
-  width: var(--timeline-task-status-size);
-  height: var(--timeline-task-status-size);
-  border-radius: 999px;
   display: inline-flex;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
   align-items: center;
   justify-content: center;
-  background: var(--timeline-task-status-logo-background);
-  box-shadow: 0 0 0 1px rgba(15, 28, 52, 0.14);
-  color: var(--status-neutral-text);
-  transform: translateY(-50%);
-  pointer-events: none;
-  z-index: 10020;
+  --timeline-task-status-logo-background: var(--bg-panel);
 }
-
-.timeline-task-status-logo svg {
-  width: 1.24rem;
-  height: 1.24rem;
-  display: block;
-}
+.timeline-task-status-logo svg { width: 16px; height: 16px; }
+.timeline-task-status-logo-signal-not-started { color: var(--status-neutral-text); }
+.timeline-task-status-logo-signal-in-progress,
+.timeline-task-status-logo-signal-waiting-on-dependency { color: var(--status-warning-text); }
+.timeline-task-status-logo-signal-waiting-for-qa { color: var(--status-info-text); }
+.timeline-task-status-logo-signal-complete { color: var(--status-success-text); }
+.timeline-task-status-logo-signal-blocked { color: var(--status-danger-text); }
 
 .task-detail-header-status-icon .timeline-task-status-logo,
 .task-queue-board-focused-title-icon .timeline-task-status-logo,
 .task-queue-board-column-header-icon .timeline-task-status-logo {
-  position: static;
-  top: auto;
-  right: auto;
-  left: auto;
-  transform: none;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
-}
-
-.timeline-task-status-logo.is-compact {
-  --timeline-task-status-logo-background: rgba(255, 255, 255, 0.5);
-  --timeline-task-status-track-height: 1rem;
-  --timeline-task-status-size: 0.9rem;
-  box-shadow: 0 0 0 1px rgba(15, 28, 52, 0.12);
-}
-
-.timeline-task-status-column {
-  min-width: 0;
-}
-
-.timeline-task-status-icon-button {
-  width: var(--timeline-task-status-size);
-  min-width: var(--timeline-task-status-size);
-  height: var(--timeline-task-status-size);
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  cursor: pointer;
-  transition: background-color 160ms ease, box-shadow 160ms ease;
-  overflow: visible;
-  pointer-events: auto;
-}
-
-.timeline-task-status-icon-button .timeline-task-status-logo {
-  position: static;
-  top: auto;
-  left: auto;
-  right: auto;
-  transform: none;
-}
-
-.timeline-task-status-icon-button.is-compact {
-  width: var(--timeline-task-status-size-compact, 0.9rem);
-  min-width: var(--timeline-task-status-size-compact, 0.9rem);
-  height: var(--timeline-task-status-size-compact, 0.9rem);
-}
-
-.timeline-task-status-icon-button:hover,
-.timeline-task-status-icon-button:focus-visible {
-  justify-content: flex-end;
-  z-index: 10021;
-}
-
-.timeline-task-status-caption {
-  display: none;
-  position: absolute;
-  right: calc(100% + 0.15rem);
-  top: 50%;
-  transform: translateY(-50%);
-  margin: 0;
-  max-width: 12rem;
-  overflow: hidden;
-  white-space: nowrap;
-  pointer-events: none;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  line-height: 1.05rem;
-  color: inherit;
-  background: color-mix(in srgb, var(--status-info-bg, #eef2f8) 86%, transparent);
-  box-shadow: 0 1px 3px rgba(15, 28, 52, 0.2);
-}
-
-.timeline-task-status-icon-button:hover .timeline-task-status-caption,
-.timeline-task-status-icon-button:focus-visible .timeline-task-status-caption,
-.timeline-task-status-icon-button.is-row-highlighted .timeline-task-status-caption {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.12rem 0.45rem;
-}
-
-.timeline-task-status-icon-button[data-status-signal="not-started"] .timeline-task-status-caption {
-  background: color-mix(in srgb, var(--status-neutral-bg) 86%, transparent);
-  color: var(--status-neutral-text);
-}
-
-.timeline-task-status-icon-button[data-status-signal="in-progress"] .timeline-task-status-caption {
-  background: color-mix(in srgb, var(--status-warning-bg) 86%, transparent);
-  color: var(--status-warning-text);
-}
-
-.timeline-task-status-icon-button[data-status-signal="waiting-for-qa"] .timeline-task-status-caption {
-  background: color-mix(in srgb, var(--status-info-bg) 86%, transparent);
-  color: var(--status-info-text);
-}
-
-.timeline-task-status-icon-button[data-status-signal="complete"] .timeline-task-status-caption {
-  background: color-mix(in srgb, var(--status-success-bg) 86%, transparent);
-  color: var(--status-success-text);
-}
-
-.timeline-task-status-icon-button[data-status-signal="blocked"] .timeline-task-status-caption {
-  background: color-mix(in srgb, var(--status-danger-bg) 86%, transparent);
-  color: var(--status-danger-text);
-}
-
-.timeline-task-status-icon-button[data-status-signal="waiting-on-dependency"] .timeline-task-status-caption {
-  background: color-mix(in srgb, var(--status-warning-bg) 86%, transparent);
-  color: var(--status-warning-text);
-}
-
-.timeline-task-status-logo.is-compact svg {
-  width: 0.6rem;
-  height: 0.6rem;
-}
-
-.timeline-task-status-logo-not-started {
-  color: var(--status-neutral-text);
-}
-
-.timeline-task-status-logo-signal-in-progress {
-  color: var(--status-warning-text);
-}
-
-.timeline-task-status-logo-signal-waiting-for-qa {
-  color: var(--status-info-text);
-}
-
-.timeline-task-status-logo-signal-complete {
-  color: var(--status-success-text);
-}
-
-.timeline-task-status-logo-signal-blocked {
-  color: var(--official-red);
-}
-
-.timeline-task-status-logo-signal-waiting-on-dependency {
-  color: var(--status-warning-text);
-}
-
-@media (max-width: 640px) {
-  .timeline-task-status-icon-button,
-  .timeline-task-status-icon-button.is-compact {
-    width: 24px;
-    min-width: 24px;
-    height: 24px;
-    margin-right: -12px;
-  }
 }

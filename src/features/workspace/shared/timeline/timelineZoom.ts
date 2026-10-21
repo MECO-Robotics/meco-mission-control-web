@@ -49,9 +49,6 @@ export function getTimelineMinimumZoomForWidth({
 export function getTimelineDayTrackSize(
   viewInterval: TimelineViewInterval,
   zoom: number,
-  fixedColumnWidth = 0,
-  shellWidth = 0,
-  statusIconColumnWidth = 0,
 ) {
   const minimumDayWidth = Math.round(TIMELINE_BASE_DAY_WIDTHS[viewInterval] * zoom);
   if (viewInterval === "month") {
@@ -59,9 +56,6 @@ export function getTimelineDayTrackSize(
   }
 
   if (viewInterval === "week") {
-    void shellWidth;
-    void fixedColumnWidth;
-    void statusIconColumnWidth;
     return `minmax(${minimumDayWidth}px, 1fr)`;
   }
 
@@ -73,7 +67,6 @@ export function getTimelineGridMinWidth({
   projectColumnWidth,
   subsystemColumnWidth,
   taskColumnWidth,
-  statusIconColumnWidth = 0,
   dayCount,
   viewInterval,
   zoom,
@@ -82,12 +75,10 @@ export function getTimelineGridMinWidth({
   projectColumnWidth: number;
   subsystemColumnWidth: number;
   taskColumnWidth: number;
-  statusIconColumnWidth?: number;
   dayCount: number;
   viewInterval: TimelineViewInterval;
   zoom: number;
 }) {
-  void statusIconColumnWidth;
   const minimumDayWidth = Math.round(TIMELINE_BASE_DAY_WIDTHS[viewInterval] * zoom);
   return (
     (hasProjectColumn ? projectColumnWidth : 0) +

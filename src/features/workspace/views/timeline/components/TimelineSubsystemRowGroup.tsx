@@ -1,23 +1,17 @@
+import type { TimelineTaskPresentation } from "../model/timelineTaskPresentation";
 import React from "react";
-import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineGridDaySlots } from "../TimelineGridDaySlots";
 import { TimelineSubsystemHeaderCell } from "./TimelineSubsystemHeaderCell";
 import { TimelineTaskTrackRowList } from "./TimelineTaskTrackRowList";
-import type {
-  TimelineTaskDependencyCounts,
-  TimelineTaskStatusSignal,
-} from "../timelineGridBodyUtils";
+
 import type { TimelineDayHeaderCell, TimelineSubsystemRow } from "../timelineViewModel";
 
 interface TimelineSubsystemRowGroupProps {
-  clearHoveredMilestonePopup: () => void;
   clearHoveredSubsystemRow: () => void;
   clearHoveredTaskRow: () => void;
   collapsedSubsystems: Record<string, boolean>;
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   firstDayGridColumn: number;
-  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   hoveredSubsystemId: string | null;
   hoveredTaskId?: string | null;
   hoverSubsystemRow: (id: string) => void;
@@ -30,14 +24,13 @@ interface TimelineSubsystemRowGroupProps {
   selectedSubsystemId: string | null;
   selectedTaskId?: string | null;
   showSubsystemCol: boolean;
-  statusIconColumnIndex: number;
-  statusIconColumnWidth: number;
-  statusIconStickyRight: number;
+  taskColumnIndex: number;
+  taskColumnWidth: number;
+  taskStickyLeft: number;
   subsystem: TimelineSubsystemRow;
   subsystemColumnIndex: number;
   subsystemStickyLeft: number;
-  taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
-  taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
+  taskPresentationsById: Record<string, TimelineTaskPresentation>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
   toggleSubsystem: (id: string) => void;
   gridAutoRows?: string;
@@ -45,13 +38,10 @@ interface TimelineSubsystemRowGroupProps {
 }
 
 export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps> = ({
-  clearHoveredMilestonePopup,
   clearHoveredSubsystemRow,
   clearHoveredTaskRow,
   collapsedSubsystems,
-  workTypesById,
   firstDayGridColumn,
-  handleTimelineDayMouseEnter,
   hoveredSubsystemId,
   hoveredTaskId,
   hoverSubsystemRow,
@@ -64,16 +54,15 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
   selectedSubsystemId,
   selectedTaskId,
   showSubsystemCol,
-  statusIconColumnIndex,
-  statusIconColumnWidth,
-  statusIconStickyRight,
+  taskColumnIndex,
+  taskColumnWidth,
+  taskStickyLeft,
   gridAutoRows,
   rowStyle,
   subsystem,
   subsystemColumnIndex,
   subsystemStickyLeft,
-  taskDependencyCountsById,
-  taskStatusSignalsById,
+  taskPresentationsById,
   timelineDayHeaderCells,
   toggleSubsystem,
 }) => {
@@ -125,25 +114,22 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
 
       {collapsed && subsystem.tasks.length > 0 ? (
         <TimelineTaskTrackRowList
-          clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           clearHoveredTaskRow={clearHoveredTaskRow}
-          workTypesById={workTypesById}
           firstDayGridColumn={firstDayGridColumn}
-          handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
           hoveredTaskId={hoveredTaskId}
           hoverTaskRow={hoverTaskRow}
           mode="subsystem-collapsed"
+          onExpandGroup={() => toggleSubsystem(subsystem.id)}
           onCollapsedRowMouseEnter={() => hoverSubsystemRow(subsystem.id)}
           onCollapsedRowMouseLeave={clearHoveredSubsystemRow}
           onOpenTask={openTaskDetailModal}
           ownerId={subsystem.id}
           rowStart={rowIndex}
           selectedTaskId={selectedTaskId}
-          statusIconColumnIndex={statusIconColumnIndex}
-          statusIconColumnWidth={statusIconColumnWidth}
-          statusIconStickyRight={statusIconStickyRight}
-          taskDependencyCountsById={taskDependencyCountsById}
-          taskStatusSignalsById={taskStatusSignalsById}
+          taskColumnIndex={taskColumnIndex}
+          taskColumnWidth={taskColumnWidth}
+          taskStickyLeft={taskStickyLeft}
+          taskPresentationsById={taskPresentationsById}
           tasks={subsystem.tasks}
           timelineDayHeaderCells={timelineDayHeaderCells}
         />
@@ -151,11 +137,8 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
 
       {!collapsed && subsystem.tasks.length > 0 ? (
         <TimelineTaskTrackRowList
-          clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           clearHoveredTaskRow={clearHoveredTaskRow}
-          workTypesById={workTypesById}
           firstDayGridColumn={firstDayGridColumn}
-          handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
           hoveredTaskId={hoveredTaskId}
           hoverTaskRow={hoverTaskRow}
           mode="subsystem-expanded"
@@ -170,11 +153,10 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
           rowStart={rowIndex}
           selectedTaskId={selectedTaskId}
           showTopBorderForExpandedRows
-          statusIconColumnIndex={statusIconColumnIndex}
-          statusIconColumnWidth={statusIconColumnWidth}
-          statusIconStickyRight={statusIconStickyRight}
-          taskDependencyCountsById={taskDependencyCountsById}
-          taskStatusSignalsById={taskStatusSignalsById}
+          taskColumnIndex={taskColumnIndex}
+          taskColumnWidth={taskColumnWidth}
+          taskStickyLeft={taskStickyLeft}
+          taskPresentationsById={taskPresentationsById}
           tasks={subsystem.tasks}
           timelineDayHeaderCells={timelineDayHeaderCells}
         />
@@ -182,10 +164,8 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
 
       {!collapsed && subsystem.tasks.length === 0 ? (
         <TimelineGridDaySlots
-          clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           firstDayGridColumn={firstDayGridColumn}
           gridRow={rowIndex}
-          handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
           includeTopBorder={rowIndex > 1}
           onRowMouseEnter={() => hoverSubsystemRow(subsystem.id)}
           onRowMouseLeave={clearHoveredSubsystemRow}

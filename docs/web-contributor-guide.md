@@ -155,6 +155,11 @@ truth for permissions, persistence, and schema validation.
 
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
 
+`WorkspacePopover` supplies anchored, nonmodal freeform details for status
+legends, dependency references, and milestone lists. It reuses shared dropdown
+positioning/dismissal and portals above scrolling surfaces; use it when the
+content is a disclosure rather than a filter or action menu.
+
 Before adding a UI element, inspect the shared UI components, existing view patterns, and design tokens for one that already provides the needed behavior and appearance. Compose or extend that owner; do not recreate an existing button, menu, control, layout, or interaction with view-local markup and styles. Add a new shared element only when the behavior is genuinely missing, and document its intended reuse.
 
 Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it. Use [color-theme.md](../color-theme.md) as the official definition of semantic theme tokens and visual exceptions; if a shared semantic role is missing, define it there and in the runtime theme rather than adding an undefined token or light-only fallback. Check light and dark modes, including empty and disabled states. Colored side borders on cards, list items, callouts, or alerts must stay at 1px or less.

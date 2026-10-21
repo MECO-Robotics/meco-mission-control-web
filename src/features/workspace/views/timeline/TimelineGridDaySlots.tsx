@@ -2,10 +2,8 @@ import React from "react";
 import type { TimelineDayHeaderCell } from "./timelineViewModel";
 
 interface TimelineGridDaySlotsProps {
-  clearHoveredMilestonePopup: () => void;
   firstDayGridColumn: number;
   gridRow: string | number;
-  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   includeTopBorder?: boolean;
   onRowClick?: () => void;
   onRowMouseEnter?: () => void;
@@ -15,10 +13,8 @@ interface TimelineGridDaySlotsProps {
 }
 
 export const TimelineGridDaySlots: React.FC<TimelineGridDaySlotsProps> = ({
-  clearHoveredMilestonePopup,
   firstDayGridColumn,
   gridRow,
-  handleTimelineDayMouseEnter,
   includeTopBorder = false,
   onRowClick,
   onRowMouseEnter,
@@ -33,15 +29,15 @@ export const TimelineGridDaySlots: React.FC<TimelineGridDaySlotsProps> = ({
       data-popup-end-day={cell.primaryMilestoneEndDay}
       data-popup-start-day={cell.primaryMilestoneStartDay}
       data-timeline-day={cell.day}
+      data-weekend={[0, 6].includes(new Date(`${cell.day}T12:00:00`).getDay()) || undefined}
+      data-week-start={new Date(`${cell.day}T12:00:00`).getDay() === 1 || undefined}
       data-timeline-grid-cell="true"
       key={`${rowKey}-${cell.day}`}
       onClick={onRowClick}
-      onMouseEnter={(milestone) => {
-        handleTimelineDayMouseEnter(milestone);
+      onMouseEnter={() => {
         onRowMouseEnter?.();
       }}
       onMouseLeave={() => {
-        clearHoveredMilestonePopup();
         onRowMouseLeave?.();
       }}
       style={{
@@ -49,7 +45,7 @@ export const TimelineGridDaySlots: React.FC<TimelineGridDaySlotsProps> = ({
         gridColumn: dayIndex + firstDayGridColumn,
         borderRight: `1px solid ${cell.dayStyle?.columnBorder ?? "var(--border-base)"}`,
         borderTop: includeTopBorder ? "1px solid var(--border-base)" : "none",
-        background: cell.dayStyle?.columnBackground,
+        background: undefined,
         minHeight: "38px",
         boxSizing: "border-box",
         position: "relative",

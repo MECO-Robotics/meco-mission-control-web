@@ -42,22 +42,6 @@
   transform: translateY(-50%) translateX(0) !important;
 }
 
-.timeline-not-started {
-  --timeline-task-status-accent: var(--status-neutral-text);
-}
-
-.timeline-in-progress {
-  --timeline-task-status-accent: var(--status-warning-text);
-}
-
-.timeline-waiting-for-qa {
-  --timeline-task-status-accent: var(--status-info-text);
-}
-
-.timeline-complete {
-  --timeline-task-status-accent: var(--status-success-text);
-}
-
 .table-shell {
   display: grid;
   gap: 0.2rem;

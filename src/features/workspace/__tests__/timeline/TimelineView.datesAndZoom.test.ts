@@ -93,29 +93,6 @@ describe("TimelineView", () => {
     ).toBe(1.1);
   });
 
-  it("scales task fragments and milestone text with timeline zoom", () => {
-    const css = readAppCss();
-    const taskTrackRowListSource = readFileSync(
-      join(
-        process.cwd(),
-        "src/features/workspace/views/timeline/components/TimelineTaskTrackRowList.tsx",
-      ),
-      "utf8",
-    );
-    const headerSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/components/TimelineGridHeaderContent.tsx"),
-      "utf8",
-    );
-
-    expect(taskTrackRowListSource).toContain('fontSize: "0.7rem"');
-    expect(css).not.toContain("font-size: calc(0.7rem * var(--timeline-zoom, 1))");
-    expect(css).toContain("font-size: 1rem");
-    expect(css).toContain("gap: calc(0.35rem + 0.35rem * var(--timeline-zoom, 1))");
-    expect(css).toContain("font-size: inherit");
-    expect(headerSource).toContain('width: "100%"');
-    expect(headerSource).toContain('"--timeline-zoom": timelineZoom');
-  });
-
   it("abbreviates weekday labels when the day cell gets narrow", () => {
     const css = readAppCss();
     const presentationSource = readFileSync(

@@ -1,4 +1,6 @@
+import type { MilestoneRecord } from "@/types/recordsExecution";
 import React from "react";
+import { buildTimelineTaskPresentations } from "./model/timelineTaskPresentation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type {
@@ -11,20 +13,14 @@ import type { TimelineGridMotion } from "./timelineGridTypes";
 import { TimelineGridHeaderContent } from "./components/TimelineGridHeaderContent";
 import { TimelineProjectGroup } from "./TimelineProjectGroup";
 import { TimelineSubsystemGroup } from "./TimelineSubsystemGroup";
-import {
-  buildTaskDependencyCountsByTaskId,
-  buildTimelineTaskStatusSignalByTaskId,
-} from "./timelineGridBodyUtils";
 
 interface TimelineGridBodyProps {
   bootstrap: BootstrapPayload;
   collapsedProjects: Record<string, boolean>;
   collapsedSubsystems: Record<string, boolean>;
-  clearHoveredMilestonePopup: () => void;
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
+  onOpenMilestoneDetails: (milestone: MilestoneRecord) => void;
   firstDayGridColumn: number;
   gridMinWidth: number;
-  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   handleTimelineZoomWheel: (milestone: React.WheelEvent<HTMLDivElement>) => void;
   hasProjectColumn: boolean;
   isScrolling: boolean;
@@ -44,9 +40,9 @@ interface TimelineGridBodyProps {
   subsystemColumnWidth: number;
   subsystemRows: TimelineSubsystemRow[];
   subsystemStickyLeft: number;
-  statusIconColumnIndex: number;
-  statusIconColumnWidth: number;
-  statusIconStickyRight: number;
+  taskColumnIndex: number;
+  taskColumnWidth: number;
+  taskStickyLeft: number;
   timelineDayCellRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
   timelineFilterMotionClass: string;
@@ -74,11 +70,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
   bootstrap,
   collapsedProjects,
   collapsedSubsystems,
-  clearHoveredMilestonePopup,
-  workTypesById,
   firstDayGridColumn,
+  onOpenMilestoneDetails,
   gridMinWidth,
-  handleTimelineDayMouseEnter,
   handleTimelineZoomWheel,
   hasProjectColumn,
   isScrolling,
@@ -98,9 +92,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
   subsystemColumnWidth,
   subsystemRows,
   subsystemStickyLeft,
-  statusIconColumnIndex,
-  statusIconColumnWidth,
-  statusIconStickyRight,
+  taskColumnIndex,
+  taskColumnWidth,
+  taskStickyLeft,
   timelineDayCellRefs,
   timelineDayHeaderCells,
   timelineFilterMotionClass,
@@ -120,25 +114,15 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
   toggleSubsystem,
   toggleSubsystemColumn,
 }) => {
-  const taskDependencyCountsById = React.useMemo(
-    () => buildTaskDependencyCountsByTaskId(bootstrap.taskDependencies),
-    [bootstrap.taskDependencies],
-  );
-  const taskStatusSignalsById = React.useMemo(
-    () => buildTimelineTaskStatusSignalByTaskId(bootstrap),
-    [bootstrap],
-  );
+  const taskPresentationsById = React.useMemo(() => buildTimelineTaskPresentations(bootstrap), [bootstrap]);
 
   const rowChildren = hasProjectColumn
     ? projectRows.map((project, projectIndex) => (
         <TimelineProjectGroup
-          clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           collapsedProjects={collapsedProjects}
           collapsedSubsystems={collapsedSubsystems}
-          workTypesById={workTypesById}
           firstDayGridColumn={firstDayGridColumn}
           gridMinWidth={gridMinWidth}
-          handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
           key={project.id}
           openTaskDetailModal={openTaskDetailModal}
           project={project}
@@ -147,9 +131,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           hoveredTaskId={hoveredTaskId}
         selectedSubsystemId={selectedSubsystemId}
         selectedTaskId={selectedTaskId}
-      statusIconColumnIndex={statusIconColumnIndex}
-      statusIconColumnWidth={statusIconColumnWidth}
-      statusIconStickyRight={statusIconStickyRight}
+      taskColumnIndex={taskColumnIndex}
+      taskColumnWidth={taskColumnWidth}
+      taskStickyLeft={taskStickyLeft}
           clearHoveredSubsystemRow={clearHoveredSubsystemRow}
           clearHoveredTaskRow={clearHoveredTaskRow}
           hoverTaskRow={hoverTaskRow}
@@ -160,8 +144,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           showSubsystemCol={showSubsystemCol}
           subsystemColumnIndex={subsystemColumnIndex}
           subsystemStickyLeft={subsystemStickyLeft}
-          taskDependencyCountsById={taskDependencyCountsById}
-          taskStatusSignalsById={taskStatusSignalsById}
+          taskPresentationsById={taskPresentationsById}
           timelineDayHeaderCells={timelineDayHeaderCells}
           timelineGridTemplate={timelineGridTemplate}
           toggleProject={toggleProject}
@@ -171,12 +154,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
     : subsystemRows.map((subsystem, subsystemIndex) => {
         return (
           <TimelineSubsystemGroup
-            clearHoveredMilestonePopup={clearHoveredMilestonePopup}
             collapsedSubsystems={collapsedSubsystems}
-            workTypesById={workTypesById}
             firstDayGridColumn={firstDayGridColumn}
             gridMinWidth={gridMinWidth}
-            handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
             key={subsystem.id}
             openTaskDetailModal={openTaskDetailModal}
             hoveredSubsystemId={hoveredSubsystemId}
@@ -195,11 +175,10 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
             subsystemIndex={subsystemIndex}
             subsystemStickyLeft={subsystemStickyLeft}
             rowIndex={1}
-            statusIconColumnIndex={statusIconColumnIndex}
-            statusIconColumnWidth={statusIconColumnWidth}
-            statusIconStickyRight={statusIconStickyRight}
-            taskDependencyCountsById={taskDependencyCountsById}
-            taskStatusSignalsById={taskStatusSignalsById}
+            taskColumnIndex={taskColumnIndex}
+            taskColumnWidth={taskColumnWidth}
+            taskStickyLeft={taskStickyLeft}
+            taskPresentationsById={taskPresentationsById}
             timelineDayHeaderCells={timelineDayHeaderCells}
             timelineGridTemplate={timelineGridTemplate}
             toggleSubsystem={toggleSubsystem}
@@ -209,10 +188,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
 
   return (
       <TimelineGridHeaderContent
-      clearHoveredMilestonePopup={clearHoveredMilestonePopup}
+        onOpenMilestoneDetails={onOpenMilestoneDetails}
       firstDayGridColumn={firstDayGridColumn}
       gridMinWidth={gridMinWidth}
-      handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
       handleTimelineZoomWheel={handleTimelineZoomWheel}
       hasProjectColumn={hasProjectColumn}
       isScrolling={isScrolling}

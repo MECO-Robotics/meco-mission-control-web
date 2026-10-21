@@ -78,7 +78,7 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
       tabIndex={0}
       zIndex={10021}
       style={buildTimelineSubsystemHighlightStyle(accentColor, {
-        boxShadow: `inset 3px 0 0 ${accentColor}`,
+        boxShadow: `inset 1px 0 0 ${accentColor}`,
       })}
     >
       <div className="timeline-merged-cell-text">

@@ -11,34 +11,6 @@ describe("TimelineView", () => {
   afterEach(() => {
     jest.useRealTimers();
   });
-  it("prevents timeline label reveal overlays from doubling visible source text", () => {
-    const css = readAppCss();
-    const getRule = (selectorStart: string) => {
-      const start = css.indexOf(selectorStart);
-      expect(start).toBeGreaterThanOrEqual(0);
-      const blockStart = css.indexOf("{", start);
-      const blockEnd = css.indexOf("}", blockStart);
-
-      return css.slice(start, blockEnd + 1);
-    };
-
-    expect(css).toContain(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after");
-    expect(css).not.toContain(".timeline-merged-cell-title.timeline-ellipsis-reveal[data-full-text]::after");
-    expect(getRule(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal")).toMatch(/overflow:\s*hidden/);
-    expect(getRule(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal")).toMatch(
-      /text-overflow:\s*ellipsis/,
-    );
-    expect(getRule(".timeline-merged-cell-title")).toMatch(/text-overflow:\s*ellipsis/);
-    expect(css).toMatch(
-      /\.timeline-merged-cell-text:hover,\s*\.timeline-merged-cell-text:focus-within,\s*\.timeline-merged-cell-text:focus-visible\s*\{[\s\S]*?z-index:\s*10045/,
-    );
-    expect(css).toMatch(
-      /\.timeline-merged-cell-column:hover,\s*\.timeline-merged-cell-column:focus-within\s*\{[\s\S]*overflow:\s*visible\s*!important;[\s\S]*z-index:\s*10045/,
-    );
-    expect(css).toMatch(
-      /\.timeline-merged-cell-column:hover \.timeline-merged-cell-title,\s*\.timeline-merged-cell-column:focus-within \.timeline-merged-cell-title\s*\{[\s\S]*overflow:\s*visible;[\s\S]*text-overflow:\s*clip;/,
-    );
-  });
 
   it("anchors project title cutoff reveal to the label hover and focus area", () => {
     const collapsedMarkup = renderToStaticMarkup(

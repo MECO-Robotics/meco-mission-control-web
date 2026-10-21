@@ -12,7 +12,6 @@ import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalen
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
-import { TimelineMilestoneHoverLayer } from "./TimelineMilestoneHoverLayer";
 import { TimelineMilestoneModal } from "./TimelineMilestoneModal";
 import { TimelineMilestoneUnderlaysPortal } from "./portals/TimelineMilestoneUnderlaysPortal";
 import { TimelineRowHighlightsPortal } from "./portals/TimelineRowHighlightsPortal";
@@ -105,7 +104,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     onTaskEditSaved,
     searchFilter,
     timelineFilters: filterControls.filters,
-    timelineZoom: state.timelineZoom,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
     triggerCreateMilestoneToken,
@@ -239,13 +237,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
       <TimelineGridBody
         bootstrap={bootstrap}
-        clearHoveredMilestonePopup={data.clearHoveredMilestonePopup}
+        onOpenMilestoneDetails={data.milestoneModal.openMilestoneDetailModalForMilestone}
         collapsedProjects={state.collapsedProjects}
         collapsedSubsystems={state.collapsedSubsystems}
-        workTypesById={data.workTypesById}
         firstDayGridColumn={layout.firstDayGridColumn}
         gridMinWidth={layout.gridMinWidth}
-        handleTimelineDayMouseEnter={data.handleTimelineDayMouseEnter}
         handleTimelineZoomWheel={state.handleTimelineZoomWheel}
         hasProjectColumn={layout.hasProjectColumn}
         isScrolling={data.isTimelineShellScrolling}
@@ -258,9 +254,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         hoveredTaskId={state.hoveredTaskId}
         selectedSubsystemId={state.selectedSubsystemId}
         selectedTaskId={state.selectedTaskId}
-        statusIconColumnIndex={layout.statusIconColumnIndex}
-        statusIconColumnWidth={layout.statusIconColumnWidth}
-        statusIconStickyRight={layout.statusIconStickyRight}
+        taskColumnIndex={layout.taskColumnIndex}
+        taskColumnWidth={layout.taskColumnWidth}
+        taskStickyLeft={layout.taskStickyLeft}
         showProjectCol={layout.showProjectCol}
         showSubsystemCol={layout.showSubsystemCol}
         subsystemColumnIndex={layout.subsystemColumnIndex}
@@ -289,9 +285,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       />
 
       <TimelineMilestoneUnderlaysPortal
-        onHideMilestonePopup={data.clearHoveredMilestonePopup}
-        onOpenMilestoneDetails={data.milestoneModal.openMilestoneDetailModalForMilestone}
-        onShowMilestonePopup={data.showMilestoneUnderlayPopup}
         portalTarget={data.tooltipPortalTarget}
         underlays={data.timelineDayMilestoneUnderlays}
       />
@@ -312,12 +305,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         resolveTaskRowHighlightStyle={data.resolveTaskRowHighlightStyle}
         selectedSubsystemId={state.selectedSubsystemId}
         selectedTaskId={state.selectedTaskId}
-      />
-
-      <TimelineMilestoneHoverLayer
-        controllerRef={data.setHoveredMilestonePopupLayerRef}
-        portalTarget={data.tooltipPortalTarget}
-        resolveGeometry={data.resolveMilestonePopupGeometry}
       />
 
       <TimelineMilestoneModal

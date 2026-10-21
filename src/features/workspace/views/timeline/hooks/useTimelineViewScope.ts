@@ -36,7 +36,6 @@ export function useTimelineViewScope({
 }: UseTimelineViewScopeArgs) {
   const projectsById = useMemo(() => indexRecordsById(bootstrap.projects), [bootstrap.projects]);
   const subsystemsById = useMemo(() => indexRecordsById(bootstrap.subsystems), [bootstrap.subsystems]);
-  const workTypesById = useMemo(() => indexRecordsById(bootstrap.workTypes), [bootstrap.workTypes]);
   const tasksById = useMemo(() => indexRecordsById(bootstrap.tasks), [bootstrap.tasks]);
   const scopedProjectIds = useMemo(() => bootstrap.projects.map((project) => project.id), [bootstrap.projects]);
   const filteredProjectIds = useMemo(
@@ -190,7 +189,6 @@ export function useTimelineViewScope({
   ]);
 
   return {
-    workTypesById,
     projectsById,
     scopedMeetings,
     scopedMilestones,

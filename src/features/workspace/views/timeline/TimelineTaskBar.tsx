@@ -1,16 +1,13 @@
-import React from "react";
+import React, { useId } from "react";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
 import type { TaskRecord } from "@/types/recordsExecution";
-import type {
-  TimelineTaskDependencyCounts,
-} from "./timelineGridBodyUtils";
 
-type TimelineTaskDependencyPresentation = "none" | "outline" | "text";
+import type { TimelineTaskStatusSignal } from "./timelineGridBodyUtils";
 
 interface TimelineTaskBarProps {
   compact?: boolean;
-  dependencyCounts: TimelineTaskDependencyCounts;
-  dependencyPresentation?: TimelineTaskDependencyPresentation;
+  description: string;
+  signal: TimelineTaskStatusSignal;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onOpenTask: (task: TaskRecord) => void;
@@ -21,55 +18,10 @@ interface TimelineTaskBarProps {
   spillsRight?: boolean;
 }
 
-function hasTaskDependencies(counts: TimelineTaskDependencyCounts) {
-  return counts.incoming > 0 || counts.outgoing > 0;
-}
-
-function renderDependencyIndicator(
-  counts: TimelineTaskDependencyCounts,
-  presentation: TimelineTaskDependencyPresentation,
-) {
-  if (!hasTaskDependencies(counts) || presentation === "none") {
-    return null;
-  }
-
-  if (presentation === "outline") {
-    return (
-      <span
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          border: "1px solid rgba(255, 255, 255, 0.3)",
-          borderRadius: "inherit",
-          pointerEvents: "none",
-          opacity: 0.75,
-        }}
-      />
-    );
-  }
-
-  return (
-    <span
-      aria-hidden="true"
-      style={{
-        marginLeft: "8px",
-        fontSize: "0.65rem",
-        opacity: 0.8,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {counts.incoming > 0 ? `\u2199 ${counts.incoming}` : ""}
-      {counts.incoming > 0 && counts.outgoing > 0 ? " " : ""}
-      {counts.outgoing > 0 ? `\u2197 ${counts.outgoing}` : ""}
-    </span>
-  );
-}
-
 export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
   compact = false,
-  dependencyCounts,
-  dependencyPresentation = "none",
+  description,
+  signal,
   onMouseEnter,
   onMouseLeave,
   onOpenTask,
@@ -79,6 +31,7 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
   spillsLeft = false,
   spillsRight = false,
 }) => {
+  const tooltipId = useId();
   const { borderRadius, ...baseStyle } = style;
   const spillAwareStyle: React.CSSProperties = {
     ...baseStyle,
@@ -131,7 +84,12 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
       style={hostStyle}
       >
       <button
-        className={`timeline-bar timeline-${task.status} timeline-row-motion-item`}
+        aria-label={description}
+        aria-describedby={tooltipId}
+        data-status-signal={signal}
+        onFocus={onMouseEnter}
+        onBlur={onMouseLeave}
+        className={`timeline-bar timeline-${signal} timeline-row-motion-item`}
         data-spill-left={spillsLeft ? "true" : undefined}
         data-spill-right={spillsRight ? "true" : undefined}
         onClick={() => onOpenTask(task)}
@@ -149,13 +107,13 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
               className="timeline-bar-title timeline-ellipsis-reveal"
               data-full-text={task.title}
               style={{
-                ["--timeline-reveal-background" as const]: "var(--timeline-task-discipline-accent)",
+                ["--timeline-reveal-background" as const]: "var(--timeline-task-bar-background)",
               } as React.CSSProperties}
             >
               {task.title}
             </span>
           )}
-          {renderDependencyIndicator(dependencyCounts, dependencyPresentation)}
+          <span id={tooltipId} className="timeline-task-bar-details" role="tooltip">{description}</span>
         </span>
       </button>
       <EditableHoverIndicator className="timeline-bar-hover-indicator editable-hover-indicator-compact" />

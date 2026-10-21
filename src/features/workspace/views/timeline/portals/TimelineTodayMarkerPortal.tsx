@@ -43,7 +43,7 @@ export const TimelineTodayMarkerPortal: React.FC<TimelineTodayMarkerPortalProps>
           left: 0,
           width: "2px",
           transform: "translateX(-50%)",
-          background: "var(--meco-blue)",
+          background: "var(--text-accent)",
           zIndex: 1,
         }}
       />
@@ -61,7 +61,7 @@ export const TimelineTodayMarkerPortal: React.FC<TimelineTodayMarkerPortalProps>
           borderRadius: "999px",
           border: "1px solid var(--border-base)",
           background: "color-mix(in srgb, var(--bg-panel) 88%, transparent)",
-          color: "var(--meco-blue)",
+          color: "var(--text-accent)",
           fontSize: "0.6rem",
           fontWeight: 800,
           letterSpacing: "0.08em",

@@ -1,4 +1,5 @@
 import React from "react";
+import { TimelineStatusLegend } from "./components/TimelineStatusLegend";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -138,6 +139,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         presentation="timeline"
         range={viewInterval}
       />
+      <TimelineStatusLegend />
       <WorkspaceTopbarZoom
         ariaLabel="Timeline zoom"
         canZoomIn={timelineZoom < TIMELINE_ZOOM_MAX}

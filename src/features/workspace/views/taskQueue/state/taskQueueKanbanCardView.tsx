@@ -5,7 +5,7 @@ import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatDate } from "@/lib/appUtils/common";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
+import { getTaskDisciplineColor } from "@/features/workspace/shared/task/taskDisciplineColors";
 
 import {
   getMemberInitial,
@@ -88,7 +88,7 @@ export function TaskQueueCard({
   const needsHelp = taskLogs.some(log => /\b(needs?|needed)\s+help\b|\bhelp\s+needed\b|\brequest(?:ing|ed)?\s+help\b/i.test(log.notes));
   const loggedHours = taskLogs.reduce((sum, log) => sum + log.hours, 0);
   const disciplineAccentColor = task.workTypeId
-    ? getTimelineTaskDisciplineColor(task.workTypeId, workTypesById)
+    ? getTaskDisciplineColor(task.workTypeId, workTypesById)
     : null;
   const priorityPresentation = getTaskQueueCardPriorityPresentation(task.priority);
   const cardStyle = { ...style, ...priorityPresentation.style } as CSSProperties;

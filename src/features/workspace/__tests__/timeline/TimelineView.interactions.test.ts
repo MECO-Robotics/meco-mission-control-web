@@ -175,7 +175,7 @@ describe("TimelineView interactions", () => {
       "utf8",
     );
     const statusCellSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineTaskStatusCell.tsx"),
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineTaskNameCell.tsx"),
       "utf8",
     );
 

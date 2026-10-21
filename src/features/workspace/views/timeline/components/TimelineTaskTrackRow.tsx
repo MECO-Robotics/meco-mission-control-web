@@ -1,22 +1,17 @@
+import type { TimelineTaskPresentation } from "../model/timelineTaskPresentation";
 import React from "react";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineGridDaySlots } from "../TimelineGridDaySlots";
 import { TimelineTaskBar } from "../TimelineTaskBar";
-import { TimelineTaskStatusCell } from "../TimelineTaskStatusCell";
+import { TimelineTaskNameCell } from "../TimelineTaskNameCell";
 import type {
   TimelineDayHeaderCell,
   TimelineTaskSpan,
 } from "../timelineViewModel";
-import type {
-  TimelineTaskDependencyCounts,
-  TimelineTaskStatusSignal,
-} from "../timelineGridBodyUtils";
 
 interface TimelineTaskTrackRowProps {
-  clearHoveredMilestonePopup: () => void;
   clearHoveredTaskRow: () => void;
   firstDayGridColumn: number;
-  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   hoveredTaskId?: string | null;
   hoverTaskRow: (id: string) => void;
   onOpenTask: (task: TaskRecord) => void;
@@ -25,13 +20,12 @@ interface TimelineTaskTrackRowProps {
   onRowMouseLeave?: () => void;
   rowKey: string;
   selectedTaskId?: string | null;
-  statusIconColumnIndex: number;
-  statusIconColumnWidth: number;
-  statusIconStickyRight: number;
+  taskColumnIndex: number;
+  taskColumnWidth: number;
+  taskStickyLeft: number;
   task: TimelineTaskSpan;
   taskBarStyle: React.CSSProperties;
-  taskDependencyCounts: TimelineTaskDependencyCounts;
-  taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
+  presentation: TimelineTaskPresentation;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
   compact?: boolean;
   gridRow: string | number;
@@ -44,10 +38,8 @@ interface TimelineTaskTrackRowProps {
 }
 
 export const TimelineTaskTrackRow: React.FC<TimelineTaskTrackRowProps> = ({
-  clearHoveredMilestonePopup,
   clearHoveredTaskRow,
   firstDayGridColumn,
-  handleTimelineDayMouseEnter,
   hoveredTaskId,
   hoverTaskRow,
   onOpenTask,
@@ -56,18 +48,16 @@ export const TimelineTaskTrackRow: React.FC<TimelineTaskTrackRowProps> = ({
   onRowMouseLeave,
   rowKey,
   selectedTaskId,
-  statusIconColumnIndex,
-  statusIconColumnWidth,
-  statusIconStickyRight,
+  taskColumnIndex,
+  taskColumnWidth,
+  taskStickyLeft,
   task,
   taskBarStyle,
-  taskDependencyCounts,
-  taskStatusSignalsById,
+  presentation,
   timelineDayHeaderCells,
   compact = false,
   gridRow,
   includeTopBorder = false,
-  ownerId,
   title,
   spillsLeft = false,
   spillsRight = false,
@@ -86,28 +76,14 @@ export const TimelineTaskTrackRow: React.FC<TimelineTaskTrackRowProps> = ({
           gridColumn: `${firstDayGridColumn} / -1`,
         }}
       />
-      <TimelineTaskStatusCell
-        clearHoveredMilestonePopup={clearHoveredMilestonePopup}
-        clearHoveredTaskRow={clearHoveredTaskRow}
-        compact={compact}
-        gridRow={gridRow}
-        hoverTaskRow={hoverTaskRow}
-        isHighlighted={isHighlighted}
-        key={`status-icon-${ownerId}-${task.id}`}
-        onOpenTask={onOpenTask}
-        ownerId={ownerId}
-        statusIconColumnIndex={statusIconColumnIndex}
-        statusIconColumnWidth={statusIconColumnWidth}
-        statusIconStickyRight={statusIconStickyRight}
-        task={task}
-        taskStatusSignalsById={taskStatusSignalsById}
-      />
+      <TimelineTaskNameCell task={task} presentation={presentation} gridRow={gridRow}
+        taskColumnIndex={taskColumnIndex} taskColumnWidth={taskColumnWidth} taskStickyLeft={taskStickyLeft}
+        isHighlighted={isHighlighted} onOpenTask={onOpenTask}
+        onMouseEnter={() => hoverTaskRow(task.id)} onMouseLeave={clearHoveredTaskRow} />
       {showDaySlots ? (
         <TimelineGridDaySlots
-          clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           firstDayGridColumn={firstDayGridColumn}
           gridRow={gridRow}
-          handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
           includeTopBorder={includeTopBorder}
           onRowClick={onRowClick}
           onRowMouseEnter={onRowMouseEnter}
@@ -118,10 +94,10 @@ export const TimelineTaskTrackRow: React.FC<TimelineTaskTrackRowProps> = ({
       ) : null}
       <TimelineTaskBar
         compact={compact}
-        dependencyCounts={taskDependencyCounts}
+        description={presentation.description}
+        signal={presentation.signal}
         onMouseEnter={() => {
           hoverTaskRow(task.id);
-          clearHoveredMilestonePopup();
         }}
         onMouseLeave={clearHoveredTaskRow}
         onOpenTask={onOpenTask}

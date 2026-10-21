@@ -12,66 +12,6 @@ describe("TimelineView", () => {
     jest.useRealTimers();
   });
 
-  it.each([false, true])(
-    "layers sticky left columns above timeline milestones when all-projects view is %s",
-    (isAllProjectsView) => {
-      const markup = renderToStaticMarkup(
-        React.createElement(TimelineView, {
-          bootstrap: createBootstrap(),
-          isAllProjectsView,
-          activePersonFilter: [],
-          setActivePersonFilter: jest.fn(),
-          openTaskDetailModal: jest.fn(),
-          openCreateTaskModal: jest.fn(),
-          onDeleteTimelineMilestone: jest.fn(),
-          onSaveTimelineMilestone: jest.fn(),
-          triggerCreateMilestoneToken: 0,
-        }),
-      );
-      const css = readAppCss();
-      const milestoneUnderlayZIndexes = Array.from(
-        css.matchAll(
-          /\.timeline-day-milestone-underlay[^{]*\{[^}]*z-index:\s*(\d+)/g,
-        ),
-        (match) => Number(match[1]),
-      );
-      const milestoneOverlayZIndexes = Array.from(
-        css.matchAll(
-          /\.timeline-day-milestone-(?:overlay-tooltip|overlay-column)[^{]*\{[^}]*z-index:\s*(\d+)/g,
-        ),
-        (match) => Number(match[1]),
-      );
-      const stickyLeftZIndexes = Array.from(
-        markup.matchAll(/style="([^"]*position:sticky[^"]*left:[^"]*z-index:(\d+)[^"]*)"/g),
-        (match) => Number(match[2]),
-      );
-
-      expect(milestoneUnderlayZIndexes.length).toBeGreaterThan(0);
-      expect(milestoneOverlayZIndexes.length).toBeGreaterThan(0);
-      expect(stickyLeftZIndexes.length).toBeGreaterThan(0);
-      expect(Math.min(...stickyLeftZIndexes)).toBeGreaterThan(Math.max(...milestoneUnderlayZIndexes));
-      expect(Math.max(...milestoneOverlayZIndexes)).toBeGreaterThan(Math.max(...stickyLeftZIndexes));
-    },
-  );
-
-  it("layers hovered milestone overlays above timeline task bars while keeping underlays below them", () => {
-    const css = readAppCss();
-    const getZIndex = (selector: string) => {
-      const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const match = css.match(new RegExp(`${escapedSelector}\\s*\\{[\\s\\S]*?z-index:\\s*(\\d+)`));
-
-      expect(match).not.toBeNull();
-
-      return Number(match?.[1] ?? 0);
-    };
-
-    const taskBarZIndex = getZIndex(".timeline-bar");
-
-    expect(getZIndex(".timeline-day-milestone-overlay-column")).toBeGreaterThan(taskBarZIndex);
-    expect(getZIndex(".timeline-day-milestone-overlay-tooltip")).toBeGreaterThan(taskBarZIndex);
-    expect(getZIndex(".timeline-day-milestone-underlay")).toBeLessThan(taskBarZIndex);
-  });
-
   it("keeps timeline row groups out of content-visibility stacking containment", () => {
     const css = readAppCss();
 

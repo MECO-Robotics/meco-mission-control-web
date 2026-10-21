@@ -32,7 +32,7 @@ describe("TimelineView", () => {
     expect(markup).toContain('aria-label="Zoom out timeline"');
     expect(markup).toContain('aria-label="Zoom in timeline"');
     expect(markup).toContain("--timeline-zoom:1");
-    expect(markup).toContain("--timeline-task-bar-edge-gap:2px");
+    expect(markup).toContain("--timeline-task-bar-edge-gap:3px");
     expect(css).toMatch(
       /\.timeline-bar\s*\{[\s\S]*--timeline-task-bar-padding-start:\s*calc\(0\.65rem \* var\(--timeline-zoom,\s*1\)\)/,
     );
@@ -44,10 +44,8 @@ describe("TimelineView", () => {
     expect(clampTimelineZoom(4)).toBe(2);
     expect(getTimelineDayTrackSize("month", 1)).toBe("minmax(28px, 1fr)");
     expect(getTimelineDayTrackSize("month", 1.6)).toBe("minmax(45px, 1fr)");
-    expect(getTimelineDayTrackSize("week", 1, 388)).toBe("minmax(44px, 1fr)");
-    expect(getTimelineDayTrackSize("week", 1.6, 388)).toBe("minmax(70px, 1fr)");
-    expect(getTimelineDayTrackSize("week", 1, 388, 0, 36)).toBe("minmax(44px, 1fr)");
-    expect(css).toContain("gap: calc(0.35rem + 0.35rem * var(--timeline-zoom, 1))");
+    expect(getTimelineDayTrackSize("week", 1)).toBe("minmax(44px, 1fr)");
+    expect(getTimelineDayTrackSize("week", 1.6)).toBe("minmax(70px, 1fr)");
     expect(
       getTimelineGridMinWidth({
         dayCount: 10,
@@ -55,7 +53,6 @@ describe("TimelineView", () => {
         projectColumnWidth: 112,
         subsystemColumnWidth: 128,
         taskColumnWidth: 148,
-        statusIconColumnWidth: 36,
         viewInterval: "week",
         zoom: 1.2,
       }),
@@ -141,30 +138,7 @@ describe("TimelineView", () => {
     );
   });
 
-  it("reveals task fragment text on hover and focus instead of keeping ellipsis clipping", () => {
-    const css = readAppCss();
-
-    expect(css).toMatch(
-      /\.timeline-bar\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*content:\s*attr\(data-full-text\)[\s\S]*opacity:\s*0[\s\S]*pointer-events:\s*none[\s\S]*padding:\s*0\.08rem 0\.28rem[\s\S]*border-radius:\s*0\.3rem[\s\S]*background:\s*color-mix\(in srgb,\s*var\(--timeline-task-discipline-accent\)\s*82%,\s*transparent\)/,
-    );
-    expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover,\s*\.timeline-bar-hover-host:focus-within\s*\{[\s\S]*z-index:\s*10081/,
-    );
-    expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-content,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-content,\s*\.timeline-bar:hover\s+\.timeline-bar-content,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-content\s*\{[\s\S]*overflow:\s*visible/,
-    );
-    expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*max-width:\s*none[\s\S]*overflow:\s*visible[\s\S]*text-overflow:\s*clip/,
-    );
-    expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*color:\s*transparent\s*!important/,
-    );
-    expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*opacity:\s*1/,
-    );
-  });
-
-  it("keeps the week status icon overlay anchored to the last day column", () => {
+  it("keeps task names before the week date tracks", () => {
     const fallbackLayout = buildTimelineGridLayout({
       dayCount: 7,
       isAllProjectsView: true,
@@ -183,8 +157,8 @@ describe("TimelineView", () => {
       viewInterval: "week",
     });
 
-    expect(measuredLayout.statusIconColumnIndex).toBe(9);
-    expect(measuredLayout.statusIconColumnWidth).toBe(36);
+    expect(measuredLayout.taskColumnIndex).toBe(3);
+    expect(measuredLayout.taskColumnWidth).toBe(240);
     expect(measuredLayout.dayTrackSize).toMatch(/^minmax\(\d+px, 1fr\)$/);
     expect(measuredLayout.timelineGridTemplate).toContain(measuredLayout.dayTrackSize);
     expect(measuredLayout.dayTrackSize).toBe(fallbackLayout.dayTrackSize);

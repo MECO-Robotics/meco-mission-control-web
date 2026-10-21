@@ -12,10 +12,9 @@ import { TimelineHiddenColumnToggles } from "./TimelineHiddenColumnToggles";
 import { TimelineMonthHeaderRow } from "./TimelineMonthHeaderRow";
 
 export function TimelineGridHeaderContent({
-  clearHoveredMilestonePopup,
   firstDayGridColumn,
+  onOpenMilestoneDetails,
   gridMinWidth,
-  handleTimelineDayMouseEnter,
   handleTimelineHeaderDayClick,
   handleTimelineZoomWheel,
   hasProjectColumn,
@@ -67,7 +66,7 @@ export function TimelineGridHeaderContent({
   return (
     <div
       ref={timelineShellRef}
-      className={`timeline-shell ${timelineFilterMotionClass}${isWeekView ? " is-week-view" : ""}`}
+      className={`timeline-shell ${projectColumnWidth === 28 || subsystemColumnWidth === 28 ? "is-compact " : ""}${timelineFilterMotionClass}${isWeekView ? " is-week-view" : ""}`}
       data-is-scrolling={isScrolling ? "true" : undefined}
       onWheel={handleTimelineZoomWheel}
       style={{
@@ -126,12 +125,13 @@ export function TimelineGridHeaderContent({
           />
         ) : null}
 
+        <div className="timeline-task-name-header" style={{ gridColumn: firstDayGridColumn - 1,
+          gridRow: "1 / span 2", left: visibleFixedColumnWidth }}>Task / status</div>
         <TimelineMonthHeaderRow cells={monthHeaderCells} />
         <TimelineDayHeaderRow
+        onOpenMilestoneDetails={onOpenMilestoneDetails}
           cells={timelineDayHeaderCells}
-          clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           firstDayGridColumn={firstDayGridColumn}
-          handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
           handleTimelineHeaderDayClick={handleTimelineHeaderDayClick}
           isWeekView={isWeekView}
           timelineDayCellRefs={timelineDayCellRefs}

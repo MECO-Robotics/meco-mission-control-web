@@ -69,19 +69,9 @@ export interface MilestoneGeometry {
 export interface TimelineDayMilestoneUnderlay {
   id: string;
   milestone: MilestoneRecord;
-  lines: string[];
-  color: string;
-  rotationDeg: 45 | 90;
   geometry: MilestoneGeometry;
   startDay: string;
   endDay: string;
-  horizontalOffset: number;
-  stackOrder: number;
-}
-
-export interface TimelineMilestonePopupItem {
-  text: string;
-  horizontalOffset: number;
 }
 
 export * from "./model/timelineViewData";

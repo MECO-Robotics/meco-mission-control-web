@@ -6,20 +6,17 @@
 }
 
 .timeline-bar {
-  --timeline-task-discipline-accent: #7a8799;
-  --timeline-task-bar-text-color: #000000;
-  --timeline-task-status-accent: #54627b;
+  --timeline-task-bar-background: var(--status-neutral-bg);
+  --timeline-task-bar-text-color: var(--status-neutral-text);
   --timeline-reveal-color: var(--official-white);
-  --timeline-reveal-background: var(--timeline-task-discipline-accent);
+  --timeline-reveal-background: var(--timeline-task-bar-background);
   --timeline-task-bar-padding-start: calc(0.65rem * var(--timeline-zoom, 1));
   --timeline-task-status-edge-padding: calc(0.05rem * var(--timeline-zoom, 1));
-  --timeline-task-status-track-height: 2.2rem;
-  --timeline-task-status-size: 1.9rem;
   --timeline-bar-overflow-fade: calc(14px * var(--timeline-zoom, 1));
   --timeline-bar-overflow-edge-mask: rgba(0, 0, 0, 0.42);
-  min-width: 32px;
+  min-width: 0;
   min-height: 32px;
-  border: 0;
+  border: 1px solid color-mix(in srgb, var(--timeline-task-bar-text-color) 30%, transparent);
   border-radius: var(--timeline-task-bar-radius, 999px);
   padding: 0 var(--timeline-task-status-edge-padding) 0 var(--timeline-task-bar-padding-start);
   text-align: left;
@@ -29,10 +26,10 @@
   cursor: pointer;
   display: block;
   align-self: center;
-  background: var(--timeline-task-discipline-accent);
-  box-shadow: 0 8px 18px rgba(15, 28, 52, 0.18);
+  background: var(--timeline-task-bar-background);
+  box-shadow: none;
   position: relative;
-  z-index: 10060;
+  z-index: 2;
 }
 
 .timeline-bar[data-spill-left="true"] {
@@ -99,57 +96,10 @@
   position: relative;
 }
 
-.timeline-bar .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after {
-  content: attr(data-full-text);
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: block;
-  width: max-content;
-  max-width: none;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 10084;
-  padding: 0.08rem 0.28rem;
-  border-radius: 0.3rem;
-  background: color-mix(in srgb, var(--timeline-task-discipline-accent) 82%, transparent);
-  box-shadow: 0 2px 10px rgba(15, 28, 52, 0.2);
-  color: var(--timeline-task-bar-text-color);
-}
-
 .timeline-bar-hover-host:hover,
-.timeline-bar-hover-host:focus-within {
-  z-index: 10081;
-}
-
+.timeline-bar-hover-host:focus-within { z-index: 3; }
 .timeline-bar-hover-host:hover .timeline-bar-content,
-.timeline-bar-hover-host:focus-within .timeline-bar-content,
-.timeline-bar:hover .timeline-bar-content,
-.timeline-bar:focus-visible .timeline-bar-content {
-  overflow: visible;
-}
-
-.timeline-bar-hover-host:hover .timeline-bar-title.timeline-ellipsis-reveal,
-.timeline-bar-hover-host:focus-within .timeline-bar-title.timeline-ellipsis-reveal,
-.timeline-bar:hover .timeline-bar-title.timeline-ellipsis-reveal,
-.timeline-bar:focus-visible .timeline-bar-title.timeline-ellipsis-reveal {
-  flex: 0 0 auto;
-  max-width: none;
-  overflow: visible;
-  text-overflow: clip;
-  position: relative;
-  z-index: 10083;
-  color: transparent !important;
-}
-
-.timeline-bar-hover-host:hover .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after,
-.timeline-bar-hover-host:focus-within .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after,
-.timeline-bar:hover .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after,
-.timeline-bar:focus-visible .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after {
-  opacity: 1;
-}
+.timeline-bar-hover-host:focus-within .timeline-bar-content { overflow: visible; }
 
 .timeline-bar .editable-hover-indicator,
 .timeline-bar-hover-host .editable-hover-indicator {

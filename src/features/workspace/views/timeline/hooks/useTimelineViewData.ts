@@ -28,7 +28,6 @@ interface UseTimelineViewDataArgs {
   ) => Promise<void>;
   searchFilter: string;
   timelineFilters: TimelineTaskFilters;
-  timelineZoom: number;
   triggerCreateMilestoneToken: number;
   viewAnchorDate: string;
   viewInterval: TimelineViewInterval;
@@ -45,13 +44,11 @@ export function useTimelineViewData({
   onSaveTimelineMilestone,
   searchFilter,
   timelineFilters,
-  timelineZoom,
   triggerCreateMilestoneToken,
   viewAnchorDate,
   viewInterval,
 }: UseTimelineViewDataArgs) {
   const {
-    workTypesById,
     projectsById,
     scopedMeetings,
     scopedMilestones,
@@ -118,11 +115,6 @@ export function useTimelineViewData({
   );
 
   const {
-    clearHoveredMilestonePopup,
-    handleTimelineDayMouseEnter,
-    resolveMilestonePopupGeometry,
-    showMilestoneUnderlayPopup,
-    setHoveredMilestonePopupLayerRef,
     timelineDayCellRefs,
     timelineDayMilestoneUnderlays,
     timelineGridRef,
@@ -134,17 +126,15 @@ export function useTimelineViewData({
     tooltipPortalTarget,
   } = useTimelineMilestoneOverlay({
     days: timeline.days,
-    dayMilestonesByDate,
     milestones: scopedMilestones,
-    timelineZoom,
   });
 
   const resolveRowHighlightGeometry = useTimelineRowHighlightGeometry(timelineShellRef);
 
   const resolveTaskRowHighlightStyle = useCallback(
     (anchorKey: string) =>
-      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById, workTypesById),
-    [workTypesById, subsystemsById, tasksById],
+      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById),
+    [subsystemsById, tasksById],
   );
   const modalPortalTarget =
     typeof document !== "undefined"
@@ -152,18 +142,13 @@ export function useTimelineViewData({
       : null;
 
   return {
-    clearHoveredMilestonePopup,
-    workTypesById,
     milestoneModal,
-    handleTimelineDayMouseEnter,
     isTimelineShellScrolling,
     monthGroups,
     projectRows,
     projectsById,
-    resolveMilestonePopupGeometry,
     resolveRowHighlightGeometry,
     resolveTaskRowHighlightStyle,
-    setHoveredMilestonePopupLayerRef,
     timeline,
     timelineDayCellRefs,
     timelineDayHeaderCells,
@@ -176,7 +161,6 @@ export function useTimelineViewData({
     timelineTodayMarkerLineLeft,
     timelineTodayMarkerLeft,
     modalPortalTarget,
-    showMilestoneUnderlayPopup,
     tooltipPortalTarget,
   };
 }

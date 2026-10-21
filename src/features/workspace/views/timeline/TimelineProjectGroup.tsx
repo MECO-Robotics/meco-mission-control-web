@@ -1,27 +1,21 @@
+import type { TimelineTaskPresentation } from "./model/timelineTaskPresentation";
 import React from "react";
-import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineProjectHeaderCell } from "./components/TimelineProjectHeaderCell";
 import { TimelineProjectSummaryCell } from "./components/TimelineProjectSummaryCell";
 import { TimelineSubsystemRowGroup } from "./components/TimelineSubsystemRowGroup";
 import { TimelineTaskTrackRowList } from "./components/TimelineTaskTrackRowList";
 import { buildTimelineSubsystemHighlightStyle } from "./model/timelineTaskColors";
-import {
-  type TimelineTaskDependencyCounts,
-  type TimelineTaskStatusSignal,
-} from "./timelineGridBodyUtils";
+
 import type { TimelineDayHeaderCell, TimelineProjectRow } from "./timelineViewModel";
 
 interface TimelineProjectGroupProps {
   clearHoveredSubsystemRow: () => void;
   clearHoveredTaskRow: () => void;
-  clearHoveredMilestonePopup: () => void;
   collapsedProjects: Record<string, boolean>;
   collapsedSubsystems: Record<string, boolean>;
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   firstDayGridColumn: number;
   gridMinWidth: number;
-  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   hoveredSubsystemId: string | null;
   hoveredTaskId?: string | null;
   hoverTaskRow: (id: string) => void;
@@ -36,11 +30,10 @@ interface TimelineProjectGroupProps {
   showSubsystemCol: boolean;
   subsystemColumnIndex: number;
   subsystemStickyLeft: number;
-  statusIconColumnIndex: number;
-  statusIconColumnWidth: number;
-  statusIconStickyRight: number;
-  taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
-  taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
+  taskColumnIndex: number;
+  taskColumnWidth: number;
+  taskStickyLeft: number;
+  taskPresentationsById: Record<string, TimelineTaskPresentation>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
   timelineGridTemplate: string;
   toggleProject: (id: string) => void;
@@ -51,13 +44,10 @@ interface TimelineProjectGroupProps {
 export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
   clearHoveredSubsystemRow,
   clearHoveredTaskRow,
-  clearHoveredMilestonePopup,
   collapsedProjects,
   collapsedSubsystems,
-  workTypesById,
   firstDayGridColumn,
   gridMinWidth,
-  handleTimelineDayMouseEnter,
   hoveredSubsystemId,
   hoveredTaskId,
   hoverTaskRow,
@@ -72,11 +62,10 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
   showSubsystemCol,
   subsystemColumnIndex,
   subsystemStickyLeft,
-  statusIconColumnIndex,
-  statusIconColumnWidth,
-  statusIconStickyRight,
-  taskDependencyCountsById,
-  taskStatusSignalsById,
+  taskColumnIndex,
+  taskColumnWidth,
+  taskStickyLeft,
+  taskPresentationsById,
   timelineDayHeaderCells,
   timelineGridTemplate,
   toggleProject,
@@ -102,7 +91,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
         width: "100%",
         minWidth: `${gridMinWidth}px`,
         gridTemplateColumns: timelineGridTemplate,
-        gridAutoRows: "var(--timeline-row-height, 38px)",
+        gridAutoRows: "var(--timeline-row-height, 58px)",
         background: projectBackground,
         borderBottom: "1px solid var(--border-base)",
         position: "relative",
@@ -131,23 +120,20 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
           />
           {project.tasks.length > 0 ? (
             <TimelineTaskTrackRowList
-              clearHoveredMilestonePopup={clearHoveredMilestonePopup}
               clearHoveredTaskRow={clearHoveredTaskRow}
-              workTypesById={workTypesById}
               firstDayGridColumn={firstDayGridColumn}
-              handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
               hoveredTaskId={hoveredTaskId}
               hoverTaskRow={hoverTaskRow}
               mode="project-collapsed"
+              onExpandGroup={() => toggleProject(project.id)}
               onOpenTask={openTaskDetailModal}
               ownerId={project.id}
               rowStart={1}
               selectedTaskId={selectedTaskId}
-              statusIconColumnIndex={statusIconColumnIndex}
-              statusIconColumnWidth={statusIconColumnWidth}
-              statusIconStickyRight={statusIconStickyRight}
-              taskDependencyCountsById={taskDependencyCountsById}
-              taskStatusSignalsById={taskStatusSignalsById}
+              taskColumnIndex={taskColumnIndex}
+              taskColumnWidth={taskColumnWidth}
+              taskStickyLeft={taskStickyLeft}
+              taskPresentationsById={taskPresentationsById}
               tasks={project.tasks}
               timelineDayHeaderCells={timelineDayHeaderCells}
             />
@@ -165,19 +151,16 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
             const groupBackground =
               subsystem.index % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-alt)";
             const groupStyle = buildTimelineSubsystemHighlightStyle(subsystem.color, {
-              boxShadow: `inset 3px 0 0 ${subsystem.color}`,
-              gridAutoRows: "var(--timeline-row-height, 38px)",
+              boxShadow: `inset 1px 0 0 ${subsystem.color}`,
+              gridAutoRows: "var(--timeline-row-height, 58px)",
             });
             return (
               <TimelineSubsystemRowGroup
                 key={subsystem.id}
-                clearHoveredMilestonePopup={clearHoveredMilestonePopup}
                 clearHoveredSubsystemRow={clearHoveredSubsystemRow}
                 clearHoveredTaskRow={clearHoveredTaskRow}
                 collapsedSubsystems={collapsedSubsystems}
-                workTypesById={workTypesById}
                 firstDayGridColumn={firstDayGridColumn}
-                handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
                 hoveredSubsystemId={hoveredSubsystemId}
                 hoveredTaskId={hoveredTaskId}
                 hoverSubsystemRow={hoverSubsystemRow}
@@ -190,15 +173,14 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
                 selectedSubsystemId={selectedSubsystemId}
                 selectedTaskId={selectedTaskId}
                 showSubsystemCol={showSubsystemCol}
-                statusIconColumnIndex={statusIconColumnIndex}
-                statusIconColumnWidth={statusIconColumnWidth}
-                statusIconStickyRight={statusIconStickyRight}
+                taskColumnIndex={taskColumnIndex}
+                taskColumnWidth={taskColumnWidth}
+                taskStickyLeft={taskStickyLeft}
                 subsystem={subsystem}
                 subsystemColumnIndex={subsystemColumnIndex}
                 subsystemStickyLeft={subsystemStickyLeft}
                 rowStyle={groupStyle}
-                taskDependencyCountsById={taskDependencyCountsById}
-                taskStatusSignalsById={taskStatusSignalsById}
+                taskPresentationsById={taskPresentationsById}
                 timelineDayHeaderCells={timelineDayHeaderCells}
                 toggleSubsystem={toggleSubsystem}
               />

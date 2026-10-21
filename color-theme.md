@@ -185,9 +185,25 @@ Workspace-generated colors are normalized to six-character hex values and fall b
 
 These colors are used for workstreams, subsystems, timeline grouping, and user-selected workspace accents. The fallback subsystem highlight is `#4F86C6`.
 
-## Timeline Discipline Colors
+## Timeline Status Colors
 
-Timeline task bars use discipline-based accents:
+Timeline task bars use the canonical status token pairs above: neutral for not
+started, warning for in progress/waiting on dependency, info for QA, success for
+complete, and danger for blocked. Completed work takes precedence over stale
+blockers; other unfinished work shows blockers before unmet hard dependencies.
+Overdue is separate danger-colored text for unfinished work with due dates
+before the local calendar date. Bars retain their status color. No percentage
+progress is inferred. Task and subsystem selection use brand-blue highlights,
+independent of status and discipline. Collapsed group spans stay neutral.
+
+The timeline uses sticky task titles, readable status text/icons, secondary
+plain-text discipline labels, and a shared-topbar status legend. Milestones use
+header diamonds and thin date-range guides rather than rotated canvas labels.
+
+## Task Discipline Colors
+
+Task detail and Kanban discipline accents retain this shared palette. Timeline
+bars do not use these colors:
 
 | Discipline | Hex |
 | --- | --- |
@@ -221,7 +237,7 @@ Timeline task bars use discipline-based accents:
 | Social media | `#dd6f5a` |
 | Fallback | `#7a8799` |
 
-Timeline selection and hover states are derived by mixing the active discipline or subsystem color into transparent highlight fills and strokes.
+Discipline accents are owned by the shared task presentation, outside the timeline.
 
 ## Milestone Event Colors
 

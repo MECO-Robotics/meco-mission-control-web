@@ -10,7 +10,6 @@ import type { UseTimelineMilestoneOverlaySyncResult } from "./useTimelineMilesto
 interface UseTimelineMilestoneOverlayLayoutArgs {
   days: string[];
   milestones: BootstrapPayload["milestones"];
-  timelineZoom: number;
   timelineDayCellLayouts: UseTimelineMilestoneOverlaySyncResult["timelineDayCellLayouts"];
   timelineDayCellRefs: UseTimelineMilestoneOverlaySyncResult["timelineDayCellRefs"];
   timelineGridHeight: UseTimelineMilestoneOverlaySyncResult["timelineGridHeight"];
@@ -22,7 +21,6 @@ interface UseTimelineMilestoneOverlayLayoutArgs {
 export function useTimelineMilestoneOverlayLayout({
   days,
   milestones,
-  timelineZoom,
   timelineDayCellLayouts,
   timelineDayCellRefs,
   timelineGridHeight,
@@ -103,9 +101,8 @@ export function useTimelineMilestoneOverlayLayout({
         milestones,
         resolveGeometry: resolveMilestonePopupGeometry,
         timelineDays: days,
-        timelineZoom,
       }),
-    [days, milestones, resolveMilestonePopupGeometry, timelineZoom],
+    [days, milestones, resolveMilestonePopupGeometry],
   );
 
   return {
