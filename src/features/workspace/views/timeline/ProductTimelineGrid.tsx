@@ -99,6 +99,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   return <>
     <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
     <div className="product-timeline-grid" style={style}>
+      {milestoneLane && <div className="product-timeline-milestone-lane">{milestoneLane}</div>}
       <div className="product-timeline-row product-timeline-header">
         <div ref={workHeaderRef} className="product-timeline-work">Work</div>
         <div className="product-timeline-dates">
@@ -107,7 +108,6 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
           </button>)}
         </div>
       </div>
-      {milestoneLane && <div className="product-timeline-milestone-lane">{milestoneLane}</div>}
       <ProductTimelineDependencies dependencies={getProductTimelineTaskLinks(bootstrap)}>
       {projects.length > 0 && <div className="product-timeline-day-grid" aria-hidden="true">{days.map((day) => <span key={day} />)}</div>}
       {projects.length ? projects.map((project) => {
