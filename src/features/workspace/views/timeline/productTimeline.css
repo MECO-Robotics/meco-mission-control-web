@@ -41,7 +41,7 @@
 .product-timeline-inspect { border: 0; border-radius: 2px; padding: 0; background: transparent; color: var(--text-link); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 0.15em; }
 .product-timeline-inspect:hover { color: var(--text-link-hover); }
 .product-timeline-warning { color: var(--status-warning-text); }
-.product-timeline-track { position: relative; min-width: 0; background-image: linear-gradient(to right, var(--border-base) 1px, transparent 1px); background-size: calc(100% / var(--schedule-day-count)) 100%; }
+.product-timeline-track { position: relative; min-width: 0; background-image: linear-gradient(to right, var(--border-grid) 1px, transparent 1px); background-size: calc(100% / var(--schedule-day-count)) 100%; }
 .product-timeline-bar, .product-timeline-summary-span { position: absolute; top: 50%; transform: translateY(-50%); box-sizing: border-box; }
 .product-timeline-bar { height: 22px; min-width: 2px; border: 0; border-radius: 3px; padding: 0; background: var(--calendar-event-task-due); cursor: pointer; }
 .product-timeline-bar:hover { filter: brightness(1.15); }
