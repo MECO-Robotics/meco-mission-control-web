@@ -76,6 +76,12 @@
   align-items: stretch;
 }
 
+.kanban-swimlane-cell-count {
+  display: flex;
+  width: fit-content;
+  margin-left: auto;
+}
+
 .kanban-swimlane-statuses {
   position: sticky;
   top: 0;

@@ -112,7 +112,9 @@ export function KanbanColumns<TState extends string, TItem>({
         >
           {column.header}
           <span className={columnCountClassName}>{column.count}</span>
-        </div> : null}
+        </div> : swimlaneGroups ? (
+          <span className={`${columnCountClassName} kanban-swimlane-cell-count`}>{items.length}</span>
+        ) : null}
         {(!swimlaneGroups || !showHeader) ? <KanbanColumnScrollArea
           className={`${columnBodyClassName}${
             drag.hoveredDropState === column.state ? " is-kanban-drop-target" : ""
