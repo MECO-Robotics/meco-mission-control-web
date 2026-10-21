@@ -22,6 +22,7 @@
 .product-timeline-dates.is-project-span .product-timeline-day span { position: absolute; left: 2px; white-space: nowrap; font-size: 0.65rem; }
 .product-timeline-day:hover { background: var(--bg-row-alt); }
 .product-timeline-summary .product-timeline-work { background: var(--bg-row-alt); }
+.product-timeline-summary:not(.is-project) { border-top: 2px solid var(--border-grid); }
 .product-timeline-summary.is-project .product-timeline-work { color: var(--text-title); font-weight: 600; }
 .product-timeline-collapse { display: flex; align-items: flex-start; gap: 0.3rem; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
 .product-timeline-collapse svg { flex: 0 0 14px; margin-top: 1px; }
