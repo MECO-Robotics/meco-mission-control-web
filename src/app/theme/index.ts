@@ -48,6 +48,7 @@ function getThemeVars(mode: ThemeMode) {
       ? "0 4px 12px rgba(2, 6, 23, 0.3)"
       : "0 4px 12px rgba(15, 23, 42, 0.14)",
     "--official-green": isDarkMode ? "#34d399" : "#166534",
+    "--bg-row-stripe": isDarkMode ? "#0b1220" : "#e2e8f0",
     "--bg-row-alt": isDarkMode ? "#0f172a" : "#f8fafc",
     "--status-success-bg": isDarkMode ? "#064e3b" : "#dcfce7",
     "--status-success-text": isDarkMode ? "#34d399" : "#166534",
