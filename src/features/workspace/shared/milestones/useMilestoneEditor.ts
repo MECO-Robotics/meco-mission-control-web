@@ -1,4 +1,4 @@
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import type { MilestonePayload } from "@/types/payloads";
 import type { MilestoneRecord } from "@/types/recordsExecution";
@@ -41,13 +41,20 @@ export function useMilestoneEditor({
   const [isSavingMilestone, setIsSavingMilestone] = useState(false);
   const [isDeletingMilestone, setIsDeletingMilestone] = useState(false);
 
-  const closeMilestoneModal = useCallback(() => {
-    setMilestoneModalMode(null);
-    setActiveMilestoneId(null);
-    setMilestoneError(null);
+  const session = useRef({ pending: false });
+  useEffect(() => () => { session.current = { pending: false }; }, []);
+  const beginSession = useCallback(() => {
+    session.current = { pending: false };
     setIsSavingMilestone(false);
     setIsDeletingMilestone(false);
   }, []);
+
+  const closeMilestoneModal = useCallback(() => {
+    beginSession();
+    setMilestoneModalMode(null);
+    setActiveMilestoneId(null);
+    setMilestoneError(null);
+  }, [beginSession]);
 
   const cancelMilestoneEdit = () => {
     if (milestoneModalMode === "edit") {
@@ -58,6 +65,7 @@ export function useMilestoneEditor({
   };
 
   const openCreateMilestoneModalForDay = useCallback((day = localTodayDate()) => {
+    beginSession();
     setMilestoneModalMode("create");
     setActiveMilestoneId(null);
     setMilestoneDraft({
@@ -69,15 +77,26 @@ export function useMilestoneEditor({
     setMilestoneEndDate("");
     setMilestoneEndTime("");
     setMilestoneError(null);
-  }, [createProjectIds]);
+  }, [beginSession, createProjectIds]);
 
   const openMilestoneDetailsModal = (milestone: MilestoneRecord) => {
+    beginSession();
     setMilestoneModalMode("detail");
     setActiveMilestoneId(milestone.id);
     setMilestoneError(null);
   };
 
+  const leaveMilestoneDetails = (milestone: MilestoneRecord) => {
+    closeMilestoneModal();
+    const returnSession = session.current;
+    return () => {
+      if (session.current !== returnSession) return;
+      openMilestoneDetailsModal(milestone);
+    };
+  };
+
   const openEditMilestoneModal = useCallback((milestone: MilestoneRecord) => {
+    beginSession();
     setMilestoneModalMode("edit");
     setActiveMilestoneId(milestone.id);
     setMilestoneDraft({
@@ -89,11 +108,11 @@ export function useMilestoneEditor({
     setMilestoneEndDate(milestone.endAt ? datePortion(milestone.endAt) : "");
     setMilestoneEndTime(milestone.endAt ? timePortion(milestone.endAt) : "");
     setMilestoneError(null);
-  }, [scopedProjectIds]);
+  }, [beginSession, scopedProjectIds]);
 
   const handleMilestoneSubmit = async (milestone: FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    if (!milestoneModalMode || milestoneModalMode === "detail") {
+    if (session.current.pending || !milestoneModalMode || milestoneModalMode === "detail") {
       return;
     }
 
@@ -130,6 +149,8 @@ export function useMilestoneEditor({
       return;
     }
 
+    const savingSession = session.current;
+    savingSession.pending = true;
     setIsSavingMilestone(true);
     setMilestoneError(null);
 
@@ -145,21 +166,26 @@ export function useMilestoneEditor({
       };
 
       await onSaveTimelineMilestone(milestoneModalMode, activeMilestoneId, payload);
+      if (session.current !== savingSession) return;
       if (milestoneModalMode === "edit") {
         onTaskEditSaved();
       }
       closeMilestoneModal();
     } catch (error) {
+      if (session.current !== savingSession) return;
       setMilestoneError(
         error instanceof Error ? error.message : "Could not save the milestone. Please try again.",
       );
     } finally {
-      setIsSavingMilestone(false);
+      if (session.current === savingSession) {
+        savingSession.pending = false;
+        setIsSavingMilestone(false);
+      }
     }
   };
 
   const handleMilestoneDelete = async () => {
-    if (milestoneModalMode !== "edit" || !activeMilestoneId) {
+    if (session.current.pending || milestoneModalMode !== "edit" || !activeMilestoneId) {
       return;
     }
 
@@ -170,17 +196,25 @@ export function useMilestoneEditor({
       return;
     }
 
+    const deletingSession = session.current;
+    deletingSession.pending = true;
     setIsDeletingMilestone(true);
     setMilestoneError(null);
 
     try {
       await onDeleteTimelineMilestone(activeMilestoneId);
+      if (session.current !== deletingSession) return;
       closeMilestoneModal();
     } catch (error) {
+      if (session.current !== deletingSession) return;
       setMilestoneError(
         error instanceof Error ? error.message : "Could not delete the milestone. Please try again.",
       );
-      setIsDeletingMilestone(false);
+    } finally {
+      if (session.current === deletingSession) {
+        deletingSession.pending = false;
+        setIsDeletingMilestone(false);
+      }
     }
   };
 
@@ -198,6 +232,7 @@ export function useMilestoneEditor({
     handleMilestoneSubmit,
     isDeletingMilestone,
     isSavingMilestone,
+    leaveMilestoneDetails,
     milestoneDraft,
     openCreateMilestoneModalForDay,
     openMilestoneDetailsModal,

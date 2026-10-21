@@ -4,42 +4,6 @@ import { getTaskOpenBlockersForTask, getTaskWaitingOnDependencies } from "@/feat
 
 export type TimelineTaskStatusSignal = TaskStatus | "blocked" | "waiting-on-dependency";
 
-export interface TimelineTaskDependencyCounts {
-  incoming: number;
-  outgoing: number;
-}
-
-const EMPTY_DEPENDENCY_COUNTS: TimelineTaskDependencyCounts = {
-  incoming: 0,
-  outgoing: 0,
-};
-
-function getOrCreateDependencyCounts(
-  countsByTaskId: Record<string, TimelineTaskDependencyCounts>,
-  taskId: string,
-) {
-  if (!countsByTaskId[taskId]) {
-    countsByTaskId[taskId] = { ...EMPTY_DEPENDENCY_COUNTS };
-  }
-
-  return countsByTaskId[taskId];
-}
-
-export function buildTaskDependencyCountsByTaskId(
-  dependencies: BootstrapPayload["taskDependencies"] = [],
-) {
-  const dependencyCountsByTaskId: Record<string, TimelineTaskDependencyCounts> = {};
-
-  dependencies.forEach((dependency) => {
-    getOrCreateDependencyCounts(dependencyCountsByTaskId, dependency.taskId).incoming += 1;
-    if (dependency.kind === "task") {
-      getOrCreateDependencyCounts(dependencyCountsByTaskId, dependency.refId).outgoing += 1;
-    }
-  });
-
-  return dependencyCountsByTaskId;
-}
-
 function getTimelineTaskStatusSignalForTask(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
@@ -60,15 +24,4 @@ export function getTimelineTaskStatusSignal(
   bootstrap: BootstrapPayload,
 ): TimelineTaskStatusSignal {
   return getTimelineTaskStatusSignalForTask(task, bootstrap);
-}
-
-export function buildTimelineTaskStatusSignalByTaskId(
-  bootstrap: BootstrapPayload,
-): Record<string, TimelineTaskStatusSignal> {
-  return Object.fromEntries(
-    bootstrap.tasks.map((task) => [
-      task.id,
-      getTimelineTaskStatusSignalForTask(task, bootstrap),
-    ]),
-  );
 }

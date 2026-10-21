@@ -52,7 +52,7 @@ export function SchedulePeriodControls({
             <IconChevronRight />
           </button>
         </>
-      ) : null}
+      ) : <span className="timeline-period-label">{periodLabel}</span>}
       <button
         aria-label="Go to today"
         className="schedule-today-button"

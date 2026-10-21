@@ -128,5 +128,5 @@ export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, da
     return formatMonthDayShortYearFromDay(startDay);
   }
 
-  return "Recent window";
+  return `${formatMonthDayShortYearFromDay(startDay)} – ${formatMonthDayShortYearFromDay(endDay)}`;
 }

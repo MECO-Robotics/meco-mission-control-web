@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { formatLocalDate } from "@/lib/dateUtils";
@@ -13,7 +13,16 @@ import { ScheduleAgendaMonthList } from "./ScheduleAgendaMonthList";
 import { groupTaskCalendarEventsByMonth, toEventDateKey } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 
+export interface ScheduleAgendaHandle {
+  openMilestone: (id: string) => void;
+  createMilestone: () => void;
+}
+
 interface ScheduleAgendaPanelProps {
+  selectedDate?: string | null;
+  onClearSelectedDate?: () => void;
+  triggerCreateMilestoneToken?: number;
+  isVisible?: boolean;
   startDate: string;
   endDate: string | null;
   events: TaskCalendarEvent[];
@@ -49,7 +58,11 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
   };
 }
 
-export function ScheduleAgendaPanel({
+export const ScheduleAgendaPanel = forwardRef<ScheduleAgendaHandle, ScheduleAgendaPanelProps>(function ScheduleAgendaPanel({
+  selectedDate = null,
+  onClearSelectedDate,
+  triggerCreateMilestoneToken = 0,
+  isVisible = true,
   startDate,
   endDate,
   events,
@@ -62,11 +75,26 @@ export function ScheduleAgendaPanel({
   onTaskDetailOpen,
   onTaskEditCanceled = () => {},
   onTaskEditSaved = () => {},
-}: ScheduleAgendaPanelProps) {
+}, ref) {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isSavingMeeting, setIsSavingMeeting] = useState(false);
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
+  const meetingSession = useRef({ pending: false });
+  useEffect(() => () => { meetingSession.current = { pending: false }; }, []);
+  const closeMeeting = useCallback(() => {
+    meetingSession.current = { pending: false };
+    setIsMeetingModalOpen(false);
+    setIsSavingMeeting(false);
+    setMeetingError(null);
+  }, []);
+  const openMeeting = useCallback(() => {
+    meetingSession.current = { pending: false };
+    setMeetingDraft(createDefaultMeetingDraft(bootstrap));
+    setIsSavingMeeting(false);
+    setMeetingError(null);
+    setIsMeetingModalOpen(true);
+  }, [bootstrap]);
   const [requestedMilestoneId, setRequestedMilestoneId] = useState(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("milestone"));
   const handledMilestoneId = useRef<string | null | undefined>(undefined);
   const projectsById = useMemo(() => indexRecordsById(bootstrap.projects), [bootstrap.projects]);
@@ -86,7 +114,6 @@ export function ScheduleAgendaPanel({
   const milestoneModalActions = useRef(milestoneModalState);
   useEffect(() => { milestoneModalActions.current = milestoneModalState; });
   useEffect(() => {
-    const openMeeting = () => setIsMeetingModalOpen(true);
     const openMilestone = () => milestoneModalActions.current.openCreateMilestoneModal();
     window.addEventListener("mission-control:open-meeting", openMeeting);
     window.addEventListener("mission-control:open-milestone", openMilestone);
@@ -94,7 +121,7 @@ export function ScheduleAgendaPanel({
       window.removeEventListener("mission-control:open-meeting", openMeeting);
       window.removeEventListener("mission-control:open-milestone", openMilestone);
     };
-  }, []);
+  }, [openMeeting]);
   useEffect(() => {
     const restore = () => setRequestedMilestoneId(new URLSearchParams(window.location.search).get("milestone"));
     window.addEventListener("popstate", restore);
@@ -102,26 +129,49 @@ export function ScheduleAgendaPanel({
   }, []);
   useEffect(() => {
     if (handledMilestoneId.current === requestedMilestoneId) return;
+    if (!requestedMilestoneId) {
+      handledMilestoneId.current = null;
+      milestoneModalActions.current.closeMilestoneModal();
+      return;
+    }
+    const milestone = milestonesById[requestedMilestoneId];
+    if (!milestone) return;
     handledMilestoneId.current = requestedMilestoneId;
-    const milestone = milestonesById[requestedMilestoneId ?? ""];
-    if (milestone) milestoneModalActions.current.openMilestoneDetailsModal(milestone);
+    milestoneModalActions.current.openMilestoneDetailsModal(milestone);
   }, [milestonesById, requestedMilestoneId]);
 
-  const updateMilestoneLocation = (id: string | null) => {
+  const updateMilestoneLocation = useCallback((id: string | null) => {
     const params = new URLSearchParams(window.location.search);
     if (id) params.set("milestone", id); else params.delete("milestone");
     window.history.pushState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
     handledMilestoneId.current = id;
     setRequestedMilestoneId(id);
+  }, []);
+  const previousMilestoneMode = useRef(milestoneModalState.milestoneModalMode);
+  useEffect(() => {
+    const previousMode = previousMilestoneMode.current;
+    previousMilestoneMode.current = milestoneModalState.milestoneModalMode;
+    if (previousMode && !milestoneModalState.milestoneModalMode && requestedMilestoneId) updateMilestoneLocation(null);
+  }, [milestoneModalState.milestoneModalMode, requestedMilestoneId, updateMilestoneLocation]);
+
+  const openMilestone = (id: string) => {
+    const milestone = milestonesById[id];
+    if (!milestone) return;
+    updateMilestoneLocation(id);
+    milestoneModalActions.current.openMilestoneDetailsModal(milestone);
   };
+
+  useImperativeHandle(ref, () => ({
+    openMilestone,
+    createMilestone: () => milestoneModalActions.current.openCreateMilestoneModal(),
+  }));
+  useEffect(() => {
+    if (triggerCreateMilestoneToken > 0) milestoneModalActions.current.openCreateMilestoneModal();
+  }, [triggerCreateMilestoneToken]);
 
   const openEvent = (event: TaskCalendarEvent) => {
     if (event.extendedProps.type === "milestone") {
-      const milestone = milestonesById[event.extendedProps.recordId];
-      if (milestone) {
-        updateMilestoneLocation(milestone.id);
-        milestoneModalActions.current.openMilestoneDetailsModal(milestone);
-      }
+      openMilestone(event.extendedProps.recordId);
       return;
     }
 
@@ -134,14 +184,17 @@ export function ScheduleAgendaPanel({
   };
   const agendaEvents = useMemo(() => events.filter((event) => {
     const eventDate = toEventDateKey(event.start);
-    return eventDate >= startDate && (!endDate || eventDate <= endDate);
-  }), [endDate, startDate, events]);
+    return eventDate >= startDate && (!endDate || eventDate <= endDate) && (!selectedDate || eventDate === selectedDate);
+  }), [endDate, startDate, events, selectedDate]);
   const agendaMonths = useMemo(
     () => groupTaskCalendarEventsByMonth(agendaEvents),
     [agendaEvents],
   );
   const handleMeetingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (meetingSession.current.pending) return;
+    const savingSession = meetingSession.current;
+    savingSession.pending = true;
     setIsSavingMeeting(true);
     setMeetingError(null);
 
@@ -152,23 +205,34 @@ export function ScheduleAgendaPanel({
         location: meetingDraft.location.trim(),
         description: meetingDraft.description.trim(),
       });
-      setIsMeetingModalOpen(false);
+      if (meetingSession.current === savingSession) closeMeeting();
     } catch (error) {
-      setMeetingError(toErrorMessage(error));
+      if (meetingSession.current === savingSession) setMeetingError(toErrorMessage(error));
     } finally {
-      setIsSavingMeeting(false);
+      if (meetingSession.current === savingSession) {
+        savingSession.pending = false;
+        setIsSavingMeeting(false);
+      }
     }
   };
 
   return (
-    <aside aria-label="Schedule agenda" className="schedule-agenda-panel">
-      {agendaEvents.length === 0 ? (
-        <div aria-live="polite" className="empty-state schedule-agenda-empty-state">
-          <strong>No schedule items in this period.</strong>
-          <p className="section-copy">Adjust search, filters, or dates to see more schedule items.</p>
-        </div>
-      ) : <ScheduleAgendaMonthList groups={agendaMonths} onOpenEvent={openEvent} />}
+    <>
+      <aside aria-label="Schedule agenda" className="schedule-agenda-panel" hidden={!isVisible}>
+        {selectedDate && (
+          <div className="schedule-agenda-focus">
+            <time dateTime={selectedDate}>{new Date(`${selectedDate}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</time>
+            {onClearSelectedDate && <button className="secondary-action" onClick={onClearSelectedDate} type="button">Show period</button>}
+          </div>
+        )}
+        {agendaEvents.length === 0 ? (
+          <div aria-live="polite" className="empty-state schedule-agenda-empty-state">
+            <strong>{selectedDate ? "No schedule items on this date." : "No schedule items in this period."}</strong>
+            <p className="section-copy">Adjust search, filters, or dates to see more schedule items.</p>
+          </div>
+        ) : <ScheduleAgendaMonthList groups={agendaMonths} onOpenEvent={openEvent} />}
 
+      </aside>
       <MilestonesMilestoneModal
         activeMilestone={milestoneModalState.activeMilestone}
         bootstrap={bootstrap}
@@ -184,7 +248,7 @@ export function ScheduleAgendaPanel({
         modalPortalTarget={milestoneModalState.modalPortalTarget}
         onCancelEdit={milestoneModalState.cancelMilestoneEdit}
         onClose={() => { if (requestedMilestoneId) updateMilestoneLocation(null); milestoneModalState.closeMilestoneModal(); }}
-        onRecordResult={onCreateMilestoneReport ? (milestone) => { milestoneModalState.closeMilestoneModal(); onCreateMilestoneReport(milestone.id, () => milestoneModalState.openMilestoneDetailsModal(milestone)); } : undefined}
+        onRecordResult={onCreateMilestoneReport ? (milestone) => onCreateMilestoneReport(milestone.id, milestoneModalState.leaveMilestoneDetails(milestone)) : undefined}
         onDelete={() => void milestoneModalState.handleMilestoneDelete()}
         onEditMilestone={milestoneModalState.openEditMilestoneModal}
         onSubmit={(event) => void milestoneModalState.handleMilestoneSubmit(event)}
@@ -201,10 +265,10 @@ export function ScheduleAgendaPanel({
         error={meetingError}
         isOpen={isMeetingModalOpen}
         isSaving={isSavingMeeting}
-        onClose={() => setIsMeetingModalOpen(false)}
+        onClose={closeMeeting}
         onSubmit={(event) => void handleMeetingSubmit(event)}
         setDraft={setMeetingDraft}
       />
-    </aside>
+    </>
   );
-}
+});

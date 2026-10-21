@@ -1,0 +1,66 @@
+.schedule-milestone-lane {
+  border-block-end: 1px solid var(--border-base);
+  display: grid;
+  grid-template-columns: var(--schedule-work-width) minmax(0, 1fr);
+  max-height: 5.5rem;
+  overflow-y: auto;
+  scrollbar-color: var(--border-base) transparent;
+}
+
+.schedule-milestone-label {
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  font-size: 0.75rem;
+  font-weight: 700;
+  inset-inline-start: 0;
+  padding: 0.45rem 0.75rem;
+  position: sticky;
+  z-index: 1;
+}
+
+.schedule-milestone-track {
+  align-content: start;
+  display: grid;
+  gap: 0.2rem 0;
+  min-width: 0;
+  padding-block: 0.2rem;
+}
+
+.schedule-milestone-marker {
+  background: var(--status-info-bg);
+  border: 0;
+  border-radius: 0.2rem;
+  color: var(--status-info-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-inline: 1px;
+  min-height: 1.5rem;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.2rem 0.3rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-milestone-marker[data-tone="danger"] {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+}
+
+.schedule-milestone-marker[data-tone="success"] {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+}
+
+.schedule-milestone-marker:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.schedule-milestone-marker:focus-visible {
+  outline: 2px solid var(--status-info-text);
+  outline-offset: -2px;
+}
