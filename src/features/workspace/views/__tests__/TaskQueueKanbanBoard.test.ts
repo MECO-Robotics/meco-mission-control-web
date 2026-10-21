@@ -115,7 +115,6 @@ function renderBoard(
   renderToStaticMarkup(
     React.createElement(TaskQueueKanbanBoard, {
       bootstrap,
-      workTypesById: { "work-type-design": bootstrap.workTypes[0] },
       focusedState: null,
       membersById: { "member-1": bootstrap.members[0] },
       onClearFocus: jest.fn(),
@@ -123,9 +122,6 @@ function renderBoard(
       onReassignTaskStatus,
       openEditTaskModal,
       projectsById: { "project-1": bootstrap.projects[0] },
-      taskQueueZoom: 1,
-      showProjectContextOnCards: true,
-      showProjectOnCards: true,
       subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
       tasks: [task],
       workstreamsById: {},

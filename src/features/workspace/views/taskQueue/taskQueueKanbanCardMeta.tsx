@@ -1,32 +1,7 @@
-import type { CSSProperties } from "react";
-
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
-
-import { readTaskAssigneeIds, readTaskSubsystemIds, readTaskWorkstreamIds, formatSubsystemNames, formatWorkstreamNames } from "./taskQueueKanbanCard";
-
-const TASK_QUEUE_CARD_PRIORITY_ACCENTS: Record<TaskRecord["priority"], string> = {
-  critical: "var(--status-danger-text)",
-  high: "var(--status-danger-text)",
-  medium: "var(--status-warning-text)",
-  low: "var(--status-neutral-text)",
-};
-
-export function getTaskQueueCardPriorityAccentColor(priority: TaskRecord["priority"]) {
-  return TASK_QUEUE_CARD_PRIORITY_ACCENTS[priority];
-}
-
-export function getTaskQueueCardPriorityPresentation(priority: TaskRecord["priority"]) {
-  return {
-    className: "task-queue-board-card-priority-accented",
-    dataPriority: priority,
-    style: {
-      "--task-queue-board-card-priority-accent": getTaskQueueCardPriorityAccentColor(priority),
-    } as CSSProperties,
-  };
-}
+import { readTaskSubsystemIds, readTaskWorkstreamIds, formatSubsystemNames, formatWorkstreamNames } from "./taskQueueKanbanCard";
 
 export function getTaskPriorityLabel(priority: TaskRecord["priority"]) {
   switch (priority) {
@@ -94,37 +69,14 @@ export function TaskPriorityBadge({ priority }: { priority: TaskRecord["priority
       width="14"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <title>{label}</title>
       <TaskPriorityIcon priority={priority} />
     </svg>
   );
 }
 
-export function getTaskCardPerson(
-  task: TaskRecord,
-  membersById: Record<string, BootstrapPayload["members"][number]>,
-) {
-  const personId = readTaskAssigneeIds(task)[0];
-  return personId ? membersById[personId] ?? null : null;
-}
-
 export function getMemberInitial(member: { name: string }) {
   return member.name.trim().slice(0, 1).toUpperCase() || "?";
-}
-
-export function getTaskQueueCardContextAccentColor(
-  task: TaskRecord,
-  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
-  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
-) {
-  const contextSource =
-    projectType === "robot"
-      ? subsystemsById[readTaskSubsystemIds(task)[0] ?? ""] ?? null
-      : workstreamsById[readTaskWorkstreamIds(task)[0] ?? ""] ?? null;
-
-  return contextSource
-    ? resolveWorkspaceColor(contextSource.color ?? null, contextSource.id)
-    : resolveWorkspaceColor(null, task.id);
 }
 
 export function getTaskQueueCardContextLabel(
@@ -134,8 +86,8 @@ export function getTaskQueueCardContextLabel(
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
 ) {
   if (projectType === "robot") {
-    return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "Unassigned subsystem");
+    return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "");
   }
 
-  return formatWorkstreamNames(readTaskWorkstreamIds(task), workstreamsById, "Unassigned workflow");
+  return formatWorkstreamNames(readTaskWorkstreamIds(task), workstreamsById, "");
 }

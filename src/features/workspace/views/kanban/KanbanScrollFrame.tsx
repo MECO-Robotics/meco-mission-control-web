@@ -8,7 +8,6 @@ interface KanbanScrollFrameProps {
   shellRef?: RefObject<HTMLDivElement | null>;
   style?: CSSProperties;
   isFocused?: boolean;
-  isCompact?: boolean;
 }
 
 export function KanbanScrollFrame({
@@ -17,7 +16,6 @@ export function KanbanScrollFrame({
   shellRef: providedShellRef,
   style,
   isFocused = false,
-  isCompact,
 }: KanbanScrollFrameProps) {
   const internalShellRef = useRef<HTMLDivElement>(null);
   const shellRef = providedShellRef ?? internalShellRef;
@@ -133,7 +131,6 @@ export function KanbanScrollFrame({
       ) : null}
       <div
         className={`table-shell task-queue-board-shell${isFocused ? " is-focused-column" : ""}`}
-        data-task-queue-zoom-compact={isCompact === undefined ? undefined : String(isCompact)}
         ref={shellRef}
         style={style}
       >

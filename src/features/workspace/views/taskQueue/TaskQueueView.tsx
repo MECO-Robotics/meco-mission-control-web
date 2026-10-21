@@ -73,8 +73,6 @@ export function TaskQueueView({
     taskFilterMotionClass,
     taskSortIsDefault,
     workstreamsById,
-    showProjectContextOnCards,
-    showProjectOnCards,
     showSubsystemIterationFilter,
   } = useTaskQueueViewState({
     activePersonFilter,
@@ -137,7 +135,6 @@ export function TaskQueueView({
 
       <TaskQueueBoardSection
         bootstrap={bootstrap}
-        workTypesById={workTypesById}
         focusedBoardState={focusedBoardState}
         membersById={membersById}
         openEditTaskModal={openEditTaskModal}
@@ -147,8 +144,6 @@ export function TaskQueueView({
         taskQueueZoom={taskQueueZoom}
         setFocusedBoardState={setFocusedBoardState}
         setTaskQueueZoom={setTaskQueueZoom}
-        showProjectContextOnCards={showProjectContextOnCards}
-        showProjectOnCards={showProjectOnCards}
         subsystemsById={subsystemsById}
         taskFilterMotionClass={taskFilterMotionClass}
         workstreamsById={workstreamsById}
