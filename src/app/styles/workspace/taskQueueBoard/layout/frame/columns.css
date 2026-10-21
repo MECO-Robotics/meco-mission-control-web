@@ -82,7 +82,7 @@
   z-index: 3;
   padding-left: var(--kanban-project-label-width);
   background: var(--bg-panel);
-  border-bottom: 1px solid var(--border-grid);
+  border-bottom: 1px solid var(--border-base);
 }
 
 .has-swimlanes .kanban-swimlane {
@@ -95,7 +95,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: linear-gradient(to right, var(--border-base) 1px, transparent 1px);
+  background-image: linear-gradient(to right, var(--border-grid) 1px, transparent 1px);
   background-size: calc(var(--task-queue-board-mobile-column-width, var(--task-queue-board-column-width, 15.5rem)) + 0.7rem * var(--task-queue-zoom, 1)) 100%;
   background-position: calc(var(--task-queue-board-mobile-column-width, var(--task-queue-board-column-width, 15.5rem)) + 0.35rem * var(--task-queue-zoom, 1)) 0;
 }
@@ -149,8 +149,8 @@
   min-height: 0;
   margin: 0;
   padding: 0.75rem 0;
-  border-right: 1px solid var(--border-base);
-  border-top: 1px solid var(--border-grid);
+  border-right: 1px solid var(--border-grid);
+  border-top: 1px solid var(--border-base);
   background: var(--bg-row-alt);
   color: var(--text-title);
   font-size: calc(0.8rem * var(--task-queue-zoom, 1));
@@ -170,7 +170,7 @@
 }
 
 .kanban-swimlane {
-  border-top: 1px solid var(--border-grid);
+  border-top: 1px solid var(--border-base);
   background: var(--bg-panel);
 }
 
