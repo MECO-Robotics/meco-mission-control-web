@@ -8,6 +8,7 @@ import { localTodayDate } from "@/lib/dateUtils";
 import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 import { TaskAssigneeSummary } from "@/features/workspace/shared/task/TaskAssigneeSummary";
 import { useTimelineShellSizing } from "./hooks/useTimelineShellSizing";
+import { buildTimelineTaskToneStyle } from "./model/timelineTaskColors";
 import { TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
 import { ProductTimelineDependencies } from "./ProductTimelineDependencies";
 import { getProductTimelineTaskLinks } from "./model/productTimelineDependencies";
@@ -37,6 +38,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   const membersById = useMemo(() => indexRecordsById(bootstrap.members), [bootstrap.members]);
   const projects = useMemo(() => buildProductTimelineProjects(bootstrap, tasks, days, groupBy), [bootstrap, tasks, days, groupBy]);
   const today = localTodayDate();
+  const contexts = useMemo(() => Object.fromEntries(tasks.map((task) => [task.id, getProductTimelineTaskContext(task, bootstrap, today)])), [bootstrap, tasks, today]);
   const inspectionTask = inspectedId ? tasks.find((task) => task.id === inspectedId) : undefined;
   const inspection = inspectionTask ? getProductTimelineInspection(inspectionTask, bootstrap) : null;
   const clampedZoom = Math.min(4, Math.max(1, zoom));
@@ -55,28 +57,28 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
         <button type="button" className="product-timeline-collapse" aria-expanded={!collapsed.has(id)} onClick={() => toggle(id)}>
           <IconChevronRight /><span>{name}</span>
         </button>
-        <span className="product-timeline-count">{records.filter((task) => task.status === "complete").length} of {records.length} tasks complete</span>
+        <span className="product-timeline-count">{records.filter((task) => task.status === "complete").length} of {records.length} tasks complete · {records.filter((task) => contexts[task.id].blocked).length} blocked · {records.filter((task) => contexts[task.id].overdue).length} overdue</span>
       </div>
-      <div className="product-timeline-track" aria-hidden="true">
+      <div className="product-timeline-track">
         {collapsed.has(id) && (() => {
           const spans = records.map((task) => getProductTimelineTaskSpan(task, days)).filter((span) => span !== null);
           if (!spans.length) return null;
           const start = Math.min(...spans.map((span) => span.start));
           const end = Math.max(...spans.map((span) => span.start + span.span));
-          return <span className="product-timeline-summary-span" style={{ left: `${start / days.length * 100}%`, width: `${(end - start) / days.length * 100}%` }} />;
+          return <button type="button" aria-label={`Expand ${name}`} onClick={() => toggle(id)} className="product-timeline-summary-span" style={{ left: `${start / days.length * 100}%`, width: `${(end - start) / days.length * 100}%` }}>Group span</button>;
         })()}
       </div>
     </div>
   );
 
   const renderTask = (task: TaskRecord, groupKey: string) => {
-    const context = getProductTimelineTaskContext(task, bootstrap, today);
+    const context = contexts[task.id];
     const span = getProductTimelineTaskSpan(task, days);
     const rowKey = `${groupKey}:${task.id}`;
-    const signal = context.blocked ? "blocked" : context.waiting ? "waiting-on-dependency" : task.status;
+    const signal = context.signal;
     return <div key={rowKey} className="product-timeline-row product-timeline-task" data-task-id={task.id} data-group-key={groupKey}>
         <div className="product-timeline-work">
-          <button type="button" className="product-timeline-task-title" onClick={() => onOpenTask(task)}>{task.title}</button>
+          <button type="button" className="product-timeline-task-title" title={context.description} onClick={() => onOpenTask(task)}>{task.title}</button>
           <span className="product-timeline-task-assignees">
             <TaskAssigneeSummary task={task} membersById={membersById} />
             {context.team && <span>{context.team}</span>}
@@ -84,14 +86,12 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
           {context.unavailableTargets.length > 0 && <span className="product-timeline-task-meta">Unavailable target: {context.unavailableTargets.join(", ")}</span>}
           <div className="product-timeline-task-state">
             <span className="product-timeline-status"><TimelineTaskStatusLogo compact signal={signal} status={task.status} />{context.state}</span>
-            {context.blocked && <span className="product-timeline-warning">Blocked</span>}
-            {context.waiting && <span className="product-timeline-warning">Waiting on prerequisite</span>}
-            {context.overdue && <span className="product-timeline-warning">Overdue</span>}
+            {context.overdue && <span className="product-timeline-overdue">{context.overdueLabel}</span>}
             {context.hasHandoffs && <button type="button" className="product-timeline-inspect" aria-haspopup="dialog" aria-label={`Inspect handoffs for ${task.title}`} onClick={() => setInspectedId(task.id)}>Handoffs</button>}
           </div>
         </div>
         <div className="product-timeline-track">
-          {span ? <button type="button" data-tutorial-target="timeline-task-bar" className={`product-timeline-bar${task.status === "complete" ? " is-complete" : ""}${span.spillsLeft ? " spills-left" : ""}${span.spillsRight ? " spills-right" : ""}`} style={{ left: `${span.start / days.length * 100}%`, width: `${span.span / days.length * 100}%` }} onClick={() => onOpenTask(task)} aria-label={`Open ${task.title}, ${task.startDate} to ${task.dueDate}`} title={`${task.title}: ${task.startDate} to ${task.dueDate}`} /> : null}
+          {span ? <button type="button" data-tutorial-target="timeline-task-bar" className={`product-timeline-bar${task.status === "complete" ? " is-complete" : ""}${span.spillsLeft ? " spills-left" : ""}${span.spillsRight ? " spills-right" : ""}`} data-status-signal={signal} style={{ ...buildTimelineTaskToneStyle(signal), left: `${span.start / days.length * 100}%`, width: `${span.span / days.length * 100}%` }} onClick={() => onOpenTask(task)} aria-label={`Open ${context.description}`} title={context.description} /> : null}
         </div>
       </div>;
   };

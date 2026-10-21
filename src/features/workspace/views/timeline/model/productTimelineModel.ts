@@ -1,6 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { formatIterationVersion } from "@/lib/appUtils/common";
+import { getTimelineTaskStatusSignal } from "../timelineGridBodyUtils";
+import { dateDiffInDays, formatIterationVersion } from "@/lib/appUtils/common";
 import { getTaskDependencyTargetName } from "@/features/workspace/shared/task/taskTargeting";
 import { getTaskOpenBlockersForTask, getTaskWaitingOnDependencies } from "@/features/workspace/shared/task/taskPlanning";
 import { isTaskDependencySatisfied } from "@/features/workspace/shared/task/taskPlanningInternals";
@@ -77,13 +78,20 @@ export function getProductTimelineTaskSpan(task: TaskRecord, days: string[]) {
 export function getProductTimelineTaskContext(task: TaskRecord, bootstrap: BootstrapPayload, today: string) {
   const blockers = getTaskOpenBlockersForTask(task.id, bootstrap);
   const waiting = getTaskWaitingOnDependencies(task.id, bootstrap);
-  const state = task.status === "complete" ? "Complete" : ({ "not-started": "Not started", "in-progress": "In progress", "waiting-for-qa": "Waiting for QA" })[task.status];
+  const signal = getTimelineTaskStatusSignal(task, bootstrap);
+  const state = ({
+    "not-started": "Not started", "in-progress": "In progress", "waiting-for-qa": "Waiting for QA",
+    complete: "Complete", blocked: "Blocked", "waiting-on-dependency": "Waiting on prerequisite",
+  })[signal];
+  const overdueDays = task.status !== "complete" && task.dueDate && task.dueDate < today ? dateDiffInDays(task.dueDate, today) : 0;
+  const overdueLabel = overdueDays ? `Overdue · ${overdueDays} ${overdueDays === 1 ? "day" : "days"}` : "";
   const isRobot = bootstrap.projects.find((project) => project.id === task.projectId)?.projectType === "robot";
   const targets = isRobot ? bootstrap.subsystems : bootstrap.workstreams;
   const unavailableTargets = normalizeTaskTargetIds(isRobot ? task.subsystemIds : task.workstreamIds).filter((id) => !targets.some((target) => target.id === id && target.projectId === task.projectId));
   return {
     team: task.responsibleGroupId ? bootstrap.responsibleGroups.find((group) => group.id === task.responsibleGroupId)?.name ?? "Unavailable team" : null,
-    state,
+    state, signal, overdueDays, overdueLabel,
+    description: [task.title, state, `${task.startDate} – ${task.dueDate}`, overdueLabel].filter(Boolean).join(" · "),
     unavailableTargets,
     hasHandoffs: Boolean(task.isBlocked) || blockers.length > 0 || bootstrap.taskDependencies.some((dependency) => dependency.taskId === task.id || (dependency.kind === "task" && dependency.refId === task.id)),
     blocked: task.status !== "complete" && (Boolean(task.isBlocked) || blockers.length > 0),

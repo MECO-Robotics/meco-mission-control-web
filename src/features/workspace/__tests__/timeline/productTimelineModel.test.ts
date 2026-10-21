@@ -151,10 +151,30 @@ describe("product timeline date and handoff context", () => {
     bootstrap.taskDependencies.push({ ...bootstrap.taskDependencies[0], id: "soft", dependencyType: "soft" });
     const inspection = getProductTimelineInspection(task, bootstrap);
     expect(inspection.incoming.map((item) => [item.label, item.state])).toEqual([["Unknown task", "Waiting"], ["Unknown task", "Advisory"]]);
-    expect(getProductTimelineTaskContext(task, bootstrap, "2026-05-01")).toMatchObject({ state: "Not started", waiting: true, overdue: true });
+    expect(getProductTimelineTaskContext(task, bootstrap, "2026-05-01")).toMatchObject({ state: "Waiting on prerequisite", waiting: true, overdue: true });
     expect(getProductTimelineTaskContext({ ...task, status: "complete", isBlocked: true }, bootstrap, "2026-05-01")).toMatchObject({ state: "Complete", waiting: false, overdue: false, blocked: false });
     bootstrap.taskDependencies = bootstrap.taskDependencies.filter((dependency) => dependency.dependencyType === "soft");
     expect(getProductTimelineTaskContext(task, bootstrap, "2026-04-01").waiting).toBe(false);
   });
 
+});
+
+describe("Gantt status presentation after renderer consolidation", () => {
+  it("keeps complete above stale blockers and suppresses its overdue label", () => {
+    const bootstrap = createBootstrapWithDependency();
+    const task = { ...bootstrap.tasks[0], status: "complete" as const, isBlocked: true };
+    const context = getProductTimelineTaskContext(task, bootstrap, "2026-04-15");
+    expect(context).toMatchObject({ signal: "complete", state: "Complete", overdueDays: 0, overdueLabel: "" });
+  });
+  it("gives blockers precedence over prerequisites and retains a separate overdue count", () => {
+    const bootstrap = createBootstrapWithDependency();
+    const task = { ...bootstrap.tasks[0], isBlocked: true, dueDate: "2026-04-10" };
+    const context = getProductTimelineTaskContext(task, bootstrap, "2026-04-15");
+    expect(context).toMatchObject({ signal: "blocked", state: "Blocked", overdueDays: 5, overdueLabel: "Overdue · 5 days" });
+  });
+  it("uses local calendar date boundaries, including DST, and leaves due-today work unflagged", () => {
+    const bootstrap = createBootstrap();
+    expect(getProductTimelineTaskContext({ ...bootstrap.tasks[0], dueDate: "2026-03-08" }, bootstrap, "2026-03-09").overdueLabel).toBe("Overdue · 1 day");
+    expect(getProductTimelineTaskContext({ ...bootstrap.tasks[0], dueDate: "2026-03-09" }, bootstrap, "2026-03-09").overdueDays).toBe(0);
+  });
 });

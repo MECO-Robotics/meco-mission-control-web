@@ -1,7 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
-import { getTimelineTaskDisciplineColor } from "../timeline/model/timelineTaskColors";
+import { getTaskDisciplineColor } from "@/features/workspace/shared/task/taskDisciplineColors";
 import { readTaskSubsystemIds, readTaskWorkstreamIds } from "./taskQueueKanbanCard";
 
 export type TaskQueueGroupBy = "team" | "subsystem";
@@ -46,7 +46,7 @@ export function groupTaskQueueSwimlanes(
     const labels = new Map<string, TaskQueueLaneLabel>(groupBy === "team"
       ? bootstrap.workTypes.map((record) => [record.id, {
           name: record.name, kind, code: record.code,
-          accentColor: getTimelineTaskDisciplineColor(record.id, workTypesById),
+          accentColor: getTaskDisciplineColor(record.id, workTypesById),
         }])
       : (isRobot ? bootstrap.subsystems : bootstrap.workstreams)
           .filter((record) => record.projectId === projectId)

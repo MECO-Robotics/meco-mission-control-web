@@ -1,3 +1,4 @@
+import { TimelineStatusLegend } from "./components/TimelineStatusLegend";
 import React from "react";
 import { ArrowDownUp, Settings2 } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -161,6 +162,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       toolbarClassName="workspace-topbar-zoom-slot-actions"
       value={formatTimelineZoomLabel(timelineZoom)}
     />
+    <TimelineStatusLegend />
     <CompactFilterMenu
       className="schedule-view-menu"
       ariaLabel="Schedule view options"

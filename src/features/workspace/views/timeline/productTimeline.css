@@ -50,7 +50,7 @@
 .product-timeline-bar.is-complete { background: var(--calendar-event-manufacturing-due); }
 .product-timeline-bar.spills-left { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .product-timeline-bar.spills-right { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.product-timeline-summary-span { height: 5px; border-radius: 1px; background: var(--border-grid); }
+.product-timeline-summary-span { height: 22px; border-radius: 2px; border: 1px solid var(--border-base); background: var(--status-neutral-bg); }
 .modal-card.product-timeline-handoffs-modal { width: min(100%, 760px); max-height: calc(100dvh - 2rem); box-sizing: border-box; overflow-y: auto; overflow-wrap: anywhere; }
 .product-timeline-handoffs-body { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; color: var(--text-copy); font-size: 0.75rem; }
 .product-timeline-handoffs-body > div { min-width: 0; flex: 1 1 180px; }
@@ -76,3 +76,19 @@
   .product-timeline-work { padding: 0.4rem; }
   .product-timeline-task .product-timeline-work { padding-left: 1.1rem; }
 }
+
+.product-timeline-bar {
+  background: var(--timeline-task-bar-background, var(--status-neutral-bg));
+  color: var(--timeline-task-bar-text-color, var(--status-neutral-text));
+  border: 1px solid color-mix(in srgb, var(--timeline-task-bar-text-color, var(--status-neutral-text)) 30%, transparent);
+}
+.product-timeline-bar.is-complete { background: var(--status-success-bg); }
+.product-timeline-overdue { color: var(--status-danger-text); font-weight: 600; }
+.product-timeline-summary-span { color: var(--status-neutral-text); font: inherit; font-size: 0.65rem; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: pointer; }
+.workspace-popover { display: inline-flex; min-width: 0; }
+.workspace-popover > button { display: inline-flex; gap: 4px; align-items: center; }
+.workspace-popover-panel { padding: 12px; width: 300px; font-size: 0.8rem; color: var(--text-copy); }
+.timeline-legend-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.timeline-legend-list li { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.timeline-legend-list .timeline-task-status-logo { position: static; transform: none; flex: 0 0 18px; width: 18px; height: 18px; }
+.timeline-legend-list .timeline-task-overdue { color: var(--status-danger-text); }

@@ -196,11 +196,22 @@ Workspace-generated colors are normalized to six-character hex values and fall b
 
 These colors are used for workstreams, subsystems, timeline grouping, and user-selected workspace accents. The fallback subsystem highlight is `#4F86C6`.
 
-Kanban project rails reuse sidebar project identity colors through `--kanban-project-accent` as opaque surface tints. Kanban lane icons use `--kanban-lane-accent`: teams reuse the timeline discipline palette, while subsystem/workstream groups reuse their configured workspace colors. Names retain semantic text colors; icons mix their accent with the theme's title color for contrast. Cards remain neutral.
+Kanban project rails reuse sidebar project identity colors through `--kanban-project-accent` as opaque surface tints. Kanban lane icons use `--kanban-lane-accent`: teams reuse the shared task discipline palette, while subsystem/workstream groups reuse their configured workspace colors. Names retain semantic text colors; icons mix their accent with the theme's title color for contrast. Cards remain neutral.
 
-## Timeline Discipline Colors
+## Timeline Status Colors
 
-Timeline task bars use discipline-based accents:
+Timeline bars use canonical status pairs: neutral for not started, warning for
+in progress and waiting, info for QA, success for complete, and danger for
+blocked. Complete takes precedence over stale blockers; blockers precede unmet
+prerequisites. Overdue is separate danger-colored text counting local calendar
+days past due for unfinished work. The shared topbar provides a status legend.
+Collapsed groups use neutral summary spans. Sticky work names, the agenda and
+handoff modal remain the current schedule owners.
+
+## Task Discipline Colors
+
+Kanban and task-detail accents retain this shared task palette; Gantt bars use
+status colors instead:
 
 | Discipline | Hex |
 | --- | --- |
@@ -234,7 +245,7 @@ Timeline task bars use discipline-based accents:
 | Social media | `#dd6f5a` |
 | Fallback | `#7a8799` |
 
-Timeline selection and hover states are derived by mixing the active discipline or subsystem color into transparent highlight fills and strokes.
+Task discipline accents are owned by the shared task presentation.
 
 ## Milestone Event Colors
 

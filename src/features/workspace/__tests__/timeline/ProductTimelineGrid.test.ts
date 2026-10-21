@@ -124,8 +124,8 @@ it("signals an unresolved prerequisite, then prioritizes a recorded blocker", ()
   expect(waiting).toContain("Waiting on prerequisite");
   const blocked = renderGrid({ bootstrap, tasks: [{ ...task, isBlocked: true }] });
   expect(blocked).toContain("timeline-task-status-logo-signal-blocked");
-  expect(blocked).toContain(">Blocked</span>");
-  expect(blocked).toContain("Waiting on prerequisite");
+  expect(blocked).toContain("</svg></span>Blocked</span>");
+  expect(blocked).not.toContain("Waiting on prerequisite");
 });
 
 it("shows completed work as complete despite stale blocker and prerequisite flags", () => {
@@ -139,4 +139,13 @@ it("shows completed work as complete despite stale blocker and prerequisite flag
   expect(markup).not.toContain(">Blocked</span>");
   expect(markup).not.toContain("Waiting on prerequisite");
   expect(markup).toContain("1 of 1 tasks complete");
+});
+
+it("renders the effective status tone and full dates on short blocked bars", () => {
+  const bootstrap = createBootstrap();
+  const markup = renderGrid({ bootstrap, tasks: [{ ...bootstrap.tasks[0], isBlocked: true }] });
+  expect(markup).toContain('data-status-signal="blocked"');
+  expect(markup).toContain('--timeline-task-bar-background:var(--status-danger-bg)');
+  expect(markup).toContain('--timeline-task-bar-text-color:var(--status-danger-text)');
+  expect(markup).toContain('Blocked');
 });

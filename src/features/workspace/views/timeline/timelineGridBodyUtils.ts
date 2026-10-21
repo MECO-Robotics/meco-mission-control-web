@@ -8,7 +8,9 @@ function getTimelineTaskStatusSignalForTask(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
 ): TimelineTaskStatusSignal {
-  if (getTaskOpenBlockersForTask(task.id, bootstrap).length > 0) {
+  if (task.status === "complete") return "complete";
+
+  if (task.isBlocked || getTaskOpenBlockersForTask(task.id, bootstrap).length > 0) {
     return "blocked";
   }
 

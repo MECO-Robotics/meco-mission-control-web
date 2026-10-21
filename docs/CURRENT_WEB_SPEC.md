@@ -149,3 +149,14 @@ Purchases show received and remaining quantities with receipt locations and hist
 New task drafts use the selected project and a subsystem from that project. Owner defaults and choices use leads/students; mentor defaults use mentors. Missing eligible people remain unassigned. Existing advanced and manufacturing details remain available and retain saved values when collapsed.
 
 Part readiness uses reviewed, revision-matched evidence. Historical results remain stored; stale results do not verify a changed part revision. Required milestone criteria must exist before readiness can be established.
+
+## Gantt status presentation
+
+Bars use semantic status colors with visible text/icons in the sticky work
+column. Complete overrides stale blockers; otherwise open blockers precede
+unmet hard prerequisites. Overdue labels count local calendar days past due
+without replacing status color. Collapsed groups retain one neutral, clickable
+Group span with completion, blocked and overdue counts. A shared-topbar legend
+explains the colors. Current agenda, milestone lane, team/subsystem grouping,
+assignee summaries, dependency arrows and handoff modal remain authoritative.
+No API/schema migration or reseed is required.

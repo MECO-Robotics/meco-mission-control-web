@@ -227,3 +227,7 @@ clears removed placement targets. Missing hard prerequisites stay blocking.
 Manufacturing work must be retargeted or removed before its part definition is
 deleted. Help requests are canonical Risks with category `help` and server-owned
 creator attribution.
+
+`WorkspacePopover` supplies anchored, nonmodal informational disclosures such
+as the Gantt status legend, reusing dropdown positioning and dismissal. Record
+handoffs continue to use the current handoff modal.

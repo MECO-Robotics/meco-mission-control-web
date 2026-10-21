@@ -1,50 +1,13 @@
-import type { BootstrapPayload } from "@/types/bootstrap";
-import type { DisciplineCode } from "@/types/common";
-
-const FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR = "#7a8799";
-
-const TIMELINE_TASK_DISCIPLINE_COLORS: Record<DisciplineCode, string> = {
-  design: "#c67b1f",
-  manufacturing: "#b86125",
-  assembly: "#d1863d",
-  electrical: "#c9a227",
-  programming: "#6d5bd0",
-  testing: "#b84f7a",
-  planning: "#6a7f96",
-  communications: "#2f8f83",
-  finance: "#5d8c4a",
-  research: "#4b7ca8",
-  documentation: "#8c6b4d",
-  engagement: "#b26d3b",
-  presentation: "#a05fb8",
-  media_production: "#d05b7f",
-  partnerships: "#3a8a76",
-  game_analysis: "#3e7cc7",
-  scouting: "#3aa0b8",
-  data_analysis: "#4f65b8",
-  risk_review: "#8b5c4d",
-  curriculum: "#5e8f6a",
-  instruction: "#7d62c7",
-  practice: "#3d9b7a",
-  assessment: "#c16b4a",
-  photography: "#a85c46",
-  video: "#7a5be0",
-  graphics: "#d45e8c",
-  writing: "#6f7b91",
-  web: "#2f8fa6",
-  social_media: "#dd6f5a",
+import type { CSSProperties } from "react";
+import type { TimelineTaskStatusSignal } from "../timelineGridBodyUtils";
+export const TIMELINE_STATUS_TONES: Record<TimelineTaskStatusSignal, string> = {
+  "not-started": "neutral", "in-progress": "warning", "waiting-for-qa": "info",
+  complete: "success", blocked: "danger", "waiting-on-dependency": "warning",
 };
-
-export function getTimelineTaskDisciplineColor(
-  disciplineId: string | null,
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
-) {
-  if (!disciplineId) {
-    return FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR;
-  }
-
-  const code = workTypesById[disciplineId]?.code;
-  return code && code in TIMELINE_TASK_DISCIPLINE_COLORS
-    ? TIMELINE_TASK_DISCIPLINE_COLORS[code as DisciplineCode]
-    : FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR;
+export function buildTimelineTaskToneStyle(signal: TimelineTaskStatusSignal): CSSProperties {
+  const tone = TIMELINE_STATUS_TONES[signal];
+  return {
+    "--timeline-task-bar-background": `var(--status-${tone}-bg)`,
+    "--timeline-task-bar-text-color": `var(--status-${tone}-text)`,
+  } as CSSProperties;
 }
