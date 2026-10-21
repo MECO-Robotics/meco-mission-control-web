@@ -9,11 +9,13 @@ import { TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
 import { ProductTimelineDependencies } from "./ProductTimelineDependencies";
 import { getProductTimelineTaskLinks } from "./model/productTimelineDependencies";
 import { buildProductTimelineProjects, getProductTimelineDateLabelIndices, getProductTimelineInspection, getProductTimelineTaskContext, getProductTimelineTaskSpan } from "./model/productTimelineModel";
+import type { GroupBy } from "./model/productTimelineModel";
 
 interface ProductTimelineGridProps {
   bootstrap: BootstrapPayload;
   tasks: TaskRecord[];
   days: string[];
+  groupBy: GroupBy;
   viewInterval: "week" | "month" | "all";
   zoom?: number;
   selectedDate: string | null;
@@ -23,7 +25,7 @@ interface ProductTimelineGridProps {
   isAllProjectsView: boolean;
 }
 
-export function ProductTimelineGrid({ bootstrap, tasks, days, viewInterval, zoom = 1, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
+export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, viewInterval, zoom = 1, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const workHeaderRef = useRef<HTMLDivElement | null>(null);
   const datesRef = useRef<HTMLDivElement | null>(null);
@@ -32,7 +34,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, viewInterval, zoom
   const trackWidth = useTimelineShellSizing(datesRef);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [inspectedId, setInspectedId] = useState<string | null>(null);
-  const projects = useMemo(() => buildProductTimelineProjects(bootstrap, tasks, days), [bootstrap, tasks, days]);
+  const projects = useMemo(() => buildProductTimelineProjects(bootstrap, tasks, days, groupBy), [bootstrap, tasks, days, groupBy]);
   const today = localTodayDate();
   const inspectionTask = inspectedId ? tasks.find((task) => task.id === inspectedId) : undefined;
   const inspection = inspectionTask ? getProductTimelineInspection(inspectionTask, bootstrap) : null;

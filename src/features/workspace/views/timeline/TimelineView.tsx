@@ -10,6 +10,7 @@ import { WorkspaceTopbarControls, buildSingleAddMenuAction, buildTopbarAddMenuAc
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { ScheduleAgendaPanel, type ScheduleAgendaHandle } from "../taskCalendar/ScheduleAgendaPanel";
 import { ProductTimelineGrid } from "./ProductTimelineGrid";
+import type { GroupBy } from "./model/productTimelineModel";
 import { TimelineMilestoneLane } from "./TimelineMilestoneLane";
 import { TimelineToolbar } from "./TimelineToolbar";
 import { useTimelineViewData } from "./hooks/useTimelineViewData";
@@ -45,6 +46,7 @@ export function TimelineView({
   const agendaRef = useRef<ScheduleAgendaHandle>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [localSearchFilter, setLocalSearchFilter] = useState("");
+  const [groupBy, setGroupBy] = useState<GroupBy>("team");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showAgenda, setShowAgenda] = useState(true);
   const [mobileAgendaOpen, setMobileAgendaOpen] = useState(false);
@@ -74,6 +76,7 @@ export function TimelineView({
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="timeline-toolbar timeline-topbar-controls">
           <TimelineToolbar
+            groupBy={groupBy} onGroupByChange={setGroupBy}
             activeFilterCount={filterControls.activeFilterCount}
             activePersonFilter={activePersonFilter} bootstrap={bootstrap} isAllProjectsView={isAllProjectsView}
             workTypeFilter={filterControls.filters.workTypeFilter} workTypeFilterOptions={filterControls.workTypeFilterOptions}
@@ -101,7 +104,7 @@ export function TimelineView({
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
       <div className="schedule-gantt-agenda" data-agenda-visible={!isPhone && showAgenda} ref={contentRef}>
-        <ProductTimelineGrid bootstrap={bootstrap} tasks={data.tasks} days={data.days} viewInterval={state.viewInterval}
+        <ProductTimelineGrid bootstrap={bootstrap} tasks={data.tasks} days={data.days} groupBy={groupBy} viewInterval={state.viewInterval}
           zoom={state.timelineZoom} selectedDate={selectedDate} onSelectDate={selectDate} onOpenTask={openTaskDetailModal}
           isAllProjectsView={isAllProjectsView}
           milestoneLane={<TimelineMilestoneLane days={data.days} milestones={data.milestones} onOpenMilestone={(id) => agendaRef.current?.openMilestone(id)} />} />

@@ -6,6 +6,8 @@ import { getTaskOpenBlockersForTask, getTaskWaitingOnDependencies } from "@/feat
 import { isTaskDependencySatisfied } from "@/features/workspace/shared/task/taskPlanningInternals";
 import { normalizeTaskTargetIds } from "@/features/workspace/shared/task/normalizeTaskTargetIds";
 
+export type GroupBy = "team" | "subsystem";
+
 export interface ProductTimelineGroup {
   id: string;
   name: string;
@@ -20,7 +22,7 @@ export interface ProductTimelineProject {
   completeCount: number;
 }
 
-export function buildProductTimelineProjects(bootstrap: BootstrapPayload, tasks: TaskRecord[], days: string[]): ProductTimelineProject[] {
+export function buildProductTimelineProjects(bootstrap: BootstrapPayload, tasks: TaskRecord[], days: string[], groupBy: GroupBy): ProductTimelineProject[] {
   const projects = new Map<string, ProductTimelineProject>();
   const uniqueTasks = new Map(tasks.filter((task) => getProductTimelineTaskSpan(task, days)).map((task) => [task.id, task]));
   const sortedTasks = Array.from(uniqueTasks.values()).sort((left, right) => left.startDate.localeCompare(right.startDate) || left.dueDate.localeCompare(right.dueDate) || left.title.localeCompare(right.title) || left.id.localeCompare(right.id));
@@ -36,12 +38,14 @@ export function buildProductTimelineProjects(bootstrap: BootstrapPayload, tasks:
     const isRobot = record?.projectType === "robot";
     const targets = isRobot ? bootstrap.subsystems : bootstrap.workstreams;
     const ids = normalizeTaskTargetIds(isRobot ? task.subsystemIds : task.workstreamIds).filter((id) => targets.some((candidate) => candidate.id === id && candidate.projectId === task.projectId));
-    for (const id of ids.length ? ids : ["general"]) {
-      const target = targets.find((candidate) => candidate.id === id && candidate.projectId === task.projectId);
-      const groupId = ids.length ? `target:${id}` : "general";
-      let group = project.groups.find((candidate) => candidate.id === groupId);
+    const team = task.responsibleGroupId ? bootstrap.responsibleGroups.find((candidate) => candidate.id === task.responsibleGroupId) : undefined;
+    const groups = groupBy === "team"
+      ? [{ id: task.responsibleGroupId ? `team:${task.responsibleGroupId}` : "unassigned-team", name: task.responsibleGroupId ? team?.name ?? `Unavailable team (${task.responsibleGroupId})` : "Unassigned team" }]
+      : ids.length ? ids.map((id) => ({ id: `target:${id}`, name: targets.find((candidate) => candidate.id === id && candidate.projectId === task.projectId)!.name })) : [{ id: "general", name: "General" }];
+    for (const { id, name } of groups) {
+      let group = project.groups.find((candidate) => candidate.id === id);
       if (!group) {
-        group = { id: groupId, name: !ids.length ? "General" : target?.name ?? `Unavailable ${isRobot ? "subsystem" : "workstream"} (${id})`, tasks: [] };
+        group = { id, name, tasks: [] };
         project.groups.push(group);
       }
       group.tasks.push(task);
@@ -50,8 +54,11 @@ export function buildProductTimelineProjects(bootstrap: BootstrapPayload, tasks:
   const projectOrder = new Map(bootstrap.projects.map((project, index) => [project.id, index]));
   return Array.from(projects.values()).sort((left, right) => (projectOrder.get(left.id) ?? Infinity) - (projectOrder.get(right.id) ?? Infinity)).map((project) => {
     const isRobot = bootstrap.projects.find((record) => record.id === project.id)?.projectType === "robot";
-    const targetOrder = new Map((isRobot ? bootstrap.subsystems : bootstrap.workstreams).filter((target) => target.projectId === project.id).map((target, index) => [`target:${target.id}`, index]));
-    project.groups.sort((left, right) => (targetOrder.get(left.id) ?? Infinity) - (targetOrder.get(right.id) ?? Infinity));
+    const groupOrder = new Map<string, number>(groupBy === "team"
+      ? bootstrap.responsibleGroups.map((team, index) => [`team:${team.id}`, index] as const)
+      : (isRobot ? bootstrap.subsystems : bootstrap.workstreams).filter((target) => target.projectId === project.id).map((target, index) => [`target:${target.id}`, index] as const));
+    const order = (id: string) => id === "unassigned-team" ? Infinity : groupOrder.get(id) ?? Number.MAX_SAFE_INTEGER;
+    project.groups.sort((left, right) => order(left.id) - order(right.id));
     return project;
   });
 }

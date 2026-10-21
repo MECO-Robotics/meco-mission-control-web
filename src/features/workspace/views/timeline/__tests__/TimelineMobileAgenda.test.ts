@@ -52,6 +52,13 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
   };
   try {
     expect(render().agenda).toMatchObject({ presentation: "modal", isVisible: false });
+    expect(render().toolbar.groupBy).toBe("team");
+    expect(render().grid.groupBy).toBe("team");
+    const tasks = render().grid.tasks;
+    const days = render().grid.days;
+    render().toolbar.onGroupByChange("subsystem");
+    expect(render().toolbar.groupBy).toBe("subsystem");
+    expect(render().grid).toMatchObject({ groupBy: "subsystem", tasks, days });
     render().grid.onSelectDate("2026-04-30");
     expect(render().agenda).toMatchObject({ presentation: "modal", isVisible: true, selectedDate: "2026-04-30" });
     render().agenda.onClose!();
@@ -71,6 +78,9 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
     expect(render().agenda).toMatchObject({ presentation: "inline", isVisible: false });
     render().grid.onSelectDate("2026-04-01");
     expect(render().agenda).toMatchObject({ presentation: "inline", isVisible: true, selectedDate: "2026-04-01" });
+    render().toolbar.onGroupByChange("team");
+    expect(render().grid.groupBy).toBe("team");
+    expect(render().agenda).toMatchObject({ isVisible: true, selectedDate: "2026-04-01" });
   } finally {
     cleanup.current?.();
     spies.forEach((spy) => spy.mockRestore());
