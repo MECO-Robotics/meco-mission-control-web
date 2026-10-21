@@ -4,7 +4,7 @@ import { ScheduleAgendaPanel } from "../ScheduleAgendaPanel";
 import { createBootstrap } from "@/features/workspace/__tests__/timeline/timelineTestFixtures";
 import type { TaskCalendarEvent } from "../taskCalendarEvents";
 
-function renderAgenda(startDate: string, endDate: string | null, selectedDate?: string, isVisible = true) {
+function renderAgenda(startDate: string, endDate: string | null, selectedDate?: string, isVisible = true, presentation: "inline" | "modal" = "inline") {
   const events: TaskCalendarEvent[] = ["2026-03-31", "2026-04-01", "2026-04-30", "2026-05-01"].map((date) => ({
     id: date,
     title: `Meeting ${date}`,
@@ -17,6 +17,8 @@ function renderAgenda(startDate: string, endDate: string | null, selectedDate?: 
     startDate,
     selectedDate,
     isVisible,
+    presentation,
+    onClose: jest.fn(),
     onClearSelectedDate: jest.fn(),
     endDate,
     events,
@@ -55,6 +57,18 @@ it("keeps filtered Agenda mounted when hidden", () => {
   const markup = renderAgenda("2026-04-01", "2026-04-30", undefined, false);
   expect(markup).toContain('class="schedule-agenda-panel" hidden=""');
   expect(markup).toContain("Meeting 2026-04-01");
+});
+
+it("presents a focused phone Agenda in one closable dialog and removes it when closed", () => {
+  const markup = renderAgenda("2026-04-01", "2026-04-30", "2026-04-30", true, "modal");
+  expect(markup).toContain('<dialog aria-label="Schedule agenda"');
+  expect(markup).toContain('class="modal-card schedule-agenda-modal"');
+  expect(markup).toContain('>Close</button>');
+  expect(markup.match(/Meeting 2026-04-30/g)).toHaveLength(1);
+  expect(markup).not.toContain("Meeting 2026-04-01");
+  const closed = renderAgenda("2026-04-01", "2026-04-30", undefined, false, "modal");
+  expect(closed).not.toContain("<dialog");
+  expect(closed).not.toContain("Meeting 2026-04-01");
 });
 
 it("retires meeting saves across close/reopen and blocks duplicate submissions", async () => {
@@ -110,6 +124,13 @@ it("retires meeting saves across close/reopen and blocks duplicate submissions",
     render().onClose();
     listeners.get("mission-control:open-meeting")!();
     render().setDraft((draft) => ({ ...draft, title: "New draft" }));
+    props.presentation = "modal";
+    props.isVisible = true;
+    expect(render()).toMatchObject({ isOpen: true, draft: { title: "New draft" } });
+    props.isVisible = false;
+    expect(render()).toMatchObject({ isOpen: true, draft: { title: "New draft" } });
+    props.presentation = "inline";
+    expect(render()).toMatchObject({ isOpen: true, draft: { title: "New draft" } });
     finish();
     await Promise.resolve();
     await Promise.resolve();

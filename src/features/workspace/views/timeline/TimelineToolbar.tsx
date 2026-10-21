@@ -8,11 +8,8 @@ import type { DropdownOption } from "@/features/workspace/shared/model/workspace
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX, TIMELINE_ZOOM_MIN } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { SchedulePeriodControls } from "@/features/workspace/views/taskCalendar/SchedulePeriodControls";
-import { SegmentedSelector } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui/WorkspaceTopbarZoomControls";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
-
-type MobileSchedulePresentation = "agenda" | "timeline";
 
 interface TimelineToolbarProps {
   activeFilterCount: number;
@@ -46,8 +43,8 @@ interface TimelineToolbarProps {
   viewInterval: TimelineViewInterval;
   showAgenda: boolean;
   onShowAgendaChange: (value: boolean) => void;
-  mobilePresentation: MobileSchedulePresentation;
-  onMobilePresentationChange: (value: MobileSchedulePresentation) => void;
+  isPhone: boolean;
+  onOpenAgenda: () => void;
 }
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
@@ -82,8 +79,8 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   viewInterval,
   showAgenda,
   onShowAgendaChange,
-  mobilePresentation,
-  onMobilePresentationChange,
+  isPhone,
+  onOpenAgenda,
 }) => (
   <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
     <TopbarResponsiveSearch
@@ -137,24 +134,11 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       items={[
         {
           label: "Agenda",
-          content: (
+          content: isPhone ? <button className="secondary-action" onClick={onOpenAgenda} type="button">Open agenda</button> : (
             <label className="schedule-desktop-view-option">
               <input checked={showAgenda} onChange={(event) => onShowAgendaChange(event.target.checked)} type="checkbox" />
               Show beside timeline
             </label>
-          ),
-        },
-        {
-          label: "Phone view",
-          content: (
-            <div className="schedule-mobile-view-option">
-              <SegmentedSelector
-                ariaLabel="Phone schedule presentation"
-                onChange={onMobilePresentationChange}
-                options={[{ id: "agenda", label: "Agenda" }, { id: "timeline", label: "Timeline" }]}
-                value={mobilePresentation}
-              />
-            </div>
           ),
         },
         {

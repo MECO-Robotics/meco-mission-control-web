@@ -10,12 +10,6 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-@media (min-width: 768px) {
-  .schedule-gantt-agenda[data-agenda-visible="false"] > .schedule-agenda-panel {
-    display: none;
-  }
-}
-
 .schedule-gantt-agenda > .product-timeline-shell {
   min-width: 0;
 }
@@ -33,6 +27,12 @@
 
 .schedule-agenda-panel[hidden] {
   display: none;
+}
+
+.schedule-agenda-modal .schedule-agenda-panel {
+  border-inline-start: 0;
+  max-height: none;
+  padding-inline-start: 0;
 }
 
 .schedule-agenda-months,
@@ -139,28 +139,4 @@ button.task-calendar-day-details-title:hover {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .schedule-gantt-agenda:not([data-mobile-presentation="timeline"]) > .product-timeline-shell,
-  .schedule-gantt-agenda[data-mobile-presentation="timeline"] > .schedule-agenda-panel {
-    display: none;
-  }
-
-  .schedule-gantt-agenda:not([data-mobile-presentation="timeline"]) > .schedule-agenda-panel {
-    border-inline-start: 0;
-    display: block;
-    max-height: none;
-    overflow: visible;
-    padding-inline-start: 0;
-  }
-}
-
-@media (min-width: 768px) {
-  .task-queue-filter-menu-item:has(> .schedule-mobile-view-option) {
-    display: none;
-  }
-}
-
-@media (max-width: 767px) {
-  .task-queue-filter-menu-item:has(> .schedule-desktop-view-option) {
-    display: none;
-  }
 }

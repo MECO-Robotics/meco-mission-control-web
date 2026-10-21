@@ -19,7 +19,7 @@ const planningSteps = [
   {
     id: "task-timeline",
     title: "Open the schedule",
-    instruction: "Choose Schedule in the sidebar. Use View to choose Timeline on phones; larger screens show the timeline beside Agenda.",
+    instruction: "Choose Schedule in the sidebar. Select a date to focus Agenda, or use View to open Agenda on phones. Larger screens show Agenda beside the timeline.",
     selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {
