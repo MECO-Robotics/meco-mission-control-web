@@ -63,20 +63,6 @@ export function buildProductTimelineProjects(bootstrap: BootstrapPayload, tasks:
   });
 }
 
-export function getProductTimelineDateLabelIndices(days: string[], trackWidth: number) {
-  const labels = new Set<number>();
-  const dayWidth = trackWidth / days.length;
-  let previousPosition = -Infinity;
-  for (const [index, day] of days.entries()) {
-    const position = index * dayWidth;
-    if ((index === 0 || new Date(`${day}T12:00:00`).getDay() === 1) && position - previousPosition >= 64 && (index === 0 || position + 64 <= trackWidth)) {
-      labels.add(index);
-      previousPosition = position;
-    }
-  }
-  return labels;
-}
-
 export function getProductTimelineTaskSpan(task: TaskRecord, days: string[]) {
   if (!days.length || !task.startDate || !task.dueDate) return null;
   const first = days[0];

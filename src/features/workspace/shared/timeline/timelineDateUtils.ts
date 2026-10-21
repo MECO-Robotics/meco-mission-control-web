@@ -5,7 +5,7 @@ import {
   localTodayDate,
 } from "@/lib/dateUtils";
 
-export type TimelineViewInterval = "all" | "week" | "month";
+export type TimelineViewInterval = "week" | "month";
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "long" });
 const MONTH_ABBREVIATED_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "short" });
@@ -98,14 +98,10 @@ export function monthEndFromDay(day: string) {
 export function getSchedulePeriodBounds(day: string, interval: TimelineViewInterval) {
   const startDate = interval === "week"
     ? startOfTimelineWeek(day)
-    : interval === "month"
-      ? monthStartFromDay(day)
-      : day;
+    : monthStartFromDay(day);
   const endDate = interval === "week"
     ? endOfTimelineWeek(day)
-    : interval === "month"
-      ? monthEndFromDay(day)
-      : null;
+    : monthEndFromDay(day);
   return { startDate, endDate };
 }
 
@@ -115,8 +111,7 @@ export function monthLabelFromDay(day: string) {
 
 export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, days: string[]) {
   const startDay = days[0];
-  const endDay = days[days.length - 1];
-  if (!startDay || !endDay) {
+  if (!startDay) {
     return viewInterval === "week" ? "No week" : "No month";
   }
 
@@ -124,9 +119,5 @@ export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, da
     return formatMonthYearLabel(startDay);
   }
 
-  if (viewInterval === "week") {
-    return formatMonthDayShortYearFromDay(startDay);
-  }
-
-  return `${formatMonthDayShortYearFromDay(startDay)} – ${formatMonthDayShortYearFromDay(endDay)}`;
+  return formatMonthDayShortYearFromDay(startDay);
 }

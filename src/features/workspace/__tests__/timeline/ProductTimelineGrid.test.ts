@@ -9,7 +9,6 @@ function renderGrid(overrides: Partial<React.ComponentProps<typeof ProductTimeli
     bootstrap,
     tasks: bootstrap.tasks,
     days: ["2026-04-06", "2026-04-07", "2026-04-08"],
-    viewInterval: "week",
     groupBy: "subsystem",
     selectedDate: "2026-04-07",
     onSelectDate: jest.fn(),
@@ -66,13 +65,6 @@ it("exposes date selection and puts the supplied milestone lane before work", ()
   expect(markup).toContain('aria-label="Show agenda for 2026-04-07" aria-pressed="true"');
   expect(markup.indexOf("Integration ready")).toBeLessThan(markup.indexOf("Drivebase"));
   expect(markup).toContain('aria-expanded="true"');
-});
-
-it("uses a weekly header for project span while retaining daily positions", () => {
-  const markup = renderGrid({ viewInterval: "all" });
-  expect(markup).toContain("is-project-span");
-  expect(markup).toContain("Apr 6");
-  expect(markup).toContain('aria-label="Show agenda for 2026-04-08"');
 });
 
 it("keeps project-level work available and hides redundant project headings", () => {

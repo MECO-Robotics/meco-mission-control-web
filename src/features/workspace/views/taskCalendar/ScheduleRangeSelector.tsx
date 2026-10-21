@@ -5,7 +5,6 @@ export type SchedulePresentation = "agenda" | "timeline";
 const TIMELINE_RANGES: Array<{ id: TimelineViewInterval; label: string }> = [
   { id: "week", label: "Week" },
   { id: "month", label: "Month" },
-  { id: "all", label: "Project span" },
 ];
 
 export function ScheduleRangeSelector({

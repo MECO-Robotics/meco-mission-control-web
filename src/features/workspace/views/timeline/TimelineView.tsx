@@ -104,7 +104,7 @@ export function TimelineView({
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
       <div className="schedule-gantt-agenda" data-agenda-visible={!isPhone && showAgenda} ref={contentRef}>
-        <ProductTimelineGrid bootstrap={bootstrap} tasks={data.tasks} days={data.days} groupBy={groupBy} viewInterval={state.viewInterval}
+        <ProductTimelineGrid bootstrap={bootstrap} tasks={data.tasks} days={data.days} groupBy={groupBy}
           zoom={state.timelineZoom} selectedDate={selectedDate} onSelectDate={selectDate} onOpenTask={openTaskDetailModal}
           isAllProjectsView={isAllProjectsView}
           milestoneLane={<TimelineMilestoneLane days={data.days} milestones={data.milestones} onOpenMilestone={(id) => agendaRef.current?.openMilestone(id)} />} />

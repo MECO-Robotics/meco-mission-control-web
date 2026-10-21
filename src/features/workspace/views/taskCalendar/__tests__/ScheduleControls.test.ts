@@ -3,8 +3,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 
-import { SegmentedSelector } from "@/features/workspace/shared/topbar/SegmentedSelector";
 import { formatMonthYearLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { ScheduleRangeSelector } from "../ScheduleRangeSelector";
 
 describe("shared Schedule month label", () => {
   it("uses the same abbreviated month and short year format across presentations", () => {
@@ -12,23 +12,18 @@ describe("shared Schedule month label", () => {
   });
 });
 
-describe("SegmentedSelector", () => {
-  it("keeps timeline range choices visible unless collapse is requested", () => {
+describe("ScheduleRangeSelector", () => {
+  it("offers only Week and Month in the expanded range selector", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(SegmentedSelector, {
-        ariaLabel: "Timeline interval",
+      React.createElement(ScheduleRangeSelector, {
         onChange: jest.fn(),
-        options: [
-          { id: "week", label: "Week" },
-          { id: "month", label: "Month" },
-          { id: "all", label: "All" },
-        ],
+        presentation: "agenda",
         value: "month",
       }),
     );
 
+    expect(markup.match(/class="timeline-interval-toggle-option/g)).toHaveLength(2);
     expect(markup).toContain(">Week</button>");
     expect(markup).toContain('aria-pressed="true" class="timeline-interval-toggle-option is-active" type="button">Month</button>');
-    expect(markup).toContain(">All</button>");
   });
 });

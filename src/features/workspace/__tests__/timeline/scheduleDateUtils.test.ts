@@ -21,7 +21,7 @@ describe("schedule date utilities", () => {
     expect(monthEndFromDay("2026-02-14")).toBe("2026-02-28");
   });
 
-  it("bounds Agenda Week and Month scopes to the selected period", () => {
+  it("bounds Week and Month scopes to the selected period across month and year edges", () => {
     expect(getSchedulePeriodBounds("2026-10-01", "week")).toEqual({
       startDate: "2026-09-27",
       endDate: "2026-10-03",
@@ -30,9 +30,13 @@ describe("schedule date utilities", () => {
       startDate: "2026-10-01",
       endDate: "2026-10-31",
     });
-    expect(getSchedulePeriodBounds("2026-10-01", "all")).toEqual({
-      startDate: "2026-10-01",
-      endDate: null,
+    expect(getSchedulePeriodBounds("2028-02-20", "month")).toEqual({
+      startDate: "2028-02-01",
+      endDate: "2028-02-29",
+    });
+    expect(getSchedulePeriodBounds("2027-01-01", "week")).toEqual({
+      startDate: "2026-12-27",
+      endDate: "2027-01-02",
     });
   });
 

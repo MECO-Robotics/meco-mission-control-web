@@ -21,12 +21,11 @@ export function useTimelinePeriodNavigation({
     const anchorDate = midpointOfTimelineDays(days) ?? viewAnchorDate;
     onIntervalChange(interval, anchorDate);
     window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
-      detail: { anchorDate, viewMode: interval === "week" ? "week" : "month" },
+      detail: { anchorDate, viewMode: interval },
     }));
   }, [days, onIntervalChange, viewAnchorDate]);
 
   const handleShiftPeriod = useCallback((direction: -1 | 1) => {
-    if (viewInterval === "all") return;
     const anchorDate = viewInterval === "week"
       ? addDaysToDay(viewAnchorDate, direction * 7)
       : addMonthsToDay(viewAnchorDate, direction);
@@ -39,7 +38,7 @@ export function useTimelinePeriodNavigation({
   const handleToday = useCallback(() => {
     goToToday();
     window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
-      detail: { anchorDate: localTodayDate(), viewMode: viewInterval === "week" ? "week" : "month" },
+      detail: { anchorDate: localTodayDate(), viewMode: viewInterval },
     }));
   }, [goToToday, viewInterval]);
 

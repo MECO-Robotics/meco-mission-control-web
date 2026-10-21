@@ -20,7 +20,6 @@ export function useTimelineViewState() {
   }, []);
 
   const shiftTimelinePeriod = useCallback((direction: -1 | 1) => {
-    if (viewInterval === "all") return;
     setViewAnchorDate((current) => viewInterval === "week"
       ? addDaysToDay(current, direction * 7)
       : addMonthsToDay(current, direction));
@@ -29,7 +28,6 @@ export function useTimelineViewState() {
 
   const goToToday = useCallback(() => {
     setViewAnchorDate(localTodayDate());
-    setViewInterval((current) => current === "all" ? "month" : current);
     setTimelineZoom(1);
   }, []);
 
