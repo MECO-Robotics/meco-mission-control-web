@@ -158,8 +158,39 @@
 .kanban-project-label span {
   position: sticky;
   top: calc(3.5rem * var(--task-queue-zoom, 1));
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
+}
+
+.kanban-project-toggle {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.kanban-project-toggle svg {
+  flex-shrink: 0;
+  transform: rotate(180deg);
+}
+
+.kanban-project-toggle:hover {
+  color: var(--status-info-text);
+}
+
+.kanban-project-toggle:focus-visible {
+  outline: 2px solid var(--status-info-text);
+  outline-offset: -2px;
 }
 
 .kanban-project-label::before {

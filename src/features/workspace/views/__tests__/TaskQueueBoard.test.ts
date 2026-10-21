@@ -46,7 +46,8 @@ describe("Task Queue board", () => {
     expect(markup).toContain("timeline-task-status-logo-signal-blocked");
     expect(markup).toContain("timeline-task-status-logo-signal-waiting-on-dependency");
     expect(markup.match(/class="task-queue-board-state-label"/g)).toHaveLength(6);
-    expect(markup.match(/class="kanban-project-label"><span>Robot<\/span><\/h3>/g)).toHaveLength(1);
+    expect(markup).toContain('aria-expanded="true" class="kanban-project-toggle"');
+    expect(markup).toContain('>Robot</span></button></h3>');
     expect(markup).not.toContain("table-pagination");
     expect(markup).not.toContain("Unknown project");
     expect(markup).toContain("task-queue-board-card-priority-accented");
