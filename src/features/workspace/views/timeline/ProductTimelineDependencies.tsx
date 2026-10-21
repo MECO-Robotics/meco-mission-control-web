@@ -14,6 +14,29 @@ export function ProductTimelineDependencies({ dependencies, children }: ProductT
   const svgRef = useRef<SVGSVGElement>(null);
   const markerId = useId().replace(/:/g, "");
   const [paths, setPaths] = useState<ProductTimelineDependencyPath[]>([]);
+  const [hoveredBar, setHoveredBar] = useState<HTMLElement | null>(null);
+  const [focusedBar, setFocusedBar] = useState<HTMLElement | null>(null);
+  const pointerPosition = useRef<{ x: number; y: number } | null>(null);
+
+  const getBar = (target: EventTarget | null) => {
+    const bar = target instanceof Element ? target.closest<HTMLElement>(".product-timeline-bar") : null;
+    return bar && wrapperRef.current?.contains(bar) ? bar : null;
+  };
+  const clearPointer = () => {
+    pointerPosition.current = null;
+    setHoveredBar(null);
+  };
+
+  useLayoutEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    // A collapse or regroup can remove a bar or move it away from the pointer.
+    const point = pointerPosition.current;
+    const underPointer = point ? wrapper.ownerDocument.elementFromPoint(point.x, point.y)?.closest(".product-timeline-bar") : null;
+    setHoveredBar((previous) => previous && wrapper.contains(previous) && underPointer === previous ? previous : null);
+    const active = wrapper.ownerDocument.activeElement;
+    setFocusedBar(active instanceof HTMLElement && active.matches(".product-timeline-bar") && wrapper.contains(active) ? active : null);
+  }, [children]);
 
   useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
@@ -45,11 +68,30 @@ export function ProductTimelineDependencies({ dependencies, children }: ProductT
     };
   }, [dependencies, children]);
 
-  return <div ref={wrapperRef} className="product-timeline-dependencies">
+  const activeTaskId = (hoveredBar ?? focusedBar)?.closest<HTMLElement>(".product-timeline-task")?.dataset.taskId;
+  const foreground: ProductTimelineDependencyPath[] = [];
+  const background: ProductTimelineDependencyPath[] = [];
+  for (const path of paths) {
+    (activeTaskId && (path.sourceTaskId === activeTaskId || path.targetTaskId === activeTaskId) ? foreground : background).push(path);
+  }
+
+  return <div ref={wrapperRef} className="product-timeline-dependencies"
+    onPointerOver={(event) => {
+      pointerPosition.current = { x: event.clientX, y: event.clientY };
+      setHoveredBar(getBar(event.target));
+    }}
+    onPointerMove={(event) => {
+      pointerPosition.current = { x: event.clientX, y: event.clientY };
+      setHoveredBar(getBar(event.target));
+    }}
+    onPointerOut={(event) => setHoveredBar(getBar(event.relatedTarget))}
+    onPointerLeave={clearPointer} onPointerCancel={clearPointer}
+    onFocusCapture={(event) => setFocusedBar(getBar(event.target))}
+    onBlurCapture={(event) => setFocusedBar(getBar(event.relatedTarget))}>
     {children}
-    <svg ref={svgRef} className="product-timeline-dependency-layer" aria-hidden="true" focusable="false">
-      <defs>{(["waiting", "satisfied", "advisory"] as const).map((state) => <marker key={state} id={`${markerId}-${state}`} className={`product-timeline-dependency-marker is-${state}`} viewBox="0 0 6 6" refX="6" refY="3" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 6 3 L 0 6 Z" /></marker>)}</defs>
-      {paths.map((path) => <path key={path.key} className={`product-timeline-dependency is-${path.state}`} d={path.d} markerEnd={`url(#${markerId}-${path.state})`} data-dependency-id={path.id} data-type={path.type} data-state={path.state} data-source-task-id={path.sourceTaskId} data-target-task-id={path.targetTaskId} data-group-key={path.groupKey} />)}
-    </svg>
+    {([ ["background", background], ["foreground", foreground] ] as const).map(([layer, layerPaths]) => <svg key={layer} ref={layer === "background" ? svgRef : undefined} className={`product-timeline-dependency-layer is-${layer}`} aria-hidden="true" focusable="false">
+      <defs>{(["waiting", "satisfied", "advisory"] as const).map((state) => <marker key={state} id={`${markerId}-${layer}-${state}`} className={`product-timeline-dependency-marker is-${state}`} viewBox="0 0 6 6" refX="6" refY="3" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 6 3 L 0 6 Z" /></marker>)}</defs>
+      {layerPaths.map((path) => <path key={path.key} className={`product-timeline-dependency is-${path.state}`} d={path.d} markerEnd={`url(#${markerId}-${layer}-${path.state})`} data-dependency-id={path.id} data-type={path.type} data-state={path.state} data-source-task-id={path.sourceTaskId} data-target-task-id={path.targetTaskId} data-group-key={path.groupKey} />)}
+    </svg>)}
   </div>;
 }
