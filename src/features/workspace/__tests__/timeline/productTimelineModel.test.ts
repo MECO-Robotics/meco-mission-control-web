@@ -81,7 +81,7 @@ describe("product timeline work coverage", () => {
 
   it("groups shared work once by its explicit team rather than its owner's memberships", () => {
     const bootstrap = createBootstrap();
-    const baseTeam = { seasonId: "season-1", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+    const baseTeam = { seasonId: "season-1", icon: "users" as const, color: "#4F86C6", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
     bootstrap.responsibleGroups = [
       { ...baseTeam, id: "owner-team", name: "Owner's team", memberIds: ["member-1"] },
       { ...baseTeam, id: "assigned", name: "Assigned team" },
@@ -95,7 +95,7 @@ describe("product timeline work coverage", () => {
 
   it("keeps assigned archived and unavailable teams distinct, with unassigned work last", () => {
     const bootstrap = createBootstrap();
-    const baseTeam = { seasonId: "season-1", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+    const baseTeam = { seasonId: "season-1", icon: "users" as const, color: "#4F86C6", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
     bootstrap.responsibleGroups = [
       { ...baseTeam, id: "unassigned-team", name: "Archived team", isArchived: true },
       { ...baseTeam, id: "second", name: "Second team" },
@@ -124,6 +124,18 @@ describe("product timeline work coverage", () => {
 });
 
 describe("product timeline date and handoff context", () => {
+  it("uses the assigned team's stored identity even when archived, renamed or unlike the task discipline", () => {
+    const bootstrap = createBootstrap();
+    const team = { id: "custom", seasonId: "season-1", name: "Electrical", icon: "megaphone" as const, color: "#C855BC", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: true };
+    bootstrap.responsibleGroups = [team];
+    const task = { ...bootstrap.tasks[0], responsibleGroupId: team.id };
+    expect(getProductTimelineTaskContext(task, bootstrap, "2026-04-01").team).toBe(team);
+    team.name = "Renamed team";
+    expect(getProductTimelineTaskContext(task, bootstrap, "2026-04-01").team).toMatchObject({ name: "Renamed team", icon: "megaphone", color: "#C855BC" });
+    expect(getProductTimelineTaskContext({ ...task, responsibleGroupId: "missing" }, bootstrap, "2026-04-01").team).toBeUndefined();
+    expect(getProductTimelineTaskContext({ ...task, responsibleGroupId: null }, bootstrap, "2026-04-01").team).toBeUndefined();
+  });
+
   it("clips inclusive task bars to the selected days without altering dates", () => {
     const task = createBootstrap().tasks[0];
     expect(getProductTimelineTaskSpan(task, ["2026-04-08", "2026-04-09"])).toEqual({ start: 0, span: 2, spillsLeft: true, spillsRight: true });

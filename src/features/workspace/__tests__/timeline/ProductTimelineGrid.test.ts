@@ -21,7 +21,7 @@ function renderGrid(overrides: Partial<React.ComponentProps<typeof ProductTimeli
 it("keeps the task name, assignee and labeled team icon independent of the timing bar", () => {
   const bootstrap = createBootstrap();
   const task = { ...bootstrap.tasks[0], title: "Verify the complete sensor bundle before controls integration", startDate: "2026-04-07", dueDate: "2026-04-07" };
-  bootstrap.responsibleGroups = [{ id: "electrical", seasonId: "season-1", name: "Electrical", projectIds: [task.projectId], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false }];
+  bootstrap.responsibleGroups = [{ id: "electrical", seasonId: "season-1", name: "Electrical", icon: "zap", color: "#F4A261", projectIds: [task.projectId], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false }];
   task.responsibleGroupId = "electrical";
   const markup = renderGrid({ bootstrap, tasks: [task] });
   expect(markup).toContain(`>${task.title}</button>`);

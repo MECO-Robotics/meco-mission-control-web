@@ -12,7 +12,7 @@ const row = (key: string, overrides: Partial<AttentionQueueRow> = {}): Attention
 const fixture = () => {
   const bootstrap = createBootstrap();
   bootstrap.responsibleGroups = ["a", "b"].map(id => ({
-    id, name: `Team ${id}`, seasonId: "season-1", projectIds: ["project-1"],
+    id, name: `Team ${id}`, icon: "users", color: "#4F86C6", seasonId: "season-1", projectIds: ["project-1"],
     workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false,
   }));
   bootstrap.tasks = [

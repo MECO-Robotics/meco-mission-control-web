@@ -276,7 +276,7 @@ test("purchase records require a human execution Task and are removed with that 
 
 test("deleting a local team clears Task and risk ownership references", () => {
   const state = snapshot();
-  const team = { id: "team", seasonId: "season", name: "Team", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+  const team = { id: "team", seasonId: "season", name: "Team", icon: "users" as const, color: "#4F86C6", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
   state.responsibleGroups.push(team);
   state.tasks[0].responsibleGroupId = team.id;
   state.risks.push({
@@ -297,8 +297,8 @@ test("making a local team primary transfers students from their previous primary
   state.seasons.push({ id: "season", teamId: "team-1", name: "Season", type: "season", startDate: "2026-01-01", endDate: "2026-12-31" });
   state.members.push({ id: studentId, name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" });
   state.responsibleGroups.push(
-    { id: "old-team", seasonId: "season", name: "Old Team", projectIds: [], workTypeIds: [], memberIds: [studentId], primaryMemberIds: [studentId], isArchived: false },
-    { id: "new-team", seasonId: "season", name: "New Team", projectIds: [], workTypeIds: [], memberIds: [studentId], primaryMemberIds: [], isArchived: false },
+    { id: "old-team", seasonId: "season", name: "Old Team", icon: "users", color: "#4F86C6", projectIds: [], workTypeIds: [], memberIds: [studentId], primaryMemberIds: [studentId], isArchived: false },
+    { id: "new-team", seasonId: "season", name: "New Team", icon: "users", color: "#4F86C6", projectIds: [], workTypeIds: [], memberIds: [studentId], primaryMemberIds: [], isArchived: false },
   );
 
   command(state, "/responsible-groups/new-team", { primaryMemberIds: [studentId] }, "PATCH");

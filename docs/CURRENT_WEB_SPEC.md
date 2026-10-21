@@ -91,6 +91,10 @@ Milestones occupy a compact lane above work, opening the same milestone detail/e
 
 ## Implementation Guardrails
 
+Teams store an explicit icon and six-character hex color, editable in the existing team editor with a live preview. The Teams list and Gantt task metadata use the same stored identity, including archived teams. Names and task disciplines do not select a team's icon. Missing teams retain a neutral fallback and an unavailable-team label; unassigned work has no team icon.
+
+Team identity requires local demo snapshot schema 3. Opening a demo saved with an older schema automatically archives its session-storage snapshot under `meco.local-demo.v1.incompatible.<version>` and starts from current examples. Old demo edits are discarded from the active demo; no import or backfill is provided. The existing Reset demo action also reloads the current examples. Authenticated workspace records are unaffected by this browser-only reset.
+
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md) for contributor and ownership criteria.
 
 Key implications for web-app changes:
