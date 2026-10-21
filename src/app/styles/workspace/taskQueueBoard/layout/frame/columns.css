@@ -165,6 +165,15 @@
   transform: rotate(180deg);
 }
 
+.kanban-project-label::before {
+  content: "";
+  position: absolute;
+  inset: -1px 100% -1px auto;
+  width: var(--task-queue-edge-pad);
+  background: inherit;
+  pointer-events: none;
+}
+
 .kanban-project-lanes {
   min-width: 0;
 }
