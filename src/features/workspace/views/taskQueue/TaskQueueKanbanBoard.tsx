@@ -7,6 +7,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { KanbanProjectGroup } from "@/features/workspace/views/kanban/KanbanProjectGroup";
+import { KanbanSwimlane } from "@/features/workspace/views/kanban/KanbanSwimlane";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
 import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
@@ -189,17 +190,16 @@ export function TaskQueueKanbanBoard({
               swimlanes.map((project) => (
                 <KanbanProjectGroup key={project.id} label={project.projectName}>
                   {project.lanes.map((lane) => (
-                    <section className="kanban-swimlane" key={lane.id}>
-                      <header className="kanban-swimlane-label">
-                        <span>{lane.disciplineName}</span>
-                        <span>{lane.tasks.length}</span>
-                      </header>
+                    <KanbanSwimlane
+                      header={<><span>{lane.disciplineName}</span><span>{lane.tasks.length}</span></>}
+                      key={lane.id}
+                    >
                       <div className="task-queue-board-focused-lane-grid">
                         {lane.tasks.map((task) => (
                           <TaskQueueCard {...cardProps} key={task.id} task={task} />
                         ))}
                       </div>
-                    </section>
+                    </KanbanSwimlane>
                   ))}
                 </KanbanProjectGroup>
               ))
