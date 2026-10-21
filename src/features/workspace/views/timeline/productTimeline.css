@@ -44,13 +44,13 @@
 .product-timeline-day-grid { position: absolute; inset: 0 0 0 var(--schedule-work-width); display: grid; grid-template-columns: repeat(var(--schedule-day-count), minmax(0, 1fr)); z-index: 1; pointer-events: none; }
 .product-timeline-day-grid > span { border-right: 1px solid var(--border-grid); }
 .product-timeline-track { position: relative; min-width: 0; }
-.product-timeline-bar, .product-timeline-summary-span { position: absolute; top: 50%; transform: translateY(-50%); box-sizing: border-box; }
-.product-timeline-bar { height: 22px; min-width: 2px; border: 0; border-radius: 3px; padding: 0; background: var(--calendar-event-task-due); cursor: pointer; }
+.product-timeline-bar, .product-timeline-summary-span { position: absolute; top: 50%; transform: translateY(-50%); box-sizing: border-box; height: 32px; }
+.product-timeline-bar { min-width: 2px; border: 0; border-radius: 3px; padding: 0; background: var(--calendar-event-task-due); cursor: pointer; }
 .product-timeline-bar:hover { filter: brightness(1.15); }
 .product-timeline-bar.is-complete { background: var(--calendar-event-manufacturing-due); }
 .product-timeline-bar.spills-left { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .product-timeline-bar.spills-right { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.product-timeline-summary-span { height: 22px; border-radius: 2px; border: 1px solid var(--border-base); background: var(--status-neutral-bg); }
+.product-timeline-summary-span { border-radius: 2px; border: 1px solid var(--border-base); background: var(--status-neutral-bg); }
 .modal-card.product-timeline-handoffs-modal { width: min(100%, 760px); max-height: calc(100dvh - 2rem); box-sizing: border-box; overflow-y: auto; overflow-wrap: anywhere; }
 .product-timeline-handoffs-body { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; color: var(--text-copy); font-size: 0.75rem; }
 .product-timeline-handoffs-body > div { min-width: 0; flex: 1 1 180px; }
