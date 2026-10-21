@@ -1,4 +1,4 @@
-import type { TaskCalendarEvent } from "./taskCalendarEvents";
+import { canOpenTaskCalendarEvent, type TaskCalendarEvent } from "./taskCalendarEvents";
 import type { groupTaskCalendarEventsByMonth } from "./taskCalendarLayout";
 
 export function ScheduleAgendaMonthList({
@@ -21,7 +21,7 @@ export function ScheduleAgendaMonthList({
             <h2>{monthLabel}</h2>
             <ol className="schedule-agenda-list">
               {events.map((event) => {
-                const canOpen = ["milestone", "task-due", "qa-due"].includes(event.extendedProps.type);
+                const canOpen = canOpenTaskCalendarEvent(event);
                 const date = new Date(event.start);
                 const dateLabel = date.toLocaleDateString(undefined, {
                   weekday: "short",

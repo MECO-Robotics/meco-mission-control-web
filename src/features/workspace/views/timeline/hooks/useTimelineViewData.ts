@@ -1,3 +1,4 @@
+import { buildTaskCalendarEvents } from "../../taskCalendar/taskCalendarEvents";
 import { useCallback, useMemo } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
@@ -68,6 +69,12 @@ export function useTimelineViewData({
     searchFilter,
     timelineFilters,
   });
+  const agendaEvents = useMemo(() => buildTaskCalendarEvents({
+    activePersonFilter: [],
+    bootstrap: { ...bootstrap, tasks: scopedTasks, milestones: scopedMilestones, meetings: scopedMeetings },
+    isAllProjectsView,
+    projectsById,
+  }), [bootstrap, isAllProjectsView, projectsById, scopedMeetings, scopedMilestones, scopedTasks]);
   const timeline = useMemo(
     () =>
       buildTimelineData({
@@ -152,6 +159,7 @@ export function useTimelineViewData({
       : null;
 
   return {
+    agendaEvents,
     clearHoveredMilestonePopup,
     workTypesById,
     milestoneModal,

@@ -31,16 +31,16 @@ describe("canonical workspace navigation", () => {
     const next = { ...state, activeTab: "tasks" as const, taskView: "timeline" as const };
     const search = writeNavigationLocation(next, "robot-project", "?season=s&project=p");
     expect(new URLSearchParams(search).get("project")).toBe("p");
-    expect(new URLSearchParams(search).get("presentation")).toBe("timeline");
+    expect(new URLSearchParams(search).has("presentation")).toBe(false);
     expect(new URLSearchParams(search).has("mode")).toBe(false);
     expect(readNavigationLocation(search, "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
-    expect(readNavigationLocation("?view=work-schedule&presentation=agenda&milestone=review-1", "robot-project")).toEqual({ tab: "tasks", taskView: "agenda", milestoneId: "review-1" });
+    expect(readNavigationLocation("?view=work-schedule&presentation=agenda&milestone=review-1", "robot-project")).toEqual({ tab: "tasks", taskView: "timeline", milestoneId: "review-1" });
     expect(readNavigationLocation("?view=work-risks&risk=risk-1", "robot-project")).toEqual({ tab: "risks", riskId: "risk-1" });
   });
   it("rejects unknown and unavailable destinations and presentation values", () => {
     expect(readNavigationLocation("?view=resources-parts", "non-robot-project")).toEqual({ tab: "home" });
     expect(readNavigationLocation("?view=unknown", "robot-project")).toEqual({ tab: "home" });
-    expect(readNavigationLocation("?view=work-schedule&presentation=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "calendar" });
+    expect(readNavigationLocation("?view=work-schedule&presentation=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
     expect(getActiveNavigationSubItemId({ ...state, activeTab: "worklogs", worklogsView: "qa" })).toBe("resources-qa-reports");
   });
   it("keeps CAD nested under Structure", () => {

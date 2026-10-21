@@ -1,6 +1,7 @@
+import { ScheduleAgendaPanel } from "../taskCalendar/ScheduleAgendaPanel";
 import React, { useEffect, useMemo, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MilestonePayload } from "@/types/payloads";
+import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -27,6 +28,7 @@ import { useTimelinePeriodNavigation } from "./hooks/useTimelinePeriodNavigation
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 
 interface TimelineViewProps {
+  onSaveMeeting: (payload: MeetingPayload) => Promise<void>;
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
@@ -55,6 +57,7 @@ interface TimelineViewProps {
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
+  onSaveMeeting,
   onCreateMilestoneReport,
   bootstrap,
   isAllProjectsView,
@@ -231,62 +234,79 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               makeAddMenuAction("Add milestone", () => window.dispatchEvent(new Event("mission-control:open-milestone")), <IconTasks />),
               buildSingleAddMenuAction({ label: "Add task", onSelect: openCreateTaskModal })[0],
             )}
-            ariaLabel="Add calendar item"
-            title="Add calendar item"
+            ariaLabel="Add schedule item"
+            title="Add schedule item"
           />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
-      <TimelineGridBody
-        bootstrap={bootstrap}
-        clearHoveredMilestonePopup={data.clearHoveredMilestonePopup}
-        collapsedProjects={state.collapsedProjects}
-        collapsedSubsystems={state.collapsedSubsystems}
-        workTypesById={data.workTypesById}
-        firstDayGridColumn={layout.firstDayGridColumn}
-        gridMinWidth={layout.gridMinWidth}
-        handleTimelineDayMouseEnter={data.handleTimelineDayMouseEnter}
-        handleTimelineZoomWheel={state.handleTimelineZoomWheel}
-        hasProjectColumn={layout.hasProjectColumn}
-        isScrolling={data.isTimelineShellScrolling}
-        isWeekView={state.viewInterval === "week"}
-        monthGroups={data.monthGroups}
-        handleTimelineHeaderDayClick={actions.handleTimelineHeaderDayClick}
-        projectColumnWidth={layout.projectColumnWidth}
-        projectRows={data.projectRows}
-        hoveredSubsystemId={state.hoveredSubsystemId}
-        hoveredTaskId={state.hoveredTaskId}
-        selectedSubsystemId={state.selectedSubsystemId}
-        selectedTaskId={state.selectedTaskId}
-        statusIconColumnIndex={layout.statusIconColumnIndex}
-        statusIconColumnWidth={layout.statusIconColumnWidth}
-        statusIconStickyRight={layout.statusIconStickyRight}
-        showProjectCol={layout.showProjectCol}
-        showSubsystemCol={layout.showSubsystemCol}
-        subsystemColumnIndex={layout.subsystemColumnIndex}
-        subsystemColumnWidth={layout.subsystemColumnWidth}
-        subsystemRows={data.timeline.subsystemRows}
-        subsystemStickyLeft={layout.subsystemStickyLeft}
-        timelineDayCellRefs={data.timelineDayCellRefs}
-        timelineDayHeaderCells={data.timelineDayHeaderCells}
-        timelineFilterMotionClass={data.timelineFilterMotionClass}
-        timelineGridMotion={state.timelineGridMotion}
-        timelineGridRef={data.timelineGridRef}
-        timelineGridTemplate={layout.timelineGridTemplate}
-        timelineZoom={state.timelineZoom}
-        timelineShellRef={data.timelineShellRef}
-        clearHoveredSubsystemRow={state.clearHoveredSubsystemRow}
-        clearHoveredTaskRow={state.clearHoveredTaskRow}
-        hoverTaskRow={state.hoverTaskRow}
-        hoverSubsystemRow={state.hoverSubsystemRow}
-        selectSubsystemRow={state.selectSubsystemRow}
-        selectTaskRow={state.selectTaskRow}
-        toggleProject={state.toggleProject}
-        toggleProjectColumn={state.toggleProjectColumn}
-        toggleSubsystem={state.toggleSubsystem}
-        toggleSubsystemColumn={state.toggleSubsystemColumn}
-        openTaskDetailModal={actions.openTaskDetailAndSelectTask}
-      />
+      <div className="schedule-gantt-agenda">
+        <TimelineGridBody
+          bootstrap={bootstrap}
+          clearHoveredMilestonePopup={data.clearHoveredMilestonePopup}
+          collapsedProjects={state.collapsedProjects}
+          collapsedSubsystems={state.collapsedSubsystems}
+          workTypesById={data.workTypesById}
+          firstDayGridColumn={layout.firstDayGridColumn}
+          gridMinWidth={layout.gridMinWidth}
+          handleTimelineDayMouseEnter={data.handleTimelineDayMouseEnter}
+          handleTimelineZoomWheel={state.handleTimelineZoomWheel}
+          hasProjectColumn={layout.hasProjectColumn}
+          isScrolling={data.isTimelineShellScrolling}
+          isWeekView={state.viewInterval === "week"}
+          monthGroups={data.monthGroups}
+          handleTimelineHeaderDayClick={actions.handleTimelineHeaderDayClick}
+          projectColumnWidth={layout.projectColumnWidth}
+          projectRows={data.projectRows}
+          hoveredSubsystemId={state.hoveredSubsystemId}
+          hoveredTaskId={state.hoveredTaskId}
+          selectedSubsystemId={state.selectedSubsystemId}
+          selectedTaskId={state.selectedTaskId}
+          statusIconColumnIndex={layout.statusIconColumnIndex}
+          statusIconColumnWidth={layout.statusIconColumnWidth}
+          statusIconStickyRight={layout.statusIconStickyRight}
+          showProjectCol={layout.showProjectCol}
+          showSubsystemCol={layout.showSubsystemCol}
+          subsystemColumnIndex={layout.subsystemColumnIndex}
+          subsystemColumnWidth={layout.subsystemColumnWidth}
+          subsystemRows={data.timeline.subsystemRows}
+          subsystemStickyLeft={layout.subsystemStickyLeft}
+          timelineDayCellRefs={data.timelineDayCellRefs}
+          timelineDayHeaderCells={data.timelineDayHeaderCells}
+          timelineFilterMotionClass={data.timelineFilterMotionClass}
+          timelineGridMotion={state.timelineGridMotion}
+          timelineGridRef={data.timelineGridRef}
+          timelineGridTemplate={layout.timelineGridTemplate}
+          timelineZoom={state.timelineZoom}
+          timelineShellRef={data.timelineShellRef}
+          clearHoveredSubsystemRow={state.clearHoveredSubsystemRow}
+          clearHoveredTaskRow={state.clearHoveredTaskRow}
+          hoverTaskRow={state.hoverTaskRow}
+          hoverSubsystemRow={state.hoverSubsystemRow}
+          selectSubsystemRow={state.selectSubsystemRow}
+          selectTaskRow={state.selectTaskRow}
+          toggleProject={state.toggleProject}
+          toggleProjectColumn={state.toggleProjectColumn}
+          toggleSubsystem={state.toggleSubsystem}
+          toggleSubsystemColumn={state.toggleSubsystemColumn}
+          openTaskDetailModal={actions.openTaskDetailAndSelectTask}
+        />
+
+        <ScheduleAgendaPanel
+          bootstrap={bootstrap}
+          isAllProjectsView={isAllProjectsView}
+          startDate={data.timeline.days[0] ?? state.viewAnchorDate}
+          endDate={data.timeline.days.at(-1) ?? null}
+          events={data.agendaEvents}
+          onSaveMeeting={onSaveMeeting}
+          onSaveTimelineMilestone={onSaveTimelineMilestone}
+          onDeleteTimelineMilestone={onDeleteTimelineMilestone}
+          onTaskDetailOpen={openTaskDetailModal}
+          onCreateMilestoneReport={onCreateMilestoneReport}
+          onTaskEditCanceled={onTaskEditCanceled}
+          onTaskEditSaved={onTaskEditSaved}
+        />
+      </div>
 
       <TimelineMilestoneUnderlaysPortal
         onHideMilestonePopup={data.clearHoveredMilestonePopup}

@@ -29,7 +29,7 @@ export function WorkspaceHomeSection(props: WorkspaceContentPanelsViewProps) {
         onOpenActionItem={openActionItem}
         onOpenAllActions={() => props.onOpenDrilldownTarget({ tab: "risks" })}
         onOpenTask={openTask}
-        onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "agenda", milestoneId })}
+        onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "timeline", milestoneId })}
         projectId={props.selectedProject?.id ?? null}
         scopeLabel={props.selectedProject?.name ?? "All projects"}
       />
