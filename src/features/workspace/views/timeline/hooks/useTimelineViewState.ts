@@ -11,8 +11,6 @@ export function useTimelineViewState() {
     setTimelineZoom((previous) => clampTimelineZoom(previous + direction * TIMELINE_ZOOM_STEP));
   }, []);
 
-  const fitTimeline = useCallback(() => setTimelineZoom(1), []);
-
   const handleTimelineIntervalChange = useCallback((nextInterval: TimelineViewInterval, nextAnchorDate?: string) => {
     if (nextAnchorDate) setViewAnchorDate(nextAnchorDate);
     setViewInterval(nextInterval);
@@ -33,7 +31,6 @@ export function useTimelineViewState() {
 
   return {
     adjustTimelineZoom,
-    fitTimeline,
     goToToday,
     handleTimelineIntervalChange,
     shiftTimelinePeriod,

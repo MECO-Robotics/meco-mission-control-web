@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { IconCalendar, IconTasks } from "@/components/shared/Icons";
+import { IconCalendar, IconChevronLeft, IconChevronRight, IconTasks } from "@/components/shared/Icons";
 import { WorkspaceTopbarControls, buildSingleAddMenuAction, buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { ScheduleAgendaPanel, type ScheduleAgendaHandle } from "../taskCalendar/ScheduleAgendaPanel";
@@ -44,7 +44,7 @@ export function TimelineView({
 }: TimelineViewProps) {
   const state = useTimelineViewState();
   const agendaRef = useRef<ScheduleAgendaHandle>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const agendaId = useId();
   const [localSearchFilter, setLocalSearchFilter] = useState("");
   const [groupBy, setGroupBy] = useState<GroupBy>("team");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -67,10 +67,6 @@ export function TimelineView({
     viewAnchorDate: state.viewAnchorDate, viewInterval: state.viewInterval });
   const navigate = (operation: () => void) => { setSelectedDate(null); operation(); };
   const selectDate = (day: string) => { setSelectedDate(day); if (isPhone) setMobileAgendaOpen(true); else setShowAgenda(true); };
-  const fit = () => {
-    state.fitTimeline();
-    contentRef.current?.querySelector(".product-timeline-shell")?.scrollTo({ left: 0 });
-  };
   return (
     <section className={`panel dense-panel timeline-layout ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
@@ -91,7 +87,7 @@ export function TimelineView({
             onChangePersonFilter={setActivePersonFilter} onAdjustZoom={state.adjustTimelineZoom}
             onIntervalChange={(interval) => navigate(() => navigation.handleTimelineIntervalChange(interval))}
             onShiftPeriod={(direction) => navigate(() => navigation.handleShiftPeriod(direction))}
-            onToday={() => navigate(navigation.handleToday)} onFit={fit}
+            onToday={() => navigate(navigation.handleToday)}
             timelinePeriodLabel={data.timelinePeriodLabel} timelineZoom={state.timelineZoom} viewInterval={state.viewInterval}
             showAgenda={showAgenda} onShowAgendaChange={setShowAgenda}
             isPhone={isPhone} onOpenAgenda={() => setMobileAgendaOpen(true)}
@@ -103,12 +99,19 @@ export function TimelineView({
           )} ariaLabel="Add schedule item" title="Add schedule item" />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
-      <div className="schedule-gantt-agenda" data-agenda-visible={!isPhone && showAgenda} ref={contentRef}>
+      <div className="schedule-gantt-agenda" data-agenda-visible={!isPhone && showAgenda}>
         <ProductTimelineGrid bootstrap={bootstrap} tasks={data.tasks} days={data.days} groupBy={groupBy}
           zoom={state.timelineZoom} selectedDate={selectedDate} onSelectDate={selectDate} onOpenTask={openTaskDetailModal}
           isAllProjectsView={isAllProjectsView}
           milestoneLane={<TimelineMilestoneLane days={data.days} milestones={data.milestones} onOpenMilestone={(id) => agendaRef.current?.openMilestone(id)} />} />
-        <ScheduleAgendaPanel ref={agendaRef} bootstrap={bootstrap} isAllProjectsView={isAllProjectsView}
+        {!isPhone && <button
+          aria-controls={agendaId} aria-expanded={showAgenda} aria-label={showAgenda ? "Collapse agenda" : "Expand agenda"}
+          className="icon-button schedule-agenda-toggle" onClick={() => setShowAgenda((visible) => !visible)}
+          title={showAgenda ? "Collapse agenda" : "Expand agenda"} type="button"
+        >
+          {showAgenda ? <IconChevronRight /> : <IconChevronLeft />}
+        </button>}
+        <ScheduleAgendaPanel id={agendaId} ref={agendaRef} bootstrap={bootstrap} isAllProjectsView={isAllProjectsView}
           presentation={isPhone ? "modal" : "inline"} isVisible={isPhone ? mobileAgendaOpen : showAgenda} onClose={() => setMobileAgendaOpen(false)}
           startDate={data.days[0] ?? state.viewAnchorDate} endDate={data.days.at(-1) ?? null} events={data.agendaEvents}
           selectedDate={selectedDate} onClearSelectedDate={() => setSelectedDate(null)} triggerCreateMilestoneToken={triggerCreateMilestoneToken}

@@ -20,6 +20,7 @@ export interface ScheduleAgendaHandle {
 }
 
 interface ScheduleAgendaPanelProps {
+  id?: string;
   selectedDate?: string | null;
   onClearSelectedDate?: () => void;
   triggerCreateMilestoneToken?: number;
@@ -62,6 +63,7 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
 }
 
 export const ScheduleAgendaPanel = forwardRef<ScheduleAgendaHandle, ScheduleAgendaPanelProps>(function ScheduleAgendaPanel({
+  id,
   selectedDate = null,
   onClearSelectedDate,
   triggerCreateMilestoneToken = 0,
@@ -222,7 +224,7 @@ export const ScheduleAgendaPanel = forwardRef<ScheduleAgendaHandle, ScheduleAgen
   };
 
   const agenda = (
-      <aside aria-label="Schedule agenda" className="schedule-agenda-panel" hidden={!isVisible}>
+      <aside id={id} aria-label="Schedule agenda" className="schedule-agenda-panel" hidden={!isVisible}>
         {selectedDate && (
           <div className="schedule-agenda-focus">
             <time dateTime={selectedDate}>{new Date(`${selectedDate}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</time>

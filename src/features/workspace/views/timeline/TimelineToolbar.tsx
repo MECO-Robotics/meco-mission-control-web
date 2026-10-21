@@ -9,7 +9,7 @@ import type { DropdownOption } from "@/features/workspace/shared/model/workspace
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX, TIMELINE_ZOOM_MIN } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { SchedulePeriodControls } from "@/features/workspace/views/taskCalendar/SchedulePeriodControls";
-import { WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui/WorkspaceTopbarZoomControls";
+import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 import type { GroupBy } from "./model/productTimelineModel";
 
@@ -28,7 +28,6 @@ interface TimelineToolbarProps {
   onSearchChange: (value: string) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
   onToday: () => void;
-  onFit: () => void;
   priorityFilter: FilterSelection;
   projectFilter: FilterSelection;
   responsibleGroupFilter: FilterSelection;
@@ -66,7 +65,6 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   onSearchChange,
   onShiftPeriod,
   onToday,
-  onFit,
   priorityFilter,
   projectFilter,
   responsibleGroupFilter,
@@ -152,9 +150,17 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       presentation="timeline"
       range={viewInterval}
     />
-    <button className="schedule-today-button" onClick={onFit} title="Fit period to timeline width" type="button">
-      Fit
-    </button>
+    <WorkspaceTopbarZoom
+      ariaLabel="Timeline zoom"
+      canZoomIn={timelineZoom < TIMELINE_ZOOM_MAX}
+      canZoomOut={timelineZoom > TIMELINE_ZOOM_MIN}
+      decreaseLabel="Zoom out timeline"
+      increaseLabel="Zoom in timeline"
+      onZoomIn={() => onAdjustZoom(1)}
+      onZoomOut={() => onAdjustZoom(-1)}
+      toolbarClassName="workspace-topbar-zoom-slot-actions"
+      value={formatTimelineZoomLabel(timelineZoom)}
+    />
     <CompactFilterMenu
       className="schedule-view-menu"
       ariaLabel="Schedule view options"
@@ -168,21 +174,6 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
               <input checked={showAgenda} onChange={(event) => onShowAgendaChange(event.target.checked)} type="checkbox" />
               Show beside timeline
             </label>
-          ),
-        },
-        {
-          label: "Timeline zoom",
-          content: (
-            <WorkspaceTopbarZoomControls
-              ariaLabel="Timeline zoom"
-              canZoomIn={timelineZoom < TIMELINE_ZOOM_MAX}
-              canZoomOut={timelineZoom > TIMELINE_ZOOM_MIN}
-              decreaseLabel="Zoom out timeline"
-              increaseLabel="Zoom in timeline"
-              onZoomIn={() => onAdjustZoom(1)}
-              onZoomOut={() => onAdjustZoom(-1)}
-              value={formatTimelineZoomLabel(timelineZoom)}
-            />
           ),
         },
       ]}
