@@ -123,7 +123,7 @@ export function TaskQueueToolbar({
               activeCount={(taskSortIsDefault ? 0 : 1) + (groupBy === DEFAULT_TASK_QUEUE_GROUP_BY ? 0 : 1)}
               ariaLabel="Sort tasks"
               buttonLabel="Sort"
-              className="task-queue-sort-menu"
+              className="task-queue-sort-menu task-queue-group-sort-menu"
               icon={<IconSort />}
               items={[
                 {
