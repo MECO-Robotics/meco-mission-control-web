@@ -59,7 +59,7 @@
   min-width: 0;
 }
 
-.app-topbar-view-title h1 {
+.app-topbar .app-topbar-view-title h1 {
   margin: 0;
   color: var(--text-title);
   font-size: 1.25rem;
