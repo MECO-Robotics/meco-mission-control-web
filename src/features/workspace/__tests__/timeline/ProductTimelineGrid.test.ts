@@ -18,7 +18,7 @@ function renderGrid(overrides: Partial<React.ComponentProps<typeof ProductTimeli
   }));
 }
 
-it("keeps the task name, assignee and team visible independently of the timing bar", () => {
+it("keeps the task name, assignee and labeled team icon independent of the timing bar", () => {
   const bootstrap = createBootstrap();
   const task = { ...bootstrap.tasks[0], title: "Verify the complete sensor bundle before controls integration", startDate: "2026-04-07", dueDate: "2026-04-07" };
   bootstrap.responsibleGroups = [{ id: "electrical", seasonId: "season-1", name: "Electrical", projectIds: [task.projectId], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false }];
@@ -27,11 +27,14 @@ it("keeps the task name, assignee and team visible independently of the timing b
   expect(markup).toContain(`>${task.title}</button>`);
   expect(markup).toContain('aria-label="Ada"');
   expect(markup).toContain(">A</span>");
-  expect(markup).toContain(">Electrical</span>");
+  expect(markup).toContain('role="img" aria-label="Team: Electrical" title="Team: Electrical"');
+  expect(markup).not.toContain(">Electrical</span>");
   expect(markup).toContain("Drivebase");
   expect(markup).toContain("0 of 1 tasks complete");
   expect(markup).not.toContain(`aria-label="Inspect handoffs for ${task.title}"`);
   expect(markup).toContain("width:33.33333333333333%");
+  const unavailable = renderGrid({ bootstrap, tasks: [{ ...task, responsibleGroupId: "missing" }] });
+  expect(unavailable).toContain('role="img" aria-label="Team: Unavailable team" title="Team: Unavailable team"');
 });
 
 it("shows the first selected assignee's photo and counts unique additional assignees", () => {
@@ -85,6 +88,7 @@ it("shows a multi-subsystem task once in Team and in each selected Subsystem gro
   const team = renderGrid({ bootstrap, tasks: [task], groupBy: "team" });
   const subsystem = renderGrid({ bootstrap, tasks: [task], groupBy: "subsystem" });
   expect(team).toContain("Unassigned team");
+  expect(team).not.toContain('aria-label="Team:');
   expect(team.match(/data-task-id="task-1"/g)).toHaveLength(1);
   expect(subsystem.match(/data-task-id="task-1"/g)).toHaveLength(2);
   expect(subsystem).toContain("Drivebase");
