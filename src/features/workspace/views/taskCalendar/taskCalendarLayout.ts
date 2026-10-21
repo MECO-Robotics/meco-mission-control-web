@@ -2,9 +2,6 @@ import type {
   TaskCalendarEvent,
   TaskCalendarEventType,
 } from "./taskCalendarEvents";
-import { formatLocalDate } from "@/lib/dateUtils";
-
-export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export const TASK_CALENDAR_EVENT_FILTER_OPTIONS: Array<{
   label: string;
@@ -43,13 +40,6 @@ const CALENDAR_DEFAULT_PRIORITY_ORDER = 9;
 
 export type TaskCalendarSortMode = (typeof TASK_CALENDAR_SORT_OPTIONS)[number]["value"];
 
-export function moveTaskCalendarDate(dateKey: string, days: -7 | -1 | 1 | 7) {
-  const [year, month, day] = dateKey.split("-").map(Number);
-  const date = new Date(year, month - 1, day, 12);
-  date.setDate(date.getDate() + days);
-  return formatLocalDate(date);
-}
-
 export function toEventDateKey(start: string) {
   const calendarDateMatch = start.match(/^(\d{4}-\d{2}-\d{2})/);
   if (calendarDateMatch) {
@@ -65,28 +55,6 @@ export function toEventDateKey(start: string) {
   }
 
   return start.slice(0, 10);
-}
-
-export function createContinuousCalendarDates(firstMonth: Date, monthCount: number) {
-  const gridStart = new Date(firstMonth.getFullYear(), firstMonth.getMonth(), 1);
-  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
-
-  const lastMonth = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + monthCount, 0);
-  const gridEnd = new Date(lastMonth);
-  gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay()));
-
-  const dayCount = Math.round((gridEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
-  return Array.from({ length: dayCount }, (_, index) => {
-    const date = new Date(gridStart);
-    date.setDate(gridStart.getDate() + index);
-    return date;
-  });
-}
-
-export function getCalendarMonthWeekCount(cursor: Date) {
-  const firstWeekday = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay();
-  const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
-  return Math.ceil((firstWeekday + daysInMonth) / 7);
 }
 
 function compareTaskCalendarEventsByDate(left: TaskCalendarEvent, right: TaskCalendarEvent) {

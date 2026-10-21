@@ -3,7 +3,7 @@ import { renderSidebar } from "./AppSidebar.testUtils";
 
 describe("flat sidebar navigation", () => {
   it("shows every destination under noninteractive headings", () => {
-    const markup = renderSidebar([], "tasks", { taskView: "calendar" });
+    const markup = renderSidebar([], "tasks", { taskView: "timeline" });
     expect(markup).toContain("sidebar-quick-action-profile");
     expect(markup).toContain('aria-label="Dashboard"');
     expect(markup).toContain('aria-label="Work"');
@@ -15,17 +15,12 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain(">Risks</span>");
     expect(markup).not.toContain("workspace-primary-navigation");
   });
-  it("nests schedule presentations only while Schedule is active", () => {
-    const activeSchedule = renderSidebar([], "tasks", { taskView: "timeline" });
-    expect(activeSchedule).toContain('aria-label="Schedule views"');
-    expect(activeSchedule).toContain('aria-label="Calendar"');
-    expect(activeSchedule).toContain('aria-label="Agenda"');
-    expect(activeSchedule).toContain('aria-label="Gantt"');
-    expect(activeSchedule.match(/sidebar-nested-nav-icon/g)).toHaveLength(3);
-    expect(activeSchedule).toMatch(/aria-current="page"[^>]*class="sidebar-nested-nav-item"[^>]*data-active="true"/);
-
-    const kanban = renderSidebar([], "tasks", { taskView: "kanban" });
-    expect(kanban).not.toContain('aria-label="Schedule views"');
+  it("opens Schedule directly without retired view selectors", () => {
+    const schedule = renderSidebar([], "tasks", { taskView: "timeline" });
+    expect(schedule).toContain('aria-label="Schedule"');
+    expect(schedule).not.toContain('aria-label="Schedule views"');
+    expect(schedule).not.toContain('aria-label="Calendar"');
+    expect(schedule).not.toContain('aria-label="Agenda"');
   });
   it("keeps destinations directly accessible when folded", () => {
     const markup = renderSidebar([], "tasks", { isCollapsed: true });

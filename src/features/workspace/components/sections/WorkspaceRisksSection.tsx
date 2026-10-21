@@ -21,7 +21,7 @@ export function WorkspaceRisksSection(props: WorkspaceContentPanelsViewProps) {
         onUpdateRisk={props.onUpdateRisk}
         openTaskDetailModal={props.openTimelineTaskDetailsModal}
         selectedRiskId={new URLSearchParams(window.location.search).get("risk")}
-        onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "agenda", milestoneId })}
+        onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "timeline", milestoneId })}
         onOpenRecord={(kind, id) => {
           if (kind === "purchase-item") {
             const record = props.bootstrap.purchaseItems.find((item) => item.id === id);

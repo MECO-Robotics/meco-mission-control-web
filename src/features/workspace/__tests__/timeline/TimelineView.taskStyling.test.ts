@@ -30,6 +30,7 @@ describe("TimelineView", () => {
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
         onSaveTimelineMilestone: jest.fn(),
+          onSaveMeeting: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -49,6 +50,7 @@ describe("TimelineView", () => {
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
         onSaveTimelineMilestone: jest.fn(),
+          onSaveMeeting: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -115,6 +117,7 @@ describe("TimelineView", () => {
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
         onSaveTimelineMilestone: jest.fn(),
+          onSaveMeeting: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -235,6 +238,7 @@ describe("TimelineView", () => {
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
         onSaveTimelineMilestone: jest.fn(),
+          onSaveMeeting: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );

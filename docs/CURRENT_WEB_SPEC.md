@@ -15,7 +15,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 | Area | Views | Consolidation |
 | --- | --- | --- |
 | Home | Action Required, next four milestone timeline, task status distribution | Uses selected project scope; one attention row per source record; Risks provides build review and linked work |
-| Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
+| Work | Tasks, Schedule, Risks, Activity | Schedule combines Gantt with Agenda on its right; both share search and date controls, stacking on narrow screens; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
 | Team | People, Teams | People combines directory, presence, availability and individual workload; Teams manages ResponsibleGroups, adds or reuses matching WorkType disciplines, and derives team workload/capacity |
 

@@ -28,7 +28,7 @@ export function renderSidebar(
     selectedSeasonId?: string | null;
     seasons?: SeasonRecord[];
     sessionUser?: SessionUser | null;
-    taskView?: "calendar" | "timeline" | "robot-map" | "kanban" | "agenda";
+    taskView?: "timeline" | "robot-map" | "kanban";
     worklogsView?: "logs" | "activity" | "qa" | "results";
   },
 ) {
