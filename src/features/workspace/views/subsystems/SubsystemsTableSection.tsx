@@ -109,8 +109,8 @@ export function SubsystemsTableSection({
                   borderBottom: "1px solid var(--border-base)",
                   color: "var(--text-copy)",
                   background: isSelected
-                    ? "rgba(22, 71, 142, 0.08)"
-                    : "var(--row-bg, var(--bg-row-alt))",
+                    ? "var(--row-tint)"
+                    : "var(--row-bg, var(--bg-panel))",
                   textAlign: "left",
                   boxShadow: isSelected
                     ? `inset 4px 0 0 ${accentColor}, inset 0 0 0 1px rgba(22, 71, 142, 0.16)`

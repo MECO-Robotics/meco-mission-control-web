@@ -174,8 +174,8 @@
   background: var(--bg-panel);
 }
 
-.kanban-swimlane:nth-child(even) {
-  background: var(--bg-row-alt);
+:nth-child(2n of .kanban-swimlane) {
+  background: var(--bg-row-stripe);
 }
 
 .kanban-swimlane-label {

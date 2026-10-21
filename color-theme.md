@@ -48,7 +48,8 @@ before using it. A CSS fallback must not silently establish a competing theme.
 | `--meco-soft-red` | `rgba(234, 28, 45, 0.08)` | `rgba(234, 28, 45, 0.2)` | Brand emphasis washes |
 | `--row-tint` | `rgba(22, 71, 142, 0.14)` | `rgba(59, 130, 246, 0.18)` | Selected or highlighted rows |
 | `--bg-panel` | `#ffffff` | `#1e293b` | Cards, panels, and controls |
-| `--bg-row-alt` | `#f8fafc` | `#0f172a` | Alternate rows and secondary shell surfaces |
+| `--bg-row-alt` | `#f8fafc` | `#0f172a` | Secondary shell surfaces and neutral controls |
+| `--bg-row-stripe` | `#e2e8f0` | `#0b1220` | Neutral alternating record rows and board lanes |
 | `--border-base` | `#e5e7eb` | `#334155` | Standard separators and outlines |
 | `--border-strong` | `#cbd5e1` | `#475569` | Emphasized separators |
 | `--text-title` | `#000000` | `#f8fafc` | Headings and primary labels |
@@ -74,6 +75,14 @@ before using it. A CSS fallback must not silently establish a competing theme.
 | `--team-task-open-chart` / `--team-task-open-text` | `#eab308` / `#a16207` | `#facc15` / `#facc15` | Team open-task metrics |
 | `--team-task-blocked-chart` / `--team-task-blocked-text` | `#ea1c2d` / `#b91c1c` | `#ea1c2d` / `#f87171` | Team blocked-task metrics |
 | `--team-task-overdue-chart` / `--team-task-overdue-text` | `#f97316` / `#c2410c` | `#fb923c` / `#fb923c` | Team overdue-task metrics |
+
+Shared zebra treatment uses `--bg-panel` for the first record and
+`--bg-row-stripe` for the second, counting only matching record siblings.
+Tables, board lanes, Timeline project/subsystem bands, roster members,
+subsystem/workflow rows, Teams and Home's Your tasks quicklist use this neutral
+pair. Headers, inline forms and detail siblings do not advance the stripe. Selected and attention states retain their
+own semantic styling; `--row-tint` is not a zebra color. Other record lists and
+modal content do not receive new striping from this rule.
 
 Use `--status-danger-text` for shared error copy, `--text-title` for pagination
 controls, and `--bg-row-alt` for neutral pagination buttons. These roles replace

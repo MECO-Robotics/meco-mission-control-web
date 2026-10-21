@@ -93,7 +93,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
   const collapsedSummarySpan = showSubsystemCol ? 1 : 0;
   const collapsedSummaryStart = subsystemColumnIndex;
   const collapsedSummaryStickyLeft = subsystemStickyLeft;
-  const projectBackground = projectIndex % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-alt)";
+  const projectBackground = projectIndex % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-stripe)";
   return (
     <div
       className="subsystem-group"
@@ -163,7 +163,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
             const subsystemRowCount = collapsed ? 1 : taskCount;
             rowCursor += subsystemRowCount;
             const groupBackground =
-              subsystem.index % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-alt)";
+              subsystem.index % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-stripe)";
             const groupStyle = buildTimelineSubsystemHighlightStyle(subsystem.color, {
               boxShadow: `inset 3px 0 0 ${subsystem.color}`,
               gridAutoRows: "var(--timeline-row-height, 38px)",
