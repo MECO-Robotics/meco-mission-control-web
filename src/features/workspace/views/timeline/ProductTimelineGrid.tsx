@@ -83,18 +83,19 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
     const warning = [context.overdueLabel, context.unavailableTargets.length ? `Unavailable target: ${context.unavailableTargets.join(", ")}` : ""].filter(Boolean).join(" · ");
     return <div key={rowKey} className="product-timeline-row product-timeline-task" data-task-id={task.id} data-group-key={groupKey}>
         <div className="product-timeline-work">
-          <button type="button" className="product-timeline-task-title" title={context.description} onClick={() => onOpenTask(task)}>{task.title}</button>
           <span className="product-timeline-task-assignees">
             <TaskAssigneeSummary compact task={task} membersById={membersById} />
-            {task.responsibleGroupId && <TeamIcon team={context.team} />}
-            <span className="product-timeline-status" role="img" aria-label={context.state} title={context.state}><TimelineTaskStatusLogo compact signal={signal} status={task.status} /></span>
             {warning && <span className={`product-timeline-warning${context.overdue ? " is-overdue" : ""}`} role="img" aria-label={warning} title={warning}><TriangleAlert size={14} aria-hidden="true" /></span>}
             {context.hasHandoffs && <button type="button" className="product-timeline-inspect" aria-haspopup="dialog" aria-label={`Inspect handoffs for ${task.title}`} title="Inspect handoffs" onClick={() => setInspectedId(task.id)}><Link2 size={14} aria-hidden="true" /></button>}
             <span className="product-timeline-hours" role="img" aria-label={`${task.actualHours}h logged / ${task.estimatedHours}h allocated`} title={`${task.actualHours}h logged / ${task.estimatedHours}h allocated`}>{task.actualHours}h/{task.estimatedHours}h</span>
           </span>
         </div>
         <div className="product-timeline-track">
-          {span ? <button type="button" data-tutorial-target="timeline-task-bar" className={`product-timeline-bar${task.status === "complete" ? " is-complete" : ""}${span.spillsLeft ? " spills-left" : ""}${span.spillsRight ? " spills-right" : ""}`} data-status-signal={signal} style={{ ...buildTimelineTaskToneStyle(signal), left: `${span.start / days.length * 100}%`, width: `${span.span / days.length * 100}%` }} onClick={() => onOpenTask(task)} aria-label={`Open ${context.description}`} title={context.description} /> : null}
+          {span ? <button type="button" data-tutorial-target="timeline-task-bar" className={`product-timeline-bar${task.status === "complete" ? " is-complete" : ""}${span.spillsLeft ? " spills-left" : ""}${span.spillsRight ? " spills-right" : ""}`} data-status-signal={signal} style={{ ...buildTimelineTaskToneStyle(signal), left: `${span.start / days.length * 100}%`, width: `${span.span / days.length * 100}%` }} onClick={() => onOpenTask(task)} aria-label={`Open ${context.description}`} title={context.description}>
+            <span className="product-timeline-status" role="img" aria-label={context.state} title={context.state}><TimelineTaskStatusLogo compact signal={signal} status={task.status} /></span>
+            {task.responsibleGroupId && <TeamIcon team={context.team} />}
+            <span className="product-timeline-bar-title">{task.title}</span>
+          </button> : null}
         </div>
       </div>;
   };
