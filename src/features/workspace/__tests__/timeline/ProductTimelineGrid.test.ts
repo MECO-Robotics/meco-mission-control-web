@@ -10,6 +10,7 @@ function renderGrid(overrides: Partial<React.ComponentProps<typeof ProductTimeli
     tasks: bootstrap.tasks,
     days: ["2026-04-06", "2026-04-07", "2026-04-08"],
     viewInterval: "week",
+    groupBy: "subsystem",
     selectedDate: "2026-04-07",
     onSelectDate: jest.fn(),
     onOpenTask: jest.fn(),
@@ -53,6 +54,21 @@ it("keeps project-level work available and hides redundant project headings", ()
   expect(markup).toContain(task.title);
   expect(markup).not.toContain("is-project\"");
   expect(renderGrid({ tasks: [] })).toContain("No tasks match this schedule.");
+});
+
+it("shows a multi-subsystem task once in Team and in each selected Subsystem group", () => {
+  const bootstrap = createBootstrap();
+  bootstrap.subsystems.push({ ...bootstrap.subsystems[0], id: "intake", name: "Intake" });
+  const task = { ...bootstrap.tasks[0], subsystemIds: ["subsystem-1", "intake"] };
+  const team = renderGrid({ bootstrap, tasks: [task], groupBy: "team" });
+  const subsystem = renderGrid({ bootstrap, tasks: [task], groupBy: "subsystem" });
+  expect(team).toContain("Unassigned team");
+  expect(team.match(/data-task-id="task-1"/g)).toHaveLength(1);
+  expect(subsystem.match(/data-task-id="task-1"/g)).toHaveLength(2);
+  expect(subsystem).toContain("Drivebase");
+  expect(subsystem).toContain("Intake");
+  expect(team).toContain("0 of 1 tasks complete");
+  expect(subsystem).toContain("0 of 1 tasks complete");
 });
 
 it("omits rows and completion counts outside the selected period", () => {

@@ -1,8 +1,9 @@
 import React from "react";
-import { Settings2 } from "lucide-react";
+import { ArrowDownUp, Settings2 } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX, TIMELINE_ZOOM_MIN } from "@/features/workspace/shared/timeline/timelineZoom";
@@ -10,9 +11,12 @@ import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/
 import { SchedulePeriodControls } from "@/features/workspace/views/taskCalendar/SchedulePeriodControls";
 import { WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui/WorkspaceTopbarZoomControls";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
+import type { GroupBy } from "./model/productTimelineModel";
 
 interface TimelineToolbarProps {
   activeFilterCount: number;
+  groupBy: GroupBy;
+  onGroupByChange: (value: GroupBy) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   workTypeFilter: FilterSelection;
@@ -49,6 +53,8 @@ interface TimelineToolbarProps {
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   activeFilterCount,
+  groupBy,
+  onGroupByChange,
   activePersonFilter,
   bootstrap,
   workTypeFilter,
@@ -84,29 +90,52 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 }) => (
   <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
     <TopbarResponsiveSearch
-      actionCount={1}
+      actionCount={2}
       actions={
-        <TimelineCompactFilterMenu
-          activeFilterCount={activeFilterCount}
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          workTypeFilter={workTypeFilter}
-          workTypeFilterOptions={workTypeFilterOptions}
-          isAllProjectsView={isAllProjectsView}
-          onChangePersonFilter={onChangePersonFilter}
-          priorityFilter={priorityFilter}
-          projectFilter={projectFilter}
-          responsibleGroupFilter={responsibleGroupFilter}
-          setWorkTypeFilter={setWorkTypeFilter}
-          setPriorityFilter={setPriorityFilter}
-          setProjectFilter={setProjectFilter}
-          setResponsibleGroupFilter={setResponsibleGroupFilter}
-          setStatusFilter={setStatusFilter}
-          setSubsystemFilter={setSubsystemFilter}
-          statusFilter={statusFilter}
-          subsystemFilter={subsystemFilter}
-          subsystemFilterOptions={subsystemFilterOptions}
-        />
+        <>
+          <TimelineCompactFilterMenu
+            activeFilterCount={activeFilterCount}
+            activePersonFilter={activePersonFilter}
+            bootstrap={bootstrap}
+            workTypeFilter={workTypeFilter}
+            workTypeFilterOptions={workTypeFilterOptions}
+            isAllProjectsView={isAllProjectsView}
+            onChangePersonFilter={onChangePersonFilter}
+            priorityFilter={priorityFilter}
+            projectFilter={projectFilter}
+            responsibleGroupFilter={responsibleGroupFilter}
+            setWorkTypeFilter={setWorkTypeFilter}
+            setPriorityFilter={setPriorityFilter}
+            setProjectFilter={setProjectFilter}
+            setResponsibleGroupFilter={setResponsibleGroupFilter}
+            setStatusFilter={setStatusFilter}
+            setSubsystemFilter={setSubsystemFilter}
+            statusFilter={statusFilter}
+            subsystemFilter={subsystemFilter}
+            subsystemFilterOptions={subsystemFilterOptions}
+          />
+          <CompactFilterMenu
+            activeCount={0}
+            ariaLabel="Sort schedule"
+            buttonLabel="Sort"
+            className="task-queue-sort-menu"
+            icon={<ArrowDownUp size={14} />}
+            iconOnly
+            items={[{
+              label: "Group by",
+              content: <FilterDropdown
+                allLabel="Group schedule by"
+                ariaLabel="Group schedule by"
+                className="task-queue-filter-menu-submenu"
+                onChange={(selection) => onGroupByChange(selection[0] === "subsystem" ? "subsystem" : "team")}
+                options={[{ id: "team", name: "Team" }, { id: "subsystem", name: "Subsystem" }]}
+                showAllOption={false}
+                singleSelect
+                value={[groupBy]}
+              />,
+            }]}
+          />
+        </>
       }
       ariaLabel="Search schedule"
       compactPlaceholder="Search"

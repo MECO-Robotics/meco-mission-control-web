@@ -8,7 +8,7 @@ describe("product timeline work coverage", () => {
     const bootstrap = createBootstrap();
     bootstrap.subsystems.push({ ...bootstrap.subsystems[0], id: "intake", name: "Intake" });
     const task = { ...bootstrap.tasks[0], subsystemIds: ["subsystem-1", "intake", "intake"] };
-    const projects = buildProductTimelineProjects(bootstrap, [task, task], days);
+    const projects = buildProductTimelineProjects(bootstrap, [task, task], days, "subsystem");
     expect(projects[0].taskCount).toBe(1);
     expect(projects[0].groups.map((group) => [group.name, group.tasks.length])).toEqual([["Drivebase", 1], ["Intake", 1]]);
   });
@@ -19,7 +19,7 @@ describe("product timeline work coverage", () => {
     bootstrap.workstreams.push({ id: "video", projectId: "media", name: "Video", description: "" });
     const task = { ...bootstrap.tasks[0], id: "video-task", projectId: "media", workstreamIds: ["video"], subsystemIds: ["subsystem-1"] };
     const general = { ...task, id: "general-task", workstreamIds: [], status: "complete" as const };
-    const projects = buildProductTimelineProjects(bootstrap, [task, general], days);
+    const projects = buildProductTimelineProjects(bootstrap, [task, general], days, "subsystem");
     expect(projects[0].groups.map((group) => group.name)).toEqual(["Video", "General"]);
     expect(projects[0].taskCount).toBe(2);
     expect(projects[0].completeCount).toBe(1);
@@ -29,10 +29,10 @@ describe("product timeline work coverage", () => {
     const bootstrap = createBootstrap();
     bootstrap.subsystems.push({ ...bootstrap.subsystems[0], id: "foreign", projectId: "other" });
     const task = { ...bootstrap.tasks[0], subsystemIds: ["missing", "foreign"] };
-    expect(buildProductTimelineProjects(bootstrap, [task], days)[0].groups[0]).toMatchObject({ name: "General", tasks: [task] });
+    expect(buildProductTimelineProjects(bootstrap, [task], days, "subsystem")[0].groups[0]).toMatchObject({ name: "General", tasks: [task] });
     expect(getProductTimelineTaskContext(task, bootstrap, "2026-04-01").unavailableTargets).toEqual(["missing", "foreign"]);
-    expect(buildProductTimelineProjects(bootstrap, [{ ...task, subsystemIds: ["missing", "subsystem-1"] }], days)[0].groups.map((group) => group.name)).toEqual(["Drivebase"]);
-    expect(buildProductTimelineProjects(bootstrap, [{ ...task, projectId: "missing" }], days)[0].name).toBe("Unavailable project");
+    expect(buildProductTimelineProjects(bootstrap, [{ ...task, subsystemIds: ["missing", "subsystem-1"] }], days, "subsystem")[0].groups.map((group) => group.name)).toEqual(["Drivebase"]);
+    expect(buildProductTimelineProjects(bootstrap, [{ ...task, projectId: "missing" }], days, "subsystem")[0].name).toBe("Unavailable project");
   });
 
   it("orders work by start, due date, title and identity", () => {
@@ -43,7 +43,9 @@ describe("product timeline work coverage", () => {
       { ...base, id: "z", title: "A" }, { ...base, id: "a", title: "A" },
       { ...base, id: "early-due", dueDate: "2026-04-09" },
     ];
-    expect(buildProductTimelineProjects(bootstrap, tasks, days)[0].groups[0].tasks.map((task) => task.id)).toEqual(["early-due", "a", "z", "later"]);
+    for (const groupBy of ["team", "subsystem"] as const) {
+      expect(buildProductTimelineProjects(bootstrap, tasks, days, groupBy)[0].groups[0].tasks.map((task) => task.id)).toEqual(["early-due", "a", "z", "later"]);
+    }
   });
 
   it("preserves bootstrap project and target order when earlier work belongs to a later target", () => {
@@ -56,7 +58,7 @@ describe("product timeline work coverage", () => {
       { ...base, id: "intake-task", subsystemIds: ["intake"], startDate: "2026-04-02" },
       { ...base, id: "general", subsystemIds: [], startDate: "2026-04-03" }, base,
     ];
-    const projects = buildProductTimelineProjects(bootstrap, tasks, days);
+    const projects = buildProductTimelineProjects(bootstrap, tasks, days, "subsystem");
     expect(projects.map((project) => project.name)).toEqual([bootstrap.projects[0].name, "Media"]);
     expect(projects[0].groups.map((group) => group.name)).toEqual(["Drivebase", "Intake", "General"]);
   });
@@ -70,9 +72,54 @@ describe("product timeline work coverage", () => {
       { ...base, id: "start-boundary", startDate: "2026-03-01", dueDate: days[0] },
       { ...base, id: "end-boundary", startDate: days[4], dueDate: "2026-05-01", status: "complete" as const },
     ];
-    expect(buildProductTimelineProjects(bootstrap, tasks, days)[0]).toMatchObject({ taskCount: 2, completeCount: 1 });
-    expect(buildProductTimelineProjects(bootstrap, tasks, ["2027-01-01"])).toEqual([]);
-    expect(buildProductTimelineProjects(bootstrap, tasks, [])).toEqual([]);
+    for (const groupBy of ["team", "subsystem"] as const) {
+      expect(buildProductTimelineProjects(bootstrap, tasks, days, groupBy)[0]).toMatchObject({ taskCount: 2, completeCount: 1 });
+      expect(buildProductTimelineProjects(bootstrap, tasks, ["2027-01-01"], groupBy)).toEqual([]);
+      expect(buildProductTimelineProjects(bootstrap, tasks, [], groupBy)).toEqual([]);
+    }
+  });
+
+  it("groups shared work once by its explicit team rather than its owner's memberships", () => {
+    const bootstrap = createBootstrap();
+    const baseTeam = { seasonId: "season-1", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+    bootstrap.responsibleGroups = [
+      { ...baseTeam, id: "owner-team", name: "Owner's team", memberIds: ["member-1"] },
+      { ...baseTeam, id: "assigned", name: "Assigned team" },
+    ];
+    bootstrap.subsystems.push({ ...bootstrap.subsystems[0], id: "intake", name: "Intake" });
+    const task = { ...bootstrap.tasks[0], responsibleGroupId: "assigned", subsystemIds: ["subsystem-1", "intake"], status: "complete" as const };
+    const project = buildProductTimelineProjects(bootstrap, [task, task], days, "team")[0];
+    expect(project).toMatchObject({ taskCount: 1, completeCount: 1 });
+    expect(project.groups).toEqual([{ id: "team:assigned", name: "Assigned team", tasks: [task] }]);
+  });
+
+  it("keeps assigned archived and unavailable teams distinct, with unassigned work last", () => {
+    const bootstrap = createBootstrap();
+    const baseTeam = { seasonId: "season-1", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+    bootstrap.responsibleGroups = [
+      { ...baseTeam, id: "unassigned-team", name: "Archived team", isArchived: true },
+      { ...baseTeam, id: "second", name: "Second team" },
+      { ...baseTeam, id: "unused", name: "Unused team" },
+    ];
+    bootstrap.projects.push({ ...bootstrap.projects[0], id: "media", name: "Media", projectType: "media" });
+    const base = bootstrap.tasks[0];
+    const tasks = [
+      { ...base, id: "media", projectId: "media", responsibleGroupId: "second", startDate: "2026-04-01" },
+      { ...base, id: "unassigned", responsibleGroupId: null, startDate: "2026-04-02" },
+      { ...base, id: "missing", responsibleGroupId: "missing", startDate: "2026-04-03" },
+      { ...base, id: "second", responsibleGroupId: "second", startDate: "2026-04-04" },
+      { ...base, id: "archived", responsibleGroupId: "unassigned-team", status: "complete" as const },
+    ];
+    const projects = buildProductTimelineProjects(bootstrap, tasks, days, "team");
+    expect(projects.map((project) => project.id)).toEqual([base.projectId, "media"]);
+    expect(projects[0]).toMatchObject({ taskCount: 4, completeCount: 1 });
+    expect(projects[0].groups.map((group) => [group.id, group.name, group.tasks.map((task) => task.id)])).toEqual([
+      ["team:unassigned-team", "Archived team", ["archived"]],
+      ["team:second", "Second team", ["second"]],
+      ["team:missing", "Unavailable team (missing)", ["missing"]],
+      ["unassigned-team", "Unassigned team", ["unassigned"]],
+    ]);
+    expect(projects[1].groups.map((group) => group.name)).toEqual(["Second team"]);
   });
 });
 
