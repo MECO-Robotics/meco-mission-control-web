@@ -50,13 +50,9 @@ function isTaskQueueEditIntentState(state: TaskQueueBoardState): state is TaskEd
 
 interface TaskQueueKanbanBoardProps {
   bootstrap: BootstrapPayload;
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  taskQueueZoom: number;
-  showProjectContextOnCards: boolean;
-  showProjectOnCards: boolean;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   tasks: TaskRecord[];
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;

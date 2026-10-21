@@ -200,8 +200,6 @@ export function useTaskQueueViewStateLogic({
     projectsById,
     subsystemFilterOptions,
     subsystemIterationOptions,
-    showProjectContextOnCards: !isAllProjectsView,
-    showProjectOnCards: isAllProjectsView && projectFilter.length === 0,
     showSubsystemIterationFilter,
     taskFilterMotionClass,
     taskSortIsDefault: sortField === "dueDate" && sortOrder === "asc",

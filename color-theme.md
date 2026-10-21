@@ -171,7 +171,7 @@ Dark mode keeps brand blue and red intact. Use paired status tokens for color wa
 
 Use the canonical status token pairs above for task states, priorities,
 deadlines, warnings, and errors. The task priority ladder is consistent across
-cards, pills, and detail views: critical/high use danger, medium uses warning,
+priority icons, pills, and detail views: critical/high use danger, medium uses warning,
 and low uses neutral. Task statuses map as follows:
 
 | Status | Token pair |
@@ -308,7 +308,7 @@ Cards and board columns use panel surfaces, thin borders, and soft shadows. Task
 
 Tables are grid-based rather than native table layouts. Headers use small uppercase labels, muted copy color, and brand-blue sort arrows. Purchase, manufacturing, and print tables each define their own proportional column templates.
 
-Task queue advanced cards use zoom-scaled spacing and type. Board labels use the canonical text tokens. Task status and priority states use the semantic token pairs defined above in both themes.
+Task queue cards use neutral 1px borders without priority-colored outlines or tinted shadows. Priority uses the shared glyphs, with accessible labels and semantic text colors. Future and completed-task deadlines stay neutral; due-today and overdue deadlines use warning and danger text. Cards use zoom-scaled spacing and type. Board labels use the canonical text tokens. Task status and priority states use the semantic token pairs defined above in both themes.
 
 ## Timeline
 
