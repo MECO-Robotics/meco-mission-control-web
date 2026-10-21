@@ -254,6 +254,19 @@ summary.kanban-swimlane-label:focus-visible {
   align-self: center;
 }
 
+.task-queue-team-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.task-queue-team-label svg {
+  display: block;
+  width: calc(0.9rem * var(--task-queue-zoom, 1));
+  height: calc(0.9rem * var(--task-queue-zoom, 1));
+}
+
 .kanban-swimlane[open] > summary .kanban-swimlane-chevron {
   transform: rotate(90deg);
 }

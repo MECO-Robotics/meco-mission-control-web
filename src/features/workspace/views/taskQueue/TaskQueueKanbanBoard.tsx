@@ -20,6 +20,7 @@ import {
 } from "./taskQueueKanbanBoardState";
 import { TaskQueueCard } from "./state/taskQueueKanbanCardView";
 import { groupTaskQueueSwimlanes } from "./taskQueueSwimlanes";
+import { TaskQueueDisciplineLabel } from "./taskQueueDisciplineBadge";
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
@@ -94,7 +95,7 @@ export function TaskQueueKanbanBoard({
       label: project.projectName,
       lanes: project.lanes.map((lane) => ({
         id: lane.id,
-        header: lane.disciplineName,
+        header: <TaskQueueDisciplineLabel name={lane.disciplineName} code={cardProps.bootstrap.workTypes.find(({ id }) => id === lane.id)?.code} />,
         itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
       })),
     })),
@@ -186,7 +187,7 @@ export function TaskQueueKanbanBoard({
                 <KanbanProjectGroup key={project.id} label={project.projectName}>
                   {project.lanes.map((lane) => (
                     <KanbanSwimlane
-                      header={lane.disciplineName}
+                      header={<TaskQueueDisciplineLabel name={lane.disciplineName} code={cardProps.bootstrap.workTypes.find(({ id }) => id === lane.id)?.code} />}
                       key={lane.id}
                     >
                       <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
