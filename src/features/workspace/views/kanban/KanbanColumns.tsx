@@ -7,6 +7,7 @@ import {
 } from "react";
 import { KanbanColumnScrollArea } from "./KanbanColumnScrollArea";
 import { KanbanProjectGroup } from "./KanbanProjectGroup";
+import { KanbanSwimlane } from "./KanbanSwimlane";
 
 import {
   useKanbanDrag,
@@ -168,12 +169,11 @@ export function KanbanColumns<TState extends string, TItem>({
       {swimlaneGroups?.map((group) => (
         <KanbanProjectGroup key={group.id} label={group.label}>
           {group.lanes.map((lane) => (
-            <section className="kanban-swimlane" key={lane.id}>
-              <header className="kanban-swimlane-label">{lane.header}</header>
+            <KanbanSwimlane header={lane.header} key={lane.id}>
               <div className="kanban-swimlane-columns">
                 {columns.map((column) => renderColumn(column, lane.itemsByState[column.state], false))}
               </div>
-            </section>
+            </KanbanSwimlane>
           ))}
         </KanbanProjectGroup>
       ))}

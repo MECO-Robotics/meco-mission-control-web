@@ -193,6 +193,34 @@
   overflow-wrap: anywhere;
 }
 
+summary.kanban-swimlane-label {
+  cursor: pointer;
+  list-style: none;
+  padding-bottom: 0.65rem;
+}
+
+summary.kanban-swimlane-label::-webkit-details-marker {
+  display: none;
+}
+
+summary.kanban-swimlane-label:hover {
+  color: var(--text-title);
+}
+
+summary.kanban-swimlane-label:focus-visible {
+  outline: 2px solid var(--status-info-text);
+  outline-offset: -2px;
+}
+
+.kanban-swimlane-chevron {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.kanban-swimlane[open] > summary .kanban-swimlane-chevron {
+  transform: rotate(90deg);
+}
+
 .has-swimlanes .task-queue-board-column-body {
   min-height: calc(4rem * var(--task-queue-zoom, 1));
   overflow-y: visible;
