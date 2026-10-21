@@ -33,10 +33,11 @@ export function ProductTimelineDependencies({ dependencies, children }: ProductT
     // A collapse or regroup can remove a bar or move it away from the pointer.
     const point = pointerPosition.current;
     const underPointer = point ? wrapper.ownerDocument.elementFromPoint(point.x, point.y)?.closest(".product-timeline-bar") : null;
-    setHoveredBar((previous) => previous && wrapper.contains(previous) && underPointer === previous ? previous : null);
+    if (hoveredBar && (!wrapper.contains(hoveredBar) || underPointer !== hoveredBar)) setHoveredBar(null);
     const active = wrapper.ownerDocument.activeElement;
-    setFocusedBar(active instanceof HTMLElement && active.matches(".product-timeline-bar") && wrapper.contains(active) ? active : null);
-  }, [children]);
+    const nextFocusedBar = active instanceof HTMLElement && active.matches(".product-timeline-bar") && wrapper.contains(active) ? active : null;
+    if (nextFocusedBar !== focusedBar) setFocusedBar(nextFocusedBar);
+  }, [children, hoveredBar, focusedBar]);
 
   useLayoutEffect(() => {
     const wrapper = wrapperRef.current;

@@ -27,6 +27,7 @@ let states: unknown[];
 let stateIndex: number;
 let refIndex: number;
 let refs: Array<{ current: unknown }>;
+const scheduledStateUpdate = jest.fn();
 
 const paths: ProductTimelineDependencyPath[] = [
   ["hard-in", "c", "a", "hard", "waiting", "one"],
@@ -65,7 +66,7 @@ beforeEach(() => {
   jest.mocked(useRef).mockImplementation(() => refs[refIndex++] as ReturnType<typeof useRef>);
   jest.mocked(useState).mockImplementation(() => {
     const index = stateIndex++;
-    return [states[index], (next: unknown) => { states[index] = typeof next === "function" ? next(states[index]) : next; }];
+    return [states[index], (next: unknown) => { scheduledStateUpdate(index); states[index] = typeof next === "function" ? next(states[index]) : next; }];
   });
 });
 
@@ -126,4 +127,23 @@ it("reconciles a removed or moved bar after collapse and regroup without leaving
   render("collapsed rows");
   jest.mocked(useLayoutEffect).mock.calls[0][0]();
   expect(painted(render(), "foreground")).toEqual([]);
+});
+
+it("does not schedule layout updates while pointer and focus identities are unchanged", () => {
+  for (let index = 0; index < 100; index += 1) {
+    render(`refreshed rows ${index}`);
+    jest.mocked(useLayoutEffect).mock.calls[0][0]();
+  }
+  expect(scheduledStateUpdate).not.toHaveBeenCalled();
+  const view = render();
+  view.props.onPointerOver({ target: barA, clientX: 20, clientY: 30 });
+  view.props.onFocusCapture({ target: barB });
+  underPointer = barA;
+  activeElement = barB;
+  scheduledStateUpdate.mockClear();
+  for (let index = 0; index < 100; index += 1) {
+    render(`regenerated rows ${index}`);
+    jest.mocked(useLayoutEffect).mock.calls[0][0]();
+  }
+  expect(scheduledStateUpdate).not.toHaveBeenCalled();
 });
