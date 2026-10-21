@@ -1,4 +1,4 @@
-import { buildProductTimelineProjects, getProductTimelineDateLabelIndices, getProductTimelineInspection, getProductTimelineTaskContext, getProductTimelineTaskSpan } from "../../views/timeline/model/productTimelineModel";
+import { buildProductTimelineProjects, getProductTimelineInspection, getProductTimelineTaskContext, getProductTimelineTaskSpan } from "../../views/timeline/model/productTimelineModel";
 import { createBootstrap, createBootstrapWithDependency } from "./timelineTestFixtures";
 
 const days = ["2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10"];
@@ -157,16 +157,4 @@ describe("product timeline date and handoff context", () => {
     expect(getProductTimelineTaskContext(task, bootstrap, "2026-04-01").waiting).toBe(false);
   });
 
-  it("spaces long project-span date labels for the measured chart width", () => {
-    const longDays = Array.from({ length: 180 }, (_, index) => new Date(Date.UTC(2026, 0, index + 1)).toISOString().slice(0, 10));
-    for (const width of [150, 400, 1200]) {
-      const labels = [...getProductTimelineDateLabelIndices(longDays, width)];
-      expect(labels[0]).toBe(0);
-      for (let index = 1; index < labels.length; index += 1) {
-        expect((labels[index] - labels[index - 1]) * width / longDays.length).toBeGreaterThanOrEqual(64);
-        expect(labels[index] * width / longDays.length + 64).toBeLessThanOrEqual(width);
-        expect(new Date(`${longDays[labels[index]]}T12:00:00`).getDay()).toBe(1);
-      }
-    }
-  });
 });

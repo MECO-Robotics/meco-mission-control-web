@@ -37,14 +37,13 @@ it("starts on the current month, resets zoom on period changes, and preserves th
   expect(render().viewAnchorDate).toBe("2027-02-28");
 });
 
-it("Fit preserves the period and Today exits Project span into the current month", () => {
+it.each(["week", "month"] as const)("Fit preserves the period and Today preserves %s mode while resetting zoom", (interval) => {
   const render = mountSchedule();
-  render().handleTimelineIntervalChange("all", "2021-03-18");
+  render().handleTimelineIntervalChange(interval, "2021-03-18");
   render().adjustTimelineZoom(1);
   render().fitTimeline();
-  expect(render()).toMatchObject({ viewAnchorDate: "2021-03-18", viewInterval: "all", timelineZoom: 1 });
-  render().shiftTimelinePeriod(1);
-  expect(render().viewAnchorDate).toBe("2021-03-18");
+  expect(render()).toMatchObject({ viewAnchorDate: "2021-03-18", viewInterval: interval, timelineZoom: 1 });
+  render().adjustTimelineZoom(1);
   render().goToToday();
-  expect(render()).toMatchObject({ viewAnchorDate: "2026-10-21", viewInterval: "month", timelineZoom: 1 });
+  expect(render()).toMatchObject({ viewAnchorDate: "2026-10-21", viewInterval: interval, timelineZoom: 1 });
 });

@@ -16,10 +16,8 @@
 .product-timeline-day { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; min-height: 42px; padding: 0; border: 0; border-right: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-muted); font: inherit; font-size: 0.65rem; cursor: pointer; font-variant-numeric: tabular-nums; }
 .product-timeline-day.is-today { font-weight: 700; color: var(--text-accent); }
 .product-timeline-day.is-selected { background: var(--meco-soft-blue); color: var(--text-link); }
-.product-timeline-dates:not(.is-project-span) .product-timeline-day:first-child span { align-self: flex-start; }
-.product-timeline-dates:not(.is-project-span) .product-timeline-day:last-child span { align-self: flex-end; }
-.product-timeline-dates.is-project-span .product-timeline-day { border-right: 0; }
-.product-timeline-dates.is-project-span .product-timeline-day span { position: absolute; left: 2px; white-space: nowrap; font-size: 0.65rem; }
+.product-timeline-day:first-child span { align-self: flex-start; }
+.product-timeline-day:last-child span { align-self: flex-end; }
 .product-timeline-day:hover { background: var(--bg-row-alt); }
 .product-timeline-summary .product-timeline-work { background: var(--bg-row-alt); }
 .product-timeline-summary:not(.is-project) { border-top: 2px solid var(--border-grid); }
@@ -63,15 +61,13 @@
 .product-timeline-shell:focus-visible, .product-timeline-shell button:focus-visible, .product-timeline-handoffs-modal button:focus-visible { outline: 2px solid var(--status-info-text); outline-offset: -2px; }
 @media (min-width: 768px) {
   @container (max-width: 720px) {
-    .product-timeline-dates:not(.is-project-span) .product-timeline-day span:first-child { display: none; }
-    .product-timeline-dates:not(.is-project-span) .product-timeline-day:not(:nth-child(5n + 1)):not(:last-child) span { visibility: hidden; }
-    .product-timeline-dates.is-project-span .product-timeline-day span { font-size: 0.6rem; }
+    .product-timeline-day span:first-child { display: none; }
+    .product-timeline-day:not(:nth-child(5n + 1)):not(:last-child) span { visibility: hidden; }
   }
 }
 @media (max-width: 1100px) { .product-timeline-shell { --schedule-work-width: 220px; } }
 @media (max-width: 767px) {
   .product-timeline-grid { --schedule-track-min-width: calc(var(--schedule-day-count) * 24px); }
-  .product-timeline-grid.is-project-span { --schedule-track-min-width: 560px; }
 }
 @media (max-width: 600px) {
   .product-timeline-shell { --schedule-work-width: 180px; max-height: calc(100dvh - 9rem); }
