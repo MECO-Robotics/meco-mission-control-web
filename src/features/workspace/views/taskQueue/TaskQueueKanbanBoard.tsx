@@ -98,7 +98,7 @@ export function TaskQueueKanbanBoard({
       label: project.projectName,
       lanes: project.lanes.map((lane) => ({
         id: lane.id,
-        header: <><span>{lane.disciplineName}</span><span>{lane.tasks.length}</span></>,
+        header: lane.disciplineName,
         itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
       })),
     })),
@@ -190,9 +190,10 @@ export function TaskQueueKanbanBoard({
                 <KanbanProjectGroup key={project.id} label={project.projectName}>
                   {project.lanes.map((lane) => (
                     <KanbanSwimlane
-                      header={<><span>{lane.disciplineName}</span><span>{lane.tasks.length}</span></>}
+                      header={lane.disciplineName}
                       key={lane.id}
                     >
+                      <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
                       <div className="task-queue-board-focused-lane-grid">
                         {lane.tasks.map((task) => (
                           <TaskQueueCard {...cardProps} key={task.id} task={task} />
