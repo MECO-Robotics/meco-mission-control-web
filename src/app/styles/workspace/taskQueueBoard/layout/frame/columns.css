@@ -124,15 +124,6 @@
   font-weight: 700;
 }
 
-.workspace-kanban-scroll-view .task-queue-board.has-swimlanes .task-queue-board-column-count {
-  min-width: 0;
-  height: auto;
-  padding: 0;
-  background: transparent;
-  color: var(--text-copy);
-  font-weight: 500;
-}
-
 .kanban-project-group {
   display: grid;
   grid-template-columns: var(--kanban-project-label-width) minmax(0, 1fr);
