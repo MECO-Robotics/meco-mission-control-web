@@ -19,7 +19,7 @@
 .people-attendance-day { display: block; width: .78rem; height: .78rem; border: 1px solid var(--border-base); border-radius: 2px; background: var(--bg-panel); }
 .people-attendance-day.is-attended { border-color: var(--official-blue); background: var(--official-blue); }
 .people-attendance-day.is-missed { border-color: var(--official-red); background: var(--official-red); }
-.people-attendance-day.is-upcoming { border-color: var(--border-base); background: var(--bg-row-alt); }
+.people-attendance-day.is-upcoming { border-color: var(--text-muted); background: var(--text-muted); }
 .people-attendance-day.is-not-scheduled { border-color: var(--border-base); background: var(--bg-panel); }
 .roster-section-title h2 { margin: 0; font-size: .95rem; }
 .people-attendance-percentage { color: var(--text-copy); font-size: .78rem; font-variant-numeric: tabular-nums; }
