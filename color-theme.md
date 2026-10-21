@@ -200,6 +200,9 @@ Responsible teams store their own icon and six-character hex color. The shared t
 
 Kanban project rails reuse sidebar project identity colors through `--kanban-project-accent` as opaque surface tints. Kanban lane icons use `--kanban-lane-accent`: teams reuse the shared task discipline palette, while subsystem/workstream groups reuse their configured workspace colors. Names retain semantic text colors; icons mix their accent with the theme's title color for contrast. Cards remain neutral.
 
+Team cards use a 3px top border in their saved team color to identify each team.
+The name and icon remain visible alongside this accent in both themes.
+
 ## Timeline Status Colors
 
 Timeline bars use canonical status pairs: neutral for not started, warning for

@@ -202,7 +202,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
           })}{!sectionMembers.length ? <p className="empty-state">No {label.toLowerCase()} members.</p> : null}</div>
         </details>;
       };
-      return <article className="panel-card team-card" key={group.id}>
+      return <article className="panel-card team-card" key={group.id} style={{ borderTopColor: group.color }}>
         <header className="panel-header team-card-header">
           <div className="team-card-identity">
             <h2><TeamIcon team={group} size={18} />{group.name}{group.isArchived ? " · Archived" : ""}</h2>
