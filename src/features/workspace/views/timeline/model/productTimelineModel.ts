@@ -89,7 +89,7 @@ export function getProductTimelineTaskContext(task: TaskRecord, bootstrap: Boots
   const targets = isRobot ? bootstrap.subsystems : bootstrap.workstreams;
   const unavailableTargets = normalizeTaskTargetIds(isRobot ? task.subsystemIds : task.workstreamIds).filter((id) => !targets.some((target) => target.id === id && target.projectId === task.projectId));
   return {
-    team: task.responsibleGroupId ? bootstrap.responsibleGroups.find((group) => group.id === task.responsibleGroupId)?.name ?? "Unavailable team" : null,
+    team: task.responsibleGroupId ? bootstrap.responsibleGroups.find((group) => group.id === task.responsibleGroupId) : undefined,
     state, signal, overdueDays, overdueLabel,
     description: [task.title, state, `${task.startDate} – ${task.dueDate}`, overdueLabel].filter(Boolean).join(" · "),
     unavailableTargets,

@@ -310,7 +310,7 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
     case "seasons": return { type: "season", startDate: today, endDate: today };
     case "projects": return { description: "", status: "planned" };
     case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
-    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", icon: "users", color: "#4F86C6", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
     case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], parentSubsystemId: null, responsibleEngineerId: null };
     case "mechanisms": return { name: "", description: "", iteration: 1 };
     case "tasks": return {

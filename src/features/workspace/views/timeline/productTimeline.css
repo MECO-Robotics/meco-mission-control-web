@@ -38,7 +38,7 @@
 .product-timeline-task-assignees > * { flex-shrink: 0; }
 .product-timeline-task-assignees .product-timeline-hours { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .product-timeline-task-assignees .task-assignee-summary { gap: 2px; }
-.product-timeline-task-team, .product-timeline-status, .product-timeline-warning { display: inline-flex; align-items: center; }
+.product-timeline-status, .product-timeline-warning { display: inline-flex; align-items: center; }
 .product-timeline-status .timeline-task-status-logo.is-compact { --timeline-task-status-logo-background: var(--schedule-row-background); position: static; inset: auto; z-index: auto; flex: 0 0 auto; transform: none; background: transparent; box-shadow: none; }
 .product-timeline-inspect { display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 2px; padding: 2px; background: transparent; color: var(--text-link); font: inherit; cursor: pointer; }
 .product-timeline-inspect:hover { color: var(--text-link-hover); }

@@ -118,10 +118,14 @@ export interface WorkTypeRecord {
   isActive: boolean;
 }
 
+export type ResponsibleGroupIcon = "wrench" | "zap" | "code" | "briefcase" | "target" | "clipboard" | "clapperboard" | "megaphone" | "graduation-cap" | "users";
+
 export interface ResponsibleGroupRecord {
   id: string;
   seasonId: string;
   name: string;
+  icon: ResponsibleGroupIcon;
+  color: string;
   projectIds: string[];
   workTypeIds: string[];
   memberIds: string[];

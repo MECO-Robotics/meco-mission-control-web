@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { Link2, Network, TriangleAlert } from "lucide-react";
+import { Link2, TriangleAlert } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
@@ -8,6 +8,7 @@ import { ModalDialog } from "@/components/ModalDialog";
 import { localTodayDate } from "@/lib/dateUtils";
 import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 import { TaskAssigneeSummary } from "@/features/workspace/shared/task/TaskAssigneeSummary";
+import { TeamIcon } from "@/features/workspace/shared/team/TeamIcon";
 import { useTimelineShellSizing } from "./hooks/useTimelineShellSizing";
 import { buildTimelineTaskToneStyle } from "./model/timelineTaskColors";
 import { TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
@@ -83,7 +84,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
           <button type="button" className="product-timeline-task-title" title={context.description} onClick={() => onOpenTask(task)}>{task.title}</button>
           <span className="product-timeline-task-assignees">
             <TaskAssigneeSummary compact task={task} membersById={membersById} />
-            {context.team && <span className="product-timeline-task-team" role="img" aria-label={`Team: ${context.team}`} title={`Team: ${context.team}`}><Network size={14} aria-hidden="true" /></span>}
+            {task.responsibleGroupId && <TeamIcon team={context.team} />}
             <span className="product-timeline-status" role="img" aria-label={context.state} title={context.state}><TimelineTaskStatusLogo compact signal={signal} status={task.status} /></span>
             {warning && <span className={`product-timeline-warning${context.overdue ? " is-overdue" : ""}`} role="img" aria-label={warning} title={warning}><TriangleAlert size={14} aria-hidden="true" /></span>}
             {context.hasHandoffs && <button type="button" className="product-timeline-inspect" aria-haspopup="dialog" aria-label={`Inspect handoffs for ${task.title}`} title="Inspect handoffs" onClick={() => setInspectedId(task.id)}><Link2 size={14} aria-hidden="true" /></button>}

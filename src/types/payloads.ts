@@ -15,7 +15,7 @@ import type {
   RiskSeverity,
   SeasonType,
 } from "./common";
-import type { SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganization";
+import type { ResponsibleGroupIcon, SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganization";
 
 export interface MilestonePayload {
   title: string;
@@ -135,6 +135,8 @@ export interface MemberCreatePayload extends MemberPayload {
 export interface ResponsibleGroupPayload {
   seasonId: string;
   name: string;
+  icon: ResponsibleGroupIcon;
+  color: string;
   projectIds: string[];
   memberIds: string[];
   primaryMemberIds: string[];

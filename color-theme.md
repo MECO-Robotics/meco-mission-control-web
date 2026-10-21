@@ -196,6 +196,8 @@ Workspace-generated colors are normalized to six-character hex values and fall b
 
 These colors are used for workstreams, subsystems, timeline grouping, and user-selected workspace accents. The fallback subsystem highlight is `#4F86C6`.
 
+Responsible teams store their own icon and six-character hex color. The shared team icon catalog renders this identity in Teams, its editor preview and Gantt task rows. Glyphs mix the stored color at 45% with the theme's title foreground for contrast; names retain semantic text colors. Identity comes from the assigned team, including archived teams, rather than its name or task discipline. Unavailable teams use a neutral people glyph.
+
 Kanban project rails reuse sidebar project identity colors through `--kanban-project-accent` as opaque surface tints. Kanban lane icons use `--kanban-lane-accent`: teams reuse the shared task discipline palette, while subsystem/workstream groups reuse their configured workspace colors. Names retain semantic text colors; icons mix their accent with the theme's title color for contrast. Cards remain neutral.
 
 ## Timeline Status Colors

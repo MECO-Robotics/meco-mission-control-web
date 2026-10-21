@@ -26,6 +26,7 @@
 .teams-list, .teams-editor { display: grid; gap: .45rem; }
 .teams-editor { padding: .85rem; border: 1px solid var(--border-base); border-radius: 10px; background: var(--bg-row-alt); }
 .teams-editor h3 { margin: 0; }
+.team-card-identity h2, .team-icon-preview { display: flex; align-items: center; gap: .45rem; }
 .teams-editor fieldset { min-width: 0; margin: 0; padding: .55rem .7rem; border: 1px solid var(--border-base); border-radius: 8px; }
 .teams-editor legend { padding-inline: .25rem; color: var(--text-title); font-weight: 600; }
 .team-primary-help { margin: 0 0 .4rem; color: var(--text-copy); font-size: .82rem; }

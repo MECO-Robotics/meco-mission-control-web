@@ -35,7 +35,7 @@ it("saves demo edits locally across reopening and never sends mutation or refres
   expect(jest.mocked(fetch).mock.calls.every(([, options]) => !options?.method || options.method === "GET")).toBe(true);
 });
 
-it("restores a schema-2 saved demo without the later actions collection before workspace scoping", async () => {
+it("restores a current-schema saved demo without the optional actions collection before workspace scoping", async () => {
   const withoutActions = (payload: BootstrapPayload) => {
     const saved = structuredClone(payload) as Partial<BootstrapPayload>;
     delete saved.actions;
@@ -46,7 +46,7 @@ it("restores a schema-2 saved demo without the later actions collection before w
     ...seed,
     materials: seed.materials.map((material) => ({ ...material, name: "Kept from older saved demo" })),
   });
-  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 2, baseline, snapshot: savedSnapshot }));
+  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 3, baseline, snapshot: savedSnapshot }));
 
   const restored = await read();
   const scoped = scopeBootstrapBySelection(restored, null, null);
@@ -216,6 +216,19 @@ it("does not publish a write if browser storage rejects it", async () => {
   expect((await read()).materials[0].name).toBe("Original");
 });
 
+it("retains a team's chosen icon and color after create, edit and reopening the demo", async () => {
+  const baseline = createBootstrap();
+  globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(baseline)));
+  await read();
+  const { item } = await requestApi<{ item: { id: string } }>("/responsible-groups", {
+    method: "POST", body: JSON.stringify({ seasonId: baseline.seasons[0].id, name: "Custom team", icon: "wrench", color: "#2A9D8F" }),
+  });
+  expect((await read()).responsibleGroups.find(team => team.id === item.id)).toMatchObject({ icon: "wrench", color: "#2A9D8F" });
+  await requestApi(`/responsible-groups/${item.id}`, { method: "PATCH", body: JSON.stringify({ icon: "megaphone", color: "#C855BC" }) });
+  leaveLocalWorkspace(); enterLocalDemo();
+  expect((await read()).responsibleGroups.find(team => team.id === item.id)).toMatchObject({ name: "Custom team", icon: "megaphone", color: "#C855BC" });
+});
+
 it("rejects unsupported local operations without falling through to a write API", async () => {
   await read();
   const calls = jest.mocked(fetch).mock.calls.length;
@@ -276,31 +289,33 @@ it("archives an incompatible snapshot intact and starts from the current canonic
   const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
   await read();
   expect(data.get("meco.local-demo.v1.incompatible.0")).toBe(incompatible);
-  expect(JSON.parse(data.get("meco.local-demo.v1")!)).toMatchObject({ schemaVersion: 2 });
+  expect(JSON.parse(data.get("meco.local-demo.v1")!)).toMatchObject({ schemaVersion: 3 });
   expect((await read()).projects).toEqual(seed.projects);
   expect(warning).toHaveBeenCalledWith(expect.stringContaining("archived as meco.local-demo.v1.incompatible.0"));
   warning.mockRestore();
 });
 
-it("archives version-one demo snapshots before reading groups without primary membership fields", async () => {
+it.each([1, 2])("archives schema-%s demo snapshots before reading groups without required identity fields", async (schemaVersion) => {
   const baseline = createBootstrap();
   baseline.responsibleGroups.push({
-    id: "legacy-team", seasonId: baseline.seasons[0]?.id ?? "season", name: "Legacy Team",
+    id: "legacy-team", seasonId: baseline.seasons[0]?.id ?? "season", name: "Legacy Team", icon: "users", color: "#4F86C6",
     projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false,
   });
   const snapshot = structuredClone(baseline);
   delete (baseline.responsibleGroups[0] as unknown as { primaryMemberIds?: string[] }).primaryMemberIds;
   delete (snapshot.responsibleGroups[0] as unknown as { primaryMemberIds?: string[] }).primaryMemberIds;
-  const legacy = JSON.stringify({ schemaVersion: 1, baseline, snapshot });
+  delete (baseline.responsibleGroups[0] as unknown as { icon?: string }).icon;
+  delete (snapshot.responsibleGroups[0] as unknown as { color?: string }).color;
+  const legacy = JSON.stringify({ schemaVersion, baseline, snapshot });
   data.set("meco.local-demo.v1", legacy);
   const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
 
   await read();
 
-  expect(data.get("meco.local-demo.v1.incompatible.1")).toBe(legacy);
-  expect(JSON.parse(data.get("meco.local-demo.v1")!).schemaVersion).toBe(2);
+  expect(data.get(`meco.local-demo.v1.incompatible.${schemaVersion}`)).toBe(legacy);
+  expect(JSON.parse(data.get("meco.local-demo.v1")!).schemaVersion).toBe(3);
   expect(fetch).toHaveBeenCalledTimes(1);
-  expect(warning).toHaveBeenCalledWith(expect.stringContaining("incompatible.1"));
+  expect(warning).toHaveBeenCalledWith(expect.stringContaining(`incompatible.${schemaVersion}`));
   warning.mockRestore();
 });
 
@@ -309,7 +324,7 @@ it("derives cached task hours from logs across reload and tutorial entry", async
   snapshot.tasks[0].actualHours = 999;
   const taskId = snapshot.tasks[0].id;
   const expected = snapshot.workLogs.filter((log) => log.taskId === taskId).reduce((sum, log) => sum + log.hours, 0);
-  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 2, baseline: snapshot, snapshot }));
+  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 3, baseline: snapshot, snapshot }));
   expect((await read()).tasks[0].actualHours).toBe(expected);
   leaveLocalWorkspace(); enterLocalDemo();
   expect((await read()).tasks[0].actualHours).toBe(expected);
