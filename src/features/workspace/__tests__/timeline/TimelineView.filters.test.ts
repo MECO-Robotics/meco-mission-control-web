@@ -7,6 +7,7 @@ import {
   countActiveTimelineFilters,
   filterTimelineMilestonesByProjectSelection,
   filterTimelineTasks,
+  filterTimelineMilestonesByTaskSelection,
   getTimelineFilterToneClassName,
   getTimelineStatusToneClassName,
   resolveTimelineFilteredProjectIds,
@@ -143,6 +144,7 @@ describe("TimelineView", () => {
       projectFilter: ["project-1"],
       statusFilter: [statusId],
       subsystemFilter: ["subsystem-1"],
+      responsibleGroupFilter: [],
     });
 
     expect(
@@ -197,4 +199,24 @@ describe("TimelineView", () => {
     expect(filteredProjectIds).toEqual(["project-1"]);
     expect(scopedProjectIds).toEqual(["project-1", "project-2"]);
   });
+  it("filters responsible teams and workstreams without changing task targets", () => {
+    const bootstrap = createBootstrap();
+    const task = { ...bootstrap.tasks[0], subsystemIds: [], workstreamIds: ["outreach"], responsibleGroupId: "electrical" };
+    const filters = { workTypeFilter: [], priorityFilter: [], projectFilter: [], statusFilter: [], subsystemFilter: ["outreach"], responsibleGroupFilter: ["electrical"] };
+    expect(filterTimelineTasks({ ...filters, bootstrap, isAllProjectsView: true, tasks: [task] })).toEqual([task]);
+    expect(filterTimelineTasks({ ...filters, responsibleGroupFilter: ["mechanical"], bootstrap, isAllProjectsView: true, tasks: [task] })).toEqual([]);
+    expect(task.subsystemIds).toEqual([]);
+    expect(countActiveTimelineFilters({ ...filters, activePersonFilter: [], isAllProjectsView: true })).toBe(2);
+  });
+
+  it("keeps milestones associated with a person's tasks when applying the people lens", () => {
+    const bootstrap = createBootstrap();
+    const milestone = createTimelineMilestone({ id: "review" });
+    const task = { ...bootstrap.tasks[0], ownerId: "member-1", scheduleRefs: [{ kind: "milestone" as const, id: "review" }] };
+    expect(filterTimelineMilestonesByTaskSelection({ activePersonFilter: ["member-1"], milestones: [milestone], tasks: [task] })).toEqual([milestone]);
+    expect(filterTimelineMilestonesByTaskSelection({ activePersonFilter: ["other"], milestones: [milestone], tasks: [task] })).toEqual([]);
+    expect(filterTimelineMilestonesByTaskSelection({ activePersonFilter: [], responsibleGroupFilter: ["electrical"], milestones: [milestone], tasks: [{ ...task, responsibleGroupId: "electrical" }] })).toEqual([milestone]);
+    expect(filterTimelineMilestonesByTaskSelection({ activePersonFilter: [], responsibleGroupFilter: ["other"], milestones: [milestone], tasks: [{ ...task, responsibleGroupId: "electrical" }] })).toEqual([]);
+  });
+
 });

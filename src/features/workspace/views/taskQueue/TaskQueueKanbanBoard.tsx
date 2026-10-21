@@ -7,6 +7,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { KanbanProjectGroup } from "@/features/workspace/views/kanban/KanbanProjectGroup";
+import { KanbanSwimlane } from "@/features/workspace/views/kanban/KanbanSwimlane";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
 import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
@@ -18,7 +19,9 @@ import {
   type TaskQueueBoardState,
 } from "./taskQueueKanbanBoardState";
 import { TaskQueueCard } from "./state/taskQueueKanbanCardView";
-import { groupTaskQueueSwimlanes } from "./taskQueueSwimlanes";
+import { groupTaskQueueSwimlanes, type TaskQueueGroupBy } from "./taskQueueSwimlanes";
+import { TaskQueueSwimlaneLabel } from "./taskQueueSwimlaneLabel";
+import { getProjectIconColor } from "@/components/layout/sidebarProjectIcons";
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
@@ -48,15 +51,11 @@ function isTaskQueueEditIntentState(state: TaskQueueBoardState): state is TaskEd
 }
 
 interface TaskQueueKanbanBoardProps {
+  groupBy: TaskQueueGroupBy;
   bootstrap: BootstrapPayload;
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
-  isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  taskQueueZoom: number;
-  showProjectContextOnCards: boolean;
-  showProjectOnCards: boolean;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   tasks: TaskRecord[];
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
@@ -67,6 +66,7 @@ interface TaskQueueKanbanBoardProps {
 }
 
 export function TaskQueueKanbanBoard({
+  groupBy,
   tasks,
   focusedState,
   onClearFocus,
@@ -89,20 +89,21 @@ export function TaskQueueKanbanBoard({
   );
 
   const swimlanes = useMemo(
-    () => groupTaskQueueSwimlanes(focusedState === null ? tasks : focusedTasks, cardProps.bootstrap),
-    [cardProps.bootstrap, focusedState, focusedTasks, tasks],
+    () => groupTaskQueueSwimlanes(focusedState === null ? tasks : focusedTasks, cardProps.bootstrap, groupBy),
+    [cardProps.bootstrap, focusedState, focusedTasks, groupBy, tasks],
   );
   const boardSwimlanes = useMemo(
     () => swimlanes.map((project) => ({
       id: project.id,
       label: project.projectName,
+      accentColor: getProjectIconColor(cardProps.projectsById[project.id] ?? null),
       lanes: project.lanes.map((lane) => ({
         id: lane.id,
-        header: <><span>{lane.disciplineName}</span><span>{lane.tasks.length}</span></>,
+        header: <TaskQueueSwimlaneLabel {...lane.label} />,
         itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
       })),
     })),
-    [cardProps.bootstrap, swimlanes],
+    [cardProps.bootstrap, cardProps.projectsById, swimlanes],
   );
   const boardColumns = useMemo(
     () =>
@@ -187,19 +188,19 @@ export function TaskQueueKanbanBoard({
           <div className="task-queue-board-focused-groups">
             {swimlanes.length > 0 ? (
               swimlanes.map((project) => (
-                <KanbanProjectGroup key={project.id} label={project.projectName}>
+                <KanbanProjectGroup key={project.id} label={project.projectName} accentColor={getProjectIconColor(cardProps.projectsById[project.id] ?? null)}>
                   {project.lanes.map((lane) => (
-                    <section className="kanban-swimlane" key={lane.id}>
-                      <header className="kanban-swimlane-label">
-                        <span>{lane.disciplineName}</span>
-                        <span>{lane.tasks.length}</span>
-                      </header>
+                    <KanbanSwimlane
+                      header={<TaskQueueSwimlaneLabel {...lane.label} />}
+                      key={lane.id}
+                    >
+                      <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
                       <div className="task-queue-board-focused-lane-grid">
                         {lane.tasks.map((task) => (
                           <TaskQueueCard {...cardProps} key={task.id} task={task} />
                         ))}
                       </div>
-                    </section>
+                    </KanbanSwimlane>
                   ))}
                 </KanbanProjectGroup>
               ))

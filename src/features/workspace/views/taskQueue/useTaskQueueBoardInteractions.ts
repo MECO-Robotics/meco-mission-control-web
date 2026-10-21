@@ -1,7 +1,5 @@
 import { useEffect } from "react";
-import type { Dispatch, RefObject, SetStateAction } from "react";
-
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "./taskQueueKanbanBoardState";
+import type { RefObject } from "react";
 
 type ZoomBoard = (direction: 1 | -1) => void;
 
@@ -56,55 +54,4 @@ export function useTaskQueueBoardZoomInput(
       shell.removeEventListener("gesturechange", handleGestureChange);
     };
   }, [boardShellRef, zoomBoard]);
-}
-
-export function useTaskQueueBoardLazyLoading({
-  isFocused,
-  loadMoreRef,
-  processedTaskCount,
-  boardShellRef,
-  setVisibleTaskCount,
-  visibleTaskCount,
-}: {
-  isFocused: boolean;
-  loadMoreRef: RefObject<HTMLDivElement | null>;
-  processedTaskCount: number;
-  boardShellRef: RefObject<HTMLDivElement | null>;
-  setVisibleTaskCount: Dispatch<SetStateAction<number>>;
-  visibleTaskCount: number;
-}) {
-  useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      isFocused ||
-      visibleTaskCount >= processedTaskCount
-    ) {
-      return;
-    }
-
-    const shell = boardShellRef.current;
-    const sentinel = loadMoreRef.current;
-    if (!shell || !sentinel) {
-      return;
-    }
-
-    const loadMore = () => {
-      setVisibleTaskCount((current) =>
-        Math.min(current + TASK_QUEUE_LAZY_LOAD_BATCH_SIZE, processedTaskCount),
-      );
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) loadMore();
-    }, { rootMargin: "240px" });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [
-    boardShellRef,
-    isFocused,
-    loadMoreRef,
-    processedTaskCount,
-    setVisibleTaskCount,
-    visibleTaskCount,
-  ]);
 }

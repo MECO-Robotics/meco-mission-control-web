@@ -14,7 +14,8 @@ import {
   type TaskQueueViewStateLogicArgs,
 } from "./state/taskQueueViewStateLogic";
 import type { TaskQueueBoardState } from "./taskQueueKanbanBoardState";
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "./taskQueueKanbanBoardState";
+
+import { DEFAULT_TASK_QUEUE_GROUP_BY, type TaskQueueGroupBy } from "./taskQueueSwimlanes";
 
 export type TaskSortField =
   | "disciplineId"
@@ -40,7 +41,6 @@ export const TASK_SORT_OPTIONS: DropdownOption[] = [
 export const TASK_QUEUE_ZOOM_MIN = 0.6;
 export const TASK_QUEUE_ZOOM_MAX = 1.6;
 export const TASK_QUEUE_ZOOM_STEP = 0.1;
-export const TASK_QUEUE_COMPACT_ZOOM_THRESHOLD = 0.9;
 
 export function clampTaskQueueZoom(value: number) {
   const normalizedValue = Math.round(value * 10) / 10;
@@ -49,10 +49,6 @@ export function clampTaskQueueZoom(value: number) {
 
 export function formatTaskQueueZoomLabel(zoom: number) {
   return `${Math.round(zoom * 100)}%`;
-}
-
-export function shouldHideTaskQueueSummary(zoom: number) {
-  return zoom <= TASK_QUEUE_COMPACT_ZOOM_THRESHOLD;
 }
 
 export const getTaskQueueStatusToneClassName = getWorkspaceStatusToneClassName;
@@ -68,6 +64,8 @@ export interface TaskQueueViewStateArgs {
 }
 
 export interface TaskQueueViewState {
+  groupBy: TaskQueueGroupBy;
+  setGroupBy: Dispatch<SetStateAction<TaskQueueGroupBy>>;
   activeFilterCount: number;
   disciplineFilter: FilterSelection;
   disciplineOptions: DropdownOption[];
@@ -90,7 +88,6 @@ export interface TaskQueueViewState {
   setSubsystemFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSubsystemIterationFilter: Dispatch<SetStateAction<FilterSelection>>;
   setTaskQueueZoom: Dispatch<SetStateAction<number>>;
-  setVisibleTaskCount: Dispatch<SetStateAction<number>>;
   sortField: TaskSortField;
   sortOrder: "asc" | "desc";
   statusFilter: FilterSelection;
@@ -101,10 +98,7 @@ export interface TaskQueueViewState {
   taskFilterMotionClass: string;
   taskSortIsDefault: boolean;
   taskQueueZoom: number;
-  visibleTaskCount: number;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
-  showProjectContextOnCards: boolean;
-  showProjectOnCards: boolean;
   showSubsystemIterationFilter: boolean;
 }
 
@@ -116,6 +110,7 @@ export function useTaskQueueViewState({
   membersById,
   subsystemsById,
 }: TaskQueueViewStateArgs): TaskQueueViewState {
+  const [groupBy, setGroupBy] = useRememberedViewState<TaskQueueGroupBy>("tasks.groupBy", DEFAULT_TASK_QUEUE_GROUP_BY);
   const [sortField, setSortField] = useRememberedViewState<TaskSortField>("tasks.sortField", "dueDate");
   const [sortOrder, setSortOrder] = useRememberedViewState<"asc" | "desc">("tasks.sortOrder", "asc");
   const [projectFilter, setProjectFilter] = useRememberedViewState<FilterSelection>("tasks.projectFilter", []);
@@ -127,7 +122,6 @@ export function useTaskQueueViewState({
   const [priorityFilter, setPriorityFilter] = useRememberedViewState<FilterSelection>("tasks.priorityFilter", []);
   const [searchFilter, setSearchFilter] = useRememberedViewState("tasks.searchFilter", "");
   const [focusedBoardState, setFocusedBoardState] = useRememberedViewState<TaskQueueBoardState | null>("tasks.focusedBoardState", null);
-  const [visibleTaskCount, setVisibleTaskCount] = useRememberedViewState("tasks.visibleTaskCount", TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
   const [taskQueueZoom, setTaskQueueZoom] = useRememberedViewState("tasks.taskQueueZoom", 1);
 
   const derived = useTaskQueueViewStateLogic({
@@ -145,7 +139,6 @@ export function useTaskQueueViewState({
     setFocusedBoardState,
     setProjectFilter,
     setSubsystemIterationFilter,
-    setVisibleTaskCount,
     sortField,
     sortOrder,
     statusFilter,
@@ -156,6 +149,8 @@ export function useTaskQueueViewState({
 
   return {
     ...derived,
+    groupBy,
+    setGroupBy,
     disciplineFilter,
     focusedBoardState,
     ownerFilter,
@@ -174,13 +169,11 @@ export function useTaskQueueViewState({
     setSubsystemFilter,
     setSubsystemIterationFilter,
     setTaskQueueZoom,
-    setVisibleTaskCount,
     sortField,
     sortOrder,
     statusFilter,
     subsystemFilter,
     subsystemIterationFilter,
     taskQueueZoom,
-    visibleTaskCount,
   };
 }

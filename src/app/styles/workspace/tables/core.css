@@ -37,8 +37,12 @@
   }
 }
 
+.table-shell > .ops-row {
+  background-color: var(--row-bg, var(--bg-panel));
+}
+
 .table-shell > :nth-child(2n of .ops-row) {
-  background-color: var(--bg-row-alt);
+  --row-bg: var(--bg-row-stripe);
 }
 
 .ops-row:is(:hover, :focus-visible) {

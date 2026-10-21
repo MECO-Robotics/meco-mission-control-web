@@ -114,19 +114,15 @@ function renderBoard(
   mockKanbanColumns.mockClear();
   renderToStaticMarkup(
     React.createElement(TaskQueueKanbanBoard, {
+        groupBy: "team",
       bootstrap,
-      workTypesById: { "work-type-design": bootstrap.workTypes[0] },
       focusedState: null,
-      isNonRobotProject: false,
       membersById: { "member-1": bootstrap.members[0] },
       onClearFocus: jest.fn(),
       onFocusState: jest.fn(),
       onReassignTaskStatus,
       openEditTaskModal,
       projectsById: { "project-1": bootstrap.projects[0] },
-      taskQueueZoom: 1,
-      showProjectContextOnCards: true,
-      showProjectOnCards: true,
       subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
       tasks: [task],
       workstreamsById: {},

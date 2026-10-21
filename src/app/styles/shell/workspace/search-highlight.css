@@ -1,0 +1,13 @@
+::highlight(workspace-search) {
+  background-color: var(--search-highlight-bg);
+  color: var(--search-highlight-text);
+}
+
+.milestone-search-highlight {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 0.08em;
+  border-radius: 3px;
+  background: var(--search-highlight-bg);
+  color: var(--search-highlight-text);
+}

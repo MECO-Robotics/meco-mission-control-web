@@ -59,10 +59,10 @@
   min-width: 0;
 }
 
-.app-topbar-view-title h1 {
+.app-topbar .app-topbar-view-title h1 {
   margin: 0;
   color: var(--text-title);
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
@@ -110,16 +110,16 @@
 }
 
 .app-topbar-brand-icon[data-logo-variant="full"] {
-  width: min(100%, 118px);
+  width: min(100%, 136px);
   height: auto;
-  max-height: 34px;
+  max-height: 46px;
 }
 
 .app-topbar-brand-icon[data-logo-variant="compact"] {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   max-width: 100%;
-  max-height: calc(var(--shell-topbar-height) - 0.75rem);
+  max-height: calc(var(--shell-topbar-height) - 0.5rem);
 }
 
 .app-topbar[data-collapsed="false"] .app-topbar-brand-icon {

@@ -101,10 +101,6 @@
   background: var(--bg-row-alt);
 }
 
-.timeline-period-controls.is-all .timeline-interval-switch {
-  margin: 0;
-}
-
 .timeline-period-divider {
   width: 1px;
   height: 1rem;

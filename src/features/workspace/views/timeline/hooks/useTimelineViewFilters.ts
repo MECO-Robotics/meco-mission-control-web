@@ -32,6 +32,7 @@ export interface TimelineViewFilterControls {
   setProjectFilter: Dispatch<SetStateAction<FilterSelection>>;
   setStatusFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSubsystemFilter: Dispatch<SetStateAction<FilterSelection>>;
+  setResponsibleGroupFilter: Dispatch<SetStateAction<FilterSelection>>;
   subsystemFilterOptions: DropdownOption[];
 }
 
@@ -55,11 +56,13 @@ export function pruneTimelineFilterSelections(
     isAllProjectsView,
     projectFilterOptions,
     subsystemFilterOptions,
+    responsibleGroupFilterOptions,
   }: {
     workTypeFilterOptions: DropdownOption[];
     isAllProjectsView: boolean;
     projectFilterOptions: DropdownOption[];
     subsystemFilterOptions: DropdownOption[];
+    responsibleGroupFilterOptions?: DropdownOption[];
   },
 ): TimelineTaskFilters {
   return {
@@ -78,10 +81,8 @@ export function pruneTimelineFilterSelections(
       filters.statusFilter,
       TIMELINE_TASK_STATUS_OPTIONS,
     ),
-    subsystemFilter: pruneStableFilterSelection(
-      filters.subsystemFilter,
-      subsystemFilterOptions,
-    ),
+    subsystemFilter: pruneStableFilterSelection(filters.subsystemFilter, subsystemFilterOptions),
+    responsibleGroupFilter: pruneStableFilterSelection(filters.responsibleGroupFilter ?? [], responsibleGroupFilterOptions ?? []),
   };
 }
 
@@ -92,6 +93,7 @@ export function useTimelineViewFilters({
 }: UseTimelineViewFiltersArgs): TimelineViewFilterControls {
   const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
   const [workTypeFilter, setWorkTypeFilter] = useState<FilterSelection>([]);
+  const [responsibleGroupFilter, setResponsibleGroupFilter] = useState<FilterSelection>([]);
   const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
   const [statusFilter, setStatusFilter] = useState<FilterSelection>([]);
   const [priorityFilter, setPriorityFilter] = useState<FilterSelection>([]);
@@ -113,8 +115,9 @@ export function useTimelineViewFilters({
       projectFilter,
       statusFilter,
       subsystemFilter,
+      responsibleGroupFilter,
     }),
-    [workTypeFilter, priorityFilter, projectFilter, statusFilter, subsystemFilter],
+    [workTypeFilter, priorityFilter, projectFilter, statusFilter, subsystemFilter, responsibleGroupFilter],
   );
 
   useEffect(() => {
@@ -123,8 +126,12 @@ export function useTimelineViewFilters({
       isAllProjectsView,
       projectFilterOptions,
       subsystemFilterOptions,
+      responsibleGroupFilterOptions: bootstrap.responsibleGroups,
     });
 
+    if (prunedFilters.responsibleGroupFilter !== filters.responsibleGroupFilter) {
+      setResponsibleGroupFilter(prunedFilters.responsibleGroupFilter ?? []);
+    }
     if (prunedFilters.projectFilter !== filters.projectFilter) {
       setProjectFilter(prunedFilters.projectFilter);
     }
@@ -141,6 +148,7 @@ export function useTimelineViewFilters({
       setPriorityFilter(prunedFilters.priorityFilter);
     }
   }, [
+    bootstrap.responsibleGroups,
     workTypeFilterOptions,
     filters,
     isAllProjectsView,
@@ -163,6 +171,7 @@ export function useTimelineViewFilters({
     setProjectFilter,
     setStatusFilter,
     setSubsystemFilter,
+    setResponsibleGroupFilter,
     subsystemFilterOptions,
   };
 }

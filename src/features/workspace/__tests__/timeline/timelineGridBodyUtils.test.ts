@@ -1,7 +1,6 @@
 /// <reference types="jest" />
 
 import {
-  buildTimelineTaskStatusSignalByTaskId,
   getTimelineTaskStatusSignal,
 } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -79,7 +78,7 @@ describe("timeline task dependency counts and status", () => {
       ],
     };
 
-    const signals = buildTimelineTaskStatusSignalByTaskId(bootstrap);
+    const signals = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, getTimelineTaskStatusSignal(task, bootstrap)]));
 
     expect(signals["task-upstream"]).toBe("in-progress");
     expect(signals["task-blocked"]).toBe("blocked");

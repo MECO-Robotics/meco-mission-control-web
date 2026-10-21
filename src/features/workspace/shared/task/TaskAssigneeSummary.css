@@ -1,0 +1,16 @@
+.task-assignee-summary {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: calc(0.35rem * var(--task-assignee-scale, 1));
+}
+
+.task-assignee-summary .profile-avatar {
+  width: calc(var(--task-assignee-size, 1.35rem) * var(--task-assignee-scale, 1));
+  height: calc(var(--task-assignee-size, 1.35rem) * var(--task-assignee-scale, 1));
+  font-size: calc(0.75rem * var(--task-assignee-scale, 1));
+}
+
+.task-assignee-summary-count {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { useMilestoneEditor } from "../useMilestoneEditor";
-import { useTimelineMilestoneModal } from "@/features/workspace/views/timeline/useTimelineEventModal";
 
-jest.mock("react", () => ({ ...jest.requireActual("react"), useState: jest.fn(), useEffect: jest.fn(), useCallback: (callback: unknown) => callback }));
+jest.mock("react", () => ({ ...jest.requireActual("react"), useRef: jest.fn(), useState: jest.fn(), useEffect: jest.fn(), useCallback: (callback: unknown) => callback }));
 
 function setup() {
   const state: unknown[] = [];
   let cursor = 0;
+  let unmount: (() => void) | undefined;
+  jest.mocked(useRef).mockImplementation((initial) => (state[cursor++] ??= { current: initial }) as ReturnType<typeof useRef>);
+  jest.mocked(useEffect).mockImplementation((effect) => { if (!unmount) unmount = effect() || undefined; });
   jest.mocked(useState).mockImplementation((initial?: unknown) => {
     const index = cursor++;
     if (!(index in state)) state[index] = typeof initial === "function" ? initial() : initial;
@@ -23,14 +25,8 @@ function setup() {
   };
   return {
     args,
+    unmount: () => unmount?.(),
     useEditor: () => { cursor = 0; return useMilestoneEditor(args); },
-    useTimelineEditor: () => {
-      cursor = 0;
-      return useTimelineMilestoneModal({
-        ...args, dayMilestonesByDate: { "2026-10-01": [record] },
-        openCreateTaskModal: jest.fn(), triggerCreateMilestoneToken: 0,
-      });
-    },
   };
 }
 
@@ -102,16 +98,63 @@ test("untimed events use noon and optional end dates; detail mode cannot submit 
   expect(args.onTaskEditSaved).not.toHaveBeenCalled();
 });
 
-test("timeline opening commands clear detail state before editing or creating", () => {
-  const { useTimelineEditor } = setup();
-  useTimelineEditor().openMilestoneDetailModalForMilestone(record);
-  expect(useTimelineEditor().activeMilestoneDetail).toBe(record);
-  useTimelineEditor().openEditMilestoneModalForMilestone(record);
-  expect(useTimelineEditor()).toMatchObject({ activeMilestoneDetail: null, milestoneModalMode: "edit" });
-  useTimelineEditor().openMilestoneDetailModalForMilestone(record);
-  useTimelineEditor().openMilestoneModalForDay("2026-10-02");
-  expect(useTimelineEditor()).toMatchObject({ activeMilestoneDetail: null, milestoneModalMode: "create", milestoneStartDate: "2026-10-02" });
-  expect(useTimelineEditor()).not.toHaveProperty("openCreateMilestoneModalForDay");
-  expect(useTimelineEditor()).not.toHaveProperty("openEditMilestoneModal");
-  expect(useTimelineEditor()).not.toHaveProperty("openMilestoneDetailsModal");
+test.each(["resolve", "reject"] as const)("a retired save cannot affect a reopened milestone after %s", async (outcome) => {
+  const { args, useEditor } = setup();
+  let resolve!: () => void;
+  let reject!: (reason: Error) => void;
+  args.onSaveTimelineMilestone.mockImplementationOnce(() => new Promise<void>((accept, fail) => { resolve = accept; reject = fail; }));
+  useEditor().openEditMilestoneModal(record);
+  const pending = useEditor().handleMilestoneSubmit(submit);
+  await useEditor().handleMilestoneSubmit(submit);
+  await useEditor().handleMilestoneDelete();
+  expect(args.onSaveTimelineMilestone).toHaveBeenCalledTimes(1);
+  expect(args.onDeleteTimelineMilestone).not.toHaveBeenCalled();
+  useEditor().closeMilestoneModal();
+  useEditor().openEditMilestoneModal({ ...record, id: "new-milestone" });
+  useEditor().setMilestoneStartDate("");
+  await useEditor().handleMilestoneSubmit(submit);
+  if (outcome === "resolve") resolve(); else reject(new Error("old failure"));
+  await pending;
+  expect(useEditor()).toMatchObject({ activeMilestoneId: "new-milestone", milestoneModalMode: "edit", milestoneError: "Start date is required.", isSavingMilestone: false });
+  expect(args.onTaskEditSaved).not.toHaveBeenCalled();
+});
+
+test("retired deletes and unmounted saves cannot close or notify a newer editor", async () => {
+  const { args, useEditor, unmount } = setup();
+  const windowBefore = globalThis.window;
+  Object.defineProperty(globalThis, "window", { configurable: true, value: { confirm: () => true } });
+  try {
+    let finish!: () => void;
+    args.onDeleteTimelineMilestone.mockImplementationOnce(() => new Promise<void>((resolve) => { finish = resolve; }));
+    useEditor().openEditMilestoneModal(record);
+    const pendingDelete = useEditor().handleMilestoneDelete();
+    await useEditor().handleMilestoneSubmit(submit);
+    expect(args.onSaveTimelineMilestone).not.toHaveBeenCalled();
+    useEditor().openCreateMilestoneModalForDay("2026-12-01");
+    finish();
+    await pendingDelete;
+    expect(useEditor()).toMatchObject({ milestoneModalMode: "create", isDeletingMilestone: false, milestoneError: null });
+    args.onSaveTimelineMilestone.mockImplementationOnce(() => new Promise<void>((resolve) => { finish = resolve; }));
+    useEditor().openEditMilestoneModal(record);
+    const pendingSave = useEditor().handleMilestoneSubmit(submit);
+    unmount();
+    finish();
+    await pendingSave;
+    expect(args.onTaskEditSaved).not.toHaveBeenCalled();
+  } finally {
+    Object.defineProperty(globalThis, "window", { configurable: true, value: windowBefore });
+  }
+});
+
+test("return from a milestone report restores details only while that editor session is current", () => {
+  const { useEditor } = setup();
+  useEditor().openMilestoneDetailsModal(record);
+  const restore = useEditor().leaveMilestoneDetails(record);
+  expect(useEditor().milestoneModalMode).toBeNull();
+  restore();
+  expect(useEditor()).toMatchObject({ milestoneModalMode: "detail", activeMilestoneId: record.id });
+  const staleRestore = useEditor().leaveMilestoneDetails(record);
+  useEditor().openCreateMilestoneModalForDay("2026-11-01");
+  staleRestore();
+  expect(useEditor()).toMatchObject({ milestoneModalMode: "create", activeMilestoneId: null });
 });

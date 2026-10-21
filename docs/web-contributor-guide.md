@@ -155,11 +155,6 @@ truth for permissions, persistence, and schema validation.
 
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
 
-`WorkspacePopover` supplies anchored, nonmodal freeform details for status
-legends, dependency references, and milestone lists. It reuses shared dropdown
-positioning/dismissal and portals above scrolling surfaces; use it when the
-content is a disclosure rather than a filter or action menu.
-
 Before adding a UI element, inspect the shared UI components, existing view patterns, and design tokens for one that already provides the needed behavior and appearance. Compose or extend that owner; do not recreate an existing button, menu, control, layout, or interaction with view-local markup and styles. Add a new shared element only when the behavior is genuinely missing, and document its intended reuse.
 
 Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it. Use [color-theme.md](../color-theme.md) as the official definition of semantic theme tokens and visual exceptions; if a shared semantic role is missing, define it there and in the runtime theme rather than adding an undefined token or light-only fallback. Check light and dark modes, including empty and disabled states. Colored side borders on cards, list items, callouts, or alerts must stay at 1px or less.
@@ -168,7 +163,7 @@ Favor minimal UI: reuse existing elements and layouts, and minimize added surfac
 
 Before implementing an additional feature, inspect and reuse the existing modules, components, and layouts that already own the relevant behavior. Extend a shared owner when the behavior is genuinely shared; keep domain-specific data and presentation at the view boundary. Do not rebuild an existing layout or interaction in parallel. For Kanban views, reuse `KanbanColumns`, `KanbanScrollFrame`, and their drag behavior, supplying view-specific columns and cards.
 
-KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom, focus selection and lazy loading stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element.
+KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom and focus selection stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element. Kanban groups the complete filtered task set by project, then the selected Team (default) or Subsystem mode. Group by lives in the shared sort menu and is remembered during navigation. Subsystem mode uses workstreams for non-robot projects, shows multi-target tasks in each linked lane, and preserves unique status-column totals. Missing targets stay visible in unassigned/unavailable lanes. The grouping model owns lane membership, order, labels and accents; the board only renders those results. Every project and status count remains visible; do not truncate tasks before grouping. Card context uses each task’s project type, showing robot subsystems or non-robot workstreams on mixed boards. Cards show a full-width title, optional neutral context, structured blocker/help exceptions and a priority/date/assignee footer. Keep descriptions, logged hours and repeated project/discipline labels in task details or board grouping. Help indicators come from unresolved linked help risks, never work-log keywords.
 
 For UI work, match existing dense Mission Control patterns. Use restrained
 controls, stable dimensions, and predictable responsive behavior. Avoid adding
@@ -232,3 +227,7 @@ clears removed placement targets. Missing hard prerequisites stay blocking.
 Manufacturing work must be retargeted or removed before its part definition is
 deleted. Help requests are canonical Risks with category `help` and server-owned
 creator attribution.
+
+`WorkspacePopover` supplies anchored, nonmodal informational disclosures such
+as the Gantt status legend, reusing dropdown positioning and dismissal. Record
+handoffs continue to use the current handoff modal.

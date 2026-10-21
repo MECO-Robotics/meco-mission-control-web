@@ -7,6 +7,7 @@ import {
 } from "react";
 import { KanbanColumnScrollArea } from "./KanbanColumnScrollArea";
 import { KanbanProjectGroup } from "./KanbanProjectGroup";
+import { KanbanSwimlane } from "./KanbanSwimlane";
 
 import {
   useKanbanDrag,
@@ -40,6 +41,7 @@ interface KanbanColumnsProps<TState extends string, TItem> {
   swimlaneGroups?: readonly {
     id: string;
     label: string;
+    accentColor?: string;
     lanes: readonly {
       id: string;
       header: ReactNode;
@@ -111,7 +113,9 @@ export function KanbanColumns<TState extends string, TItem>({
         >
           {column.header}
           <span className={columnCountClassName}>{column.count}</span>
-        </div> : null}
+        </div> : swimlaneGroups ? (
+          <span className={`${columnCountClassName} kanban-swimlane-cell-count`}>{items.length}</span>
+        ) : null}
         {(!swimlaneGroups || !showHeader) ? <KanbanColumnScrollArea
           className={`${columnBodyClassName}${
             drag.hoveredDropState === column.state ? " is-kanban-drop-target" : ""
@@ -166,14 +170,13 @@ export function KanbanColumns<TState extends string, TItem>({
         </div>
       ) : columns.map((column) => renderColumn(column, itemsByState[column.state], true))}
       {swimlaneGroups?.map((group) => (
-        <KanbanProjectGroup key={group.id} label={group.label}>
+        <KanbanProjectGroup key={group.id} label={group.label} accentColor={group.accentColor}>
           {group.lanes.map((lane) => (
-            <section className="kanban-swimlane" key={lane.id}>
-              <header className="kanban-swimlane-label">{lane.header}</header>
+            <KanbanSwimlane header={lane.header} key={lane.id}>
               <div className="kanban-swimlane-columns">
                 {columns.map((column) => renderColumn(column, lane.itemsByState[column.state], false))}
               </div>
-            </section>
+            </KanbanSwimlane>
           ))}
         </KanbanProjectGroup>
       ))}

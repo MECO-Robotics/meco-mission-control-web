@@ -4,7 +4,7 @@ import { getTaskOpenBlockersForTask, getTaskWaitingOnDependencies } from "@/feat
 
 export type TimelineTaskStatusSignal = TaskStatus | "blocked" | "waiting-on-dependency";
 
-export function getTimelineTaskStatusSignal(
+function getTimelineTaskStatusSignalForTask(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
 ): TimelineTaskStatusSignal {
@@ -21,13 +21,9 @@ export function getTimelineTaskStatusSignal(
   return task.status;
 }
 
-export function buildTimelineTaskStatusSignalByTaskId(
+export function getTimelineTaskStatusSignal(
+  task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
-): Record<string, TimelineTaskStatusSignal> {
-  return Object.fromEntries(
-    bootstrap.tasks.map((task) => [
-      task.id,
-      getTimelineTaskStatusSignal(task, bootstrap),
-    ]),
-  );
+): TimelineTaskStatusSignal {
+  return getTimelineTaskStatusSignalForTask(task, bootstrap);
 }

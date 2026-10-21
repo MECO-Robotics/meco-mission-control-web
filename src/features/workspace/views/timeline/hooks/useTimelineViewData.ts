@@ -1,166 +1,41 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MilestonePayload } from "@/types/payloads";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { formatTimelinePeriodLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { formatTimelinePeriodLabel, getSchedulePeriodBounds } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
-import { buildTimelineData } from "../model/timelineViewDataCore";
-import { buildTimelineDayHeaderCells, buildTimelineMonthGroups, buildTimelineProjectRows } from "../model/timelineViewDataPresentation";
+import { buildTaskCalendarEvents } from "../../taskCalendar/taskCalendarEvents";
+import { buildTimelineDays } from "../model/timelineViewDataCore";
 import type { TimelineTaskFilters } from "../model/timelineViewFilters";
-import { useTimelineMilestoneModal } from "../useTimelineEventModal";
-import { useTimelineMilestoneOverlay } from "./useTimelineMilestoneOverlay";
-import { useTimelineRowHighlightGeometry } from "./useTimelineRowHighlightGeometry";
 import { useTimelineViewScope } from "./useTimelineViewScope";
-import { resolveTimelineRowHighlightStyle } from "../model/timelineTaskColors";
 
-interface UseTimelineViewDataArgs {
+export function useTimelineViewData({
+  activePersonFilter, bootstrap, isAllProjectsView, searchFilter, timelineFilters, viewAnchorDate, viewInterval,
+}: {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
-  openCreateTaskModal: () => void;
-  onTaskEditCanceled: () => void;
-  onTaskEditSaved: () => void;
-  onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
-  onSaveTimelineMilestone: (
-    mode: "create" | "edit",
-    milestoneId: string | null,
-    payload: MilestonePayload,
-  ) => Promise<void>;
   searchFilter: string;
   timelineFilters: TimelineTaskFilters;
-  triggerCreateMilestoneToken: number;
   viewAnchorDate: string;
   viewInterval: TimelineViewInterval;
-}
-
-export function useTimelineViewData({
-  activePersonFilter,
-  bootstrap,
-  isAllProjectsView,
-  openCreateTaskModal,
-  onTaskEditCanceled,
-  onTaskEditSaved,
-  onDeleteTimelineMilestone,
-  onSaveTimelineMilestone,
-  searchFilter,
-  timelineFilters,
-  triggerCreateMilestoneToken,
-  viewAnchorDate,
-  viewInterval,
-}: UseTimelineViewDataArgs) {
-  const {
-    projectsById,
-    scopedMeetings,
-    scopedMilestones,
-    scopedProjectIds,
-    scopedSubsystems,
-    scopedTasks,
-    subsystemsById,
-    tasksById,
-    timelineFilterMotionClass,
-  } = useTimelineViewScope({
-    activePersonFilter,
-    bootstrap,
+}) {
+  const scope = useTimelineViewScope({ activePersonFilter, bootstrap, isAllProjectsView, searchFilter, timelineFilters });
+  const { scopedTasks, scopedMilestones, scopedMeetings, projectsById } = scope;
+  const days = useMemo(() => {
+    const { startDate, endDate } = getSchedulePeriodBounds(viewAnchorDate, viewInterval);
+    return buildTimelineDays(startDate, endDate);
+  }, [viewAnchorDate, viewInterval]);
+  const agendaEvents = useMemo(() => buildTaskCalendarEvents({
+    activePersonFilter: [],
+    bootstrap: { ...bootstrap, tasks: scopedTasks, milestones: scopedMilestones, meetings: scopedMeetings },
     isAllProjectsView,
-    searchFilter,
-    timelineFilters,
-  });
-  const timeline = useMemo(
-    () =>
-      buildTimelineData({
-        isAllProjectsView,
-        meetings: scopedMeetings,
-        milestones: scopedMilestones,
-        projectsById,
-        scopedSubsystems,
-        scopedTasks,
-        viewAnchorDate,
-        viewInterval,
-      }),
-    [
-      isAllProjectsView,
-      projectsById,
-      scopedMeetings,
-      scopedMilestones,
-      scopedSubsystems,
-      scopedTasks,
-      viewAnchorDate,
-      viewInterval,
-    ],
-  );
-  const timelinePeriodLabel = useMemo(
-    () => formatTimelinePeriodLabel(viewInterval, timeline.days),
-    [timeline.days, viewInterval],
-  );
-  const monthGroups = useMemo(() => buildTimelineMonthGroups(timeline.days), [timeline.days]);
-  const dayMilestonesByDate = timeline.dayMilestones;
-  const dayMeetingsByDate = timeline.dayMeetings;
-  const milestoneModal = useTimelineMilestoneModal({
-    dayMilestonesByDate,
-    openCreateTaskModal,
-    onTaskEditCanceled,
-    onTaskEditSaved,
-    onDeleteTimelineMilestone,
-    onSaveTimelineMilestone,
-    scopedProjectIds,
-    triggerCreateMilestoneToken,
-  });
-  const timelineDayHeaderCells = useMemo(
-    () => buildTimelineDayHeaderCells(timeline.days, dayMilestonesByDate, dayMeetingsByDate),
-    [dayMeetingsByDate, dayMilestonesByDate, timeline.days],
-  );
-  const projectRows = useMemo(
-    () => buildTimelineProjectRows(timeline.subsystemRows),
-    [timeline.subsystemRows],
-  );
-
-  const {
-    timelineDayCellRefs,
-    timelineDayMilestoneUnderlays,
-    timelineGridRef,
-    timelineShellRef,
-    timelineTodayMarkerLabelTop,
-    timelineTodayMarkerLineLeft,
-    timelineTodayMarkerLeft,
-    isTimelineShellScrolling,
-    tooltipPortalTarget,
-  } = useTimelineMilestoneOverlay({
-    days: timeline.days,
-    milestones: scopedMilestones,
-  });
-
-  const resolveRowHighlightGeometry = useTimelineRowHighlightGeometry(timelineShellRef);
-
-  const resolveTaskRowHighlightStyle = useCallback(
-    (anchorKey: string) =>
-      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById),
-    [subsystemsById, tasksById],
-  );
-  const modalPortalTarget =
-    typeof document !== "undefined"
-      ? ((document.querySelector(".page-shell") as HTMLElement | null) ?? document.body)
-      : null;
-
-  return {
-    milestoneModal,
-    isTimelineShellScrolling,
-    monthGroups,
-    projectRows,
     projectsById,
-    resolveRowHighlightGeometry,
-    resolveTaskRowHighlightStyle,
-    timeline,
-    timelineDayCellRefs,
-    timelineDayHeaderCells,
-    timelineDayMilestoneUnderlays,
-    timelineFilterMotionClass,
-    timelineGridRef,
-    timelinePeriodLabel,
-    timelineShellRef,
-    timelineTodayMarkerLabelTop,
-    timelineTodayMarkerLineLeft,
-    timelineTodayMarkerLeft,
-    modalPortalTarget,
-    tooltipPortalTarget,
+  }), [bootstrap, isAllProjectsView, projectsById, scopedMeetings, scopedMilestones, scopedTasks]);
+  return {
+    days,
+    tasks: scopedTasks,
+    milestones: scopedMilestones,
+    agendaEvents,
+    timelinePeriodLabel: formatTimelinePeriodLabel(viewInterval, days),
   };
 }

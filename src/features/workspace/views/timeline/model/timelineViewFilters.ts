@@ -9,6 +9,7 @@ import type { DropdownOption } from "@/features/workspace/shared/model/workspace
 import {
   type FilterSelection,
   filterSelectionIncludes,
+  filterSelectionMatchesTaskPeople,
   filterSelectionIntersects,
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
@@ -27,6 +28,7 @@ export interface TimelineTaskFilters {
   projectFilter: FilterSelection;
   statusFilter: FilterSelection;
   subsystemFilter: FilterSelection;
+  responsibleGroupFilter?: FilterSelection;
 }
 
 export const TIMELINE_TASK_STATUS_OPTIONS: DropdownOption[] = TASK_QUEUE_STATUS_OPTIONS;
@@ -37,10 +39,13 @@ export function readTimelineTaskSubsystemIds(task: TaskRecord) {
 }
 
 export function buildTimelineSubsystemFilterOptions(bootstrap: BootstrapPayload): DropdownOption[] {
-  return bootstrap.subsystems.map((subsystem) => ({
-    id: subsystem.id,
-    name: `${subsystem.name} (${formatIterationVersion(subsystem.iteration)})`,
-  }));
+  return [
+    ...bootstrap.subsystems.map((subsystem) => ({
+      id: subsystem.id,
+      name: `${subsystem.name} (${formatIterationVersion(subsystem.iteration)})`,
+    })),
+    ...bootstrap.workstreams.map((workstream) => ({ id: workstream.id, name: workstream.name })),
+  ];
 }
 
 export function buildTimelineWorkTypeFilterOptions(bootstrap: BootstrapPayload): DropdownOption[] {
@@ -58,6 +63,7 @@ export function filterTimelineTasks({
   projectFilter,
   statusFilter,
   subsystemFilter,
+  responsibleGroupFilter = [],
   tasks,
 }: TimelineTaskFilters & {
   bootstrap: BootstrapPayload;
@@ -74,8 +80,11 @@ export function filterTimelineTasks({
   }
   if (subsystemFilter.length > 0) {
     result = result.filter((task) =>
-      filterSelectionIntersects(subsystemFilter, readTimelineTaskSubsystemIds(task)),
+      filterSelectionIntersects(subsystemFilter, [...readTimelineTaskSubsystemIds(task), ...task.workstreamIds]),
     );
+  }
+  if (responsibleGroupFilter.length > 0) {
+    result = result.filter((task) => !!task.responsibleGroupId && filterSelectionIncludes(responsibleGroupFilter, task.responsibleGroupId));
   }
   if (statusFilter.length > 0) {
     result = result.filter((task) =>
@@ -132,11 +141,13 @@ export function hasActiveTimelineTaskFilters({
   projectFilter,
   statusFilter,
   subsystemFilter,
+  responsibleGroupFilter = [],
 }: TimelineTaskFilters & { isAllProjectsView: boolean }) {
   return [
     isAllProjectsView ? projectFilter : [],
     workTypeFilter,
     subsystemFilter,
+    responsibleGroupFilter,
     statusFilter,
     priorityFilter,
   ].some((selection) => selection.length > 0);
@@ -150,6 +161,7 @@ export function countActiveTimelineFilters({
   projectFilter,
   statusFilter,
   subsystemFilter,
+  responsibleGroupFilter = [],
 }: TimelineTaskFilters & {
   activePersonFilter: FilterSelection;
   isAllProjectsView: boolean;
@@ -159,6 +171,7 @@ export function countActiveTimelineFilters({
     isAllProjectsView ? projectFilter : [],
     workTypeFilter,
     subsystemFilter,
+    responsibleGroupFilter,
     statusFilter,
     priorityFilter,
   ].filter((selection) => selection.length > 0).length;
@@ -166,3 +179,30 @@ export function countActiveTimelineFilters({
 
 export const getTimelineFilterToneClassName = getWorkspaceFilterToneClassName;
 export const getTimelineStatusToneClassName = getWorkspaceStatusToneClassName;
+
+export function filterTimelineMilestonesByTaskSelection({
+  activePersonFilter,
+  responsibleGroupFilter = [],
+  milestones,
+  tasks,
+}: {
+  activePersonFilter: FilterSelection;
+  responsibleGroupFilter?: FilterSelection;
+  milestones: BootstrapPayload["milestones"];
+  tasks: BootstrapPayload["tasks"];
+}) {
+  if (activePersonFilter.length === 0 && responsibleGroupFilter.length === 0) {
+    return milestones;
+  }
+
+  const matchingMilestoneIds = new Set(
+    tasks.flatMap((task) =>
+      (activePersonFilter.length === 0 || filterSelectionMatchesTaskPeople(activePersonFilter, task)) &&
+      (responsibleGroupFilter.length === 0 || (!!task.responsibleGroupId && responsibleGroupFilter.includes(task.responsibleGroupId)))
+        ? task.scheduleRefs.filter((ref) => ref.kind === "milestone").map((ref) => ref.id)
+        : [],
+    ),
+  );
+
+  return milestones.filter((milestone) => matchingMilestoneIds.has(milestone.id));
+}

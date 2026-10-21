@@ -1,2 +1,130 @@
-@import url("./cards/base.css");
-@import url("./cards/dense.css");
+.task-queue-board-focused-lane-grid {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--task-queue-board-focused-card-width, 16rem)), 1fr));
+}
+
+.page-shell.dark-mode .task-queue-board-focused-exit {
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+}
+
+.task-queue-board-card {
+  display: grid;
+  gap: calc(0.45rem * var(--task-queue-zoom, 1));
+  width: 100%;
+  min-width: 0;
+  padding: calc(0.72rem * var(--task-queue-zoom, 1)) calc(0.82rem * var(--task-queue-zoom, 1));
+  border: 1px solid var(--border-base);
+  border-radius: calc(14px * var(--task-queue-zoom, 1));
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.task-queue-board-card:hover {
+  border-color: var(--text-muted);
+}
+
+.task-queue-board-card:focus-visible {
+  outline: 2px solid var(--status-info-text);
+  outline-offset: 2px;
+}
+
+.task-queue-board-card-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: var(--text-title);
+  font-size: calc(0.92rem * var(--task-queue-zoom, 1));
+  line-height: 1.3;
+}
+
+.task-queue-board-card-context {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-copy);
+  font-size: calc(0.72rem * var(--task-queue-zoom, 1));
+  line-height: 1.35;
+}
+
+.task-queue-board-card-exceptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(0.35rem * var(--task-queue-zoom, 1));
+  font-size: calc(0.68rem * var(--task-queue-zoom, 1));
+  font-weight: 600;
+}
+
+.task-queue-board-card-exceptions > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+.task-queue-board-card-exceptions svg {
+  flex-shrink: 0;
+}
+
+.task-queue-board-card-blocker-count,
+.task-queue-board-card-due[data-tone="danger"] {
+  color: var(--status-danger-text);
+}
+
+.task-queue-board-card-help,
+.task-queue-board-card-due[data-tone="warning"] {
+  color: var(--status-warning-text);
+}
+
+.task-queue-board-card-footer,
+.task-queue-board-card-schedule {
+  display: flex;
+  align-items: center;
+  gap: calc(0.35rem * var(--task-queue-zoom, 1));
+}
+
+.task-queue-board-card-footer {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: calc(0.15rem * var(--task-queue-zoom, 1));
+  color: var(--text-copy);
+  font-size: calc(0.68rem * var(--task-queue-zoom, 1));
+  line-height: 1.3;
+}
+
+.task-queue-board-card-schedule {
+  min-width: 0;
+}
+
+.task-queue-board-card-due {
+  font-variant-numeric: tabular-nums;
+}
+
+.task-queue-board-card-footer .task-assignee-summary {
+  --task-assignee-scale: var(--task-queue-zoom, 1);
+  margin-left: auto;
+}
+
+.task-queue-board-card-priority {
+  display: block;
+  flex-shrink: 0;
+  width: calc(0.95rem * var(--task-queue-zoom, 1));
+  height: calc(0.95rem * var(--task-queue-zoom, 1));
+  color: var(--status-neutral-text);
+}
+
+.task-queue-board-card-priority-critical,
+.task-queue-board-card-priority-high {
+  color: var(--status-danger-text);
+}
+
+.task-queue-board-card-priority-medium {
+  color: var(--status-warning-text);
+}

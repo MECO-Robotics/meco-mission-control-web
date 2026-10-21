@@ -15,7 +15,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 | Area | Views | Consolidation |
 | --- | --- | --- |
 | Home | Action Required, next four milestone timeline, task status distribution | Uses selected project scope; one attention row per source record; Risks provides build review and linked work |
-| Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
+| Work | Tasks, Schedule, Risks, Activity | Schedule combines a product timeline with compact Agenda; both share search, filters and dates, with Agenda available in a modal on phones; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
 | Team | People, Teams | People combines directory, presence, availability and individual workload; Teams manages ResponsibleGroups, adds or reuses matching WorkType disciplines, and derives team workload/capacity |
 
@@ -39,6 +39,8 @@ This hierarchy follows dashboard evaluation research that measures whether users
 | Task status | How are scoped tasks distributed across execution states? | Exact counts for not started, in progress, waiting for QA and complete; the donut reports completion by task count. | A status opens its matching tasks; the donut opens all scoped tasks. |
 | Next 14 days | When are unfinished task deadlines and milestone dates clustered? | Fourteen consecutive recorded civil dates from today through day 13. Task bars stack not-started, in-progress and waiting-for-QA colors with a legend and exact status counts in their accessible labels/tooltips; milestone marker counts remain distinct; past dates appear in a separate overdue bucket. Complete records and invalid dates are excluded. This is recorded timing, not a forecast. | Day and overdue buttons open matching tasks and milestones, including empty dates. Milestones open their existing Schedule details. |
 | Direct prerequisites | Which recorded prerequisite is holding up work? | Only hard, unsatisfied links from scoped unfinished dependent tasks. Shared prerequisites branch to direct waiting work. Missing references, outside-scope context, requirements and cycles remain explicit. Preview limits are disclosed and all branches remain reachable. | Prerequisites open a focused tree modal; available task/milestone nodes use existing record actions. Part prerequisites show location/readiness and waiting tasks. |
+
+Your tasks is a compact right-hand quicklist on desktop, above the charts on narrow screens. It intersects the current dashboard project/person/search scope with the signed-in linked member's owned or assigned unfinished tasks; selecting another person never impersonates that member. Tasks are ordered by critical/high/medium/low priority, valid due date (undated/invalid last), title and identity, with every matching task reachable in a bounded scroll region. Each task opens the existing task details. Anonymous or unlinked accounts see a sign-in notice; identified members with no matching work see an empty state.
 
 Search lives in the shared topbar. The top-left chart has one local grouping selector and combines workload with highlighted pressure; it has no measure switch or separate workload panel. Task status remains beside it, the next-14-days chart spans the following row, and direct prerequisites appear below. Search matches task/risk titles and descriptions and milestone titles/descriptions; it narrows the dashboard’s scoped record sets. Changing search or grouping closes the current drilldown. Dialogs retain selection identities and derive fresh contents from the current bootstrap; a disappearing group does not fall back to all records.
 
@@ -78,6 +80,14 @@ When changing data contracts:
 - Preserve keyboard and responsive behavior in topbar and timeline interactions.
 - Use the shared topbar slots for functional search, filters, sort, view-specific controls, and create actions. Do not add duplicate in-view page headings or operational-summary prose; place instructions in Help/tutorial content. See [web-contributor-guide.md](web-contributor-guide.md#workspace-topbar-contract).
 - Keep empty, loading, rollback, and storage-failure states explicit.
+
+## Schedule
+
+Schedule organizes dated work by project, then responsible team by default. The shared topbar Sort menu offers Group by Team or Subsystem. Team uses each task's explicit responsible team, retains assigned archived teams, and shows unavailable teams by identity and unassigned work in a trailing Unassigned team group. Team groups follow bootstrap team order; owners' team memberships do not assign work. Subsystem groups robot work by subsystem and non-robot work by workstream, with General for work without an available target. A shared task appears once in Team and in each linked group in Subsystem; project counts use unique task identities and explicitly describe task completion. Grouping changes presentation only, retaining filters, dates, task order and Agenda. Alternating task rows align labels with their timing bars. Readable task names, the first assignee’s profile avatar with a +N count for additional assignees, responsible team, status icons and recorded status stay in one sticky Work column. Names and bars open the existing task editor; Handoffs opens one shared modal showing the selected task's immediate prerequisites, downstream work and recorded blockers using complete workspace context. Close, Escape and backdrop clicks dismiss it; opening a linked task dismisses it before opening the task editor. Dotted prerequisite arrows connect visible bars quietly behind tasks; warning indicates unmet hard prerequisites, while satisfied and advisory dependencies use muted colors. Hovering or keyboard-focusing a timing bar brings all its incoming and outgoing arrows above task bars across every visible instance of that task. Pointer hover takes priority over keyboard focus; leaving the bar restores the focused task's arrows or the quiet background. Sticky Work cells and the date header remain above arrows. Hidden or collapsed tasks have no arrow endpoints.
+
+Week and Month are the only Gantt date ranges and show calendar days. Month opens fitted to the available width. Fit restores the fitted view, fine zoom lives in the shared topbar View menu, and Today returns to the current week or month while preserving the selected range. Date headers focus that day's Agenda rather than creating records. All creation actions remain in the shared plus menu.
+
+Milestones occupy a compact lane above work, opening the same milestone detail/editor as Agenda and deep links. Agenda uses compact date-grouped rows with bounded desktop scrolling, sits to the right when shown, and can be hidden through View. Phones keep the timeline visible with horizontal scrolling; selecting a date or choosing Open agenda in View opens Agenda in a modal. Filtering by person or responsible team retains project/area structure. No automatic rescheduling, inferred capacity, or predictive readiness percentage is supplied.
 
 ## Implementation Guardrails
 
@@ -140,23 +150,13 @@ New task drafts use the selected project and a subsystem from that project. Owne
 
 Part readiness uses reviewed, revision-matched evidence. Historical results remain stored; stale results do not verify a changed part revision. Required milestone criteria must exist before readiness can be established.
 
-## Gantt timeline presentation
+## Gantt status presentation
 
-Timeline bars encode effective status using shared semantic colors, with text
-and glyphs for grayscale use. Complete overrides stale blockers; open blockers
-precede unmet hard dependencies. Overdue labels count local calendar days past
-due for unfinished work without replacing its status. Sticky task names retain
-status and overdue text when short bars cannot fit a title. Dependency disclosures
-resolve prerequisites/dependents from the full scoped bootstrap and open task
-details; unavailable references stay visibly unavailable.
-
-Collapsed project/subsystem rows show one neutral Group span, unique task and
-completion counts, and blocked/overdue counts. Activating the summary expands
-the group. Header milestone markers open a list when dates coincide and retain
-each original date range, with thin guides in the chart. Legend, period, zoom,
-search, filters and creation remain in the single shared topbar. Date edits
-continue through the task editor. No schema migration or reseed is required.
-
-This replaces discipline-led bars and overlapping collapsed tasks because one
-status signal and persistent labels make schedule problems readable with less
-visual and implementation complexity.
+Bars use semantic status colors with visible text/icons in the sticky work
+column. Complete overrides stale blockers; otherwise open blockers precede
+unmet hard prerequisites. Overdue labels count local calendar days past due
+without replacing status color. Collapsed groups retain one neutral, clickable
+Group span with completion, blocked and overdue counts. A shared-topbar legend
+explains the colors. Current agenda, milestone lane, team/subsystem grouping,
+assignee summaries, dependency arrows and handoff modal remain authoritative.
+No API/schema migration or reseed is required.

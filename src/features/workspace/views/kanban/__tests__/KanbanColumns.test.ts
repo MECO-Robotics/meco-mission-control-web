@@ -36,11 +36,15 @@ describe("KanbanColumns", () => {
     );
     expect(markup.match(/class="column-header"/g)).toHaveLength(1);
     expect(markup.match(/data-kanban-drop-state="open"/g)).toHaveLength(3);
+    expect([...markup.matchAll(/class="column-count kanban-swimlane-cell-count">(\d+)<\/span>/g)]
+      .map((match) => Number(match[1]))).toEqual([1, 1, 0]);
+    expect(markup).toContain('class="column-count">2</span>');
     expect(markup.match(/<article>first<\/article>/g)).toHaveLength(1);
     expect(markup.match(/<article>second<\/article>/g)).toHaveLength(1);
     expect(markup).toContain("No items");
     expect(markup).toContain("Software");
-    expect(markup.match(/class="kanban-project-label"><span>Robot<\/span><\/h3>/g)).toHaveLength(1);
+    expect(markup).toContain('aria-expanded="true" class="kanban-project-toggle"');
+    expect(markup).toContain('>Robot</span></button></h3>');
     expect(markup.match(/class="kanban-project-group"/g)).toHaveLength(2);
   });
 

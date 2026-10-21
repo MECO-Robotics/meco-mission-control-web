@@ -1,13 +1,8 @@
-import { CalendarDays, ChartGantt, ClipboardCheck, FileText, History, List, type LucideIcon } from "lucide-react";
+import { ClipboardCheck, FileText, History, List, type LucideIcon } from "lucide-react";
 
 import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget, type TaskViewTab, type WorklogsViewTab } from "@/lib/workspaceNavigation";
 import { SidebarItem, type SidebarItemConfig } from "./sidebar/SidebarItem";
 
-const SCHEDULE_VIEWS = [
-  { icon: CalendarDays, label: "Calendar", key: "calendar", target: { tab: "tasks", taskView: "calendar" } },
-  { icon: List, label: "Agenda", key: "agenda", target: { tab: "tasks", taskView: "agenda" } },
-  { icon: ChartGantt, label: "Gantt", key: "timeline", target: { tab: "tasks", taskView: "timeline" } },
-] as const;
 const ACTIVITY_VIEWS = [
   { icon: List, label: "Work logs", key: "logs", target: { tab: "worklogs", worklogsView: "logs" } },
   { icon: History, label: "Changes", key: "activity", target: { tab: "worklogs", worklogsView: "activity" } },
@@ -17,7 +12,6 @@ const QA_REPORT_VIEWS = [
   { icon: FileText, label: "Milestone results", key: "results", target: { tab: "worklogs", worklogsView: "results" } },
 ] as const;
 const SUBVIEW_PARENT_IDS = new Set<NavigationSubItemId>([
-  "work-schedule",
   "work-activity",
   "resources-qa-reports",
 ]);
@@ -84,7 +78,6 @@ export function AppSidebarSections({
   onSubItemSelect,
   onDisabledSubItemSelect,
   sectionModels,
-  activeTaskView,
   activeWorklogsView,
 }: AppSidebarSectionsProps) {
   return sectionModels.map(({ section, subItems }) => (
@@ -109,9 +102,6 @@ export function AppSidebarSections({
           onSelect={(config) => onSubItemSelect(config.target)}
           onDisabledSelect={() => onDisabledSubItemSelect()}
         />
-        {item.id === "work-schedule" && (isCollapsed || activeSubItemId === "work-schedule") ? (
-          <SidebarSubviews activeKey={activeTaskView} ariaLabel="Schedule views" compact={isCollapsed} items={SCHEDULE_VIEWS} onSelect={onSubItemSelect} title="Schedule" />
-        ) : null}
         {item.id === "work-activity" && (isCollapsed || activeSubItemId === "work-activity") ? (
           <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="Activity views" compact={isCollapsed} items={ACTIVITY_VIEWS} onSelect={onSubItemSelect} title="Activity" />
         ) : null}

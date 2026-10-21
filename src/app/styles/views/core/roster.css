@@ -50,12 +50,12 @@
   width: 100%;
   border: 1px solid var(--border-base);
   border-radius: 10px;
-  background-color: var(--row-bg, var(--bg-row-alt));
+  background-color: var(--row-bg, var(--bg-panel));
   padding: 0.3rem 0.35rem;
 }
 
-.roster-list>.member-row:nth-child(odd) {
-  --row-bg: var(--row-tint);
+.roster-list > :nth-child(2n of .people-member) {
+  --row-bg: var(--bg-row-stripe);
 }
 
 .member-row-main {

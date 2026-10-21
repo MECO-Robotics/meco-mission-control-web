@@ -4,22 +4,23 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
-import { shouldHideTaskQueueSummary } from "@/features/workspace/views/taskQueue/taskQueueViewState";
 import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("Task Queue board", () => {
-  it("renders the first lazy-load batch and groups blocked tasks into the blocked column", () => {
+  it("renders every project beyond the former batch limit and groups blocked tasks", () => {
     const bootstrap = createBootstrap();
+    bootstrap.projects.push({ ...bootstrap.projects[0], id: "outreach", name: "Outreach", projectType: "outreach" });
+    bootstrap.workTypes.push({ id: "outreach:writing", projectType: "outreach", code: "writing", name: "Writing", isActive: true });
+    bootstrap.workstreams.push({ id: "sponsor", projectId: "outreach", name: "Sponsor engagement", description: "", color: "#335577", isArchived: false });
+    bootstrap.tasks.push(createTask(17, { projectId: "outreach", workTypeId: "outreach:writing", subsystemIds: [], workstreamIds: ["sponsor"] }));
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueView, {
         activePersonFilter: [],
         bootstrap,
         workTypesById: { "work-type-design": bootstrap.workTypes[0] },
-        isAllProjectsView: false,
-        isNonRobotProject: false,
+        isAllProjectsView: true,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],
@@ -31,8 +32,6 @@ describe("Task Queue board", () => {
     );
 
     expect(markup).toContain("task-queue-board");
-    expect(markup).toContain("task-queue-board-load-status");
-    expect(markup).toContain("task-queue-board-load-sentinel");
     expect(markup).toContain("task-queue-board-card-due");
     expect(markup).toContain("workspace-topbar-zoom-controls");
     expect(markup).toContain("workspace-topbar-zoom-label");
@@ -46,19 +45,17 @@ describe("Task Queue board", () => {
     expect(markup).toContain("timeline-task-status-logo-signal-blocked");
     expect(markup).toContain("timeline-task-status-logo-signal-waiting-on-dependency");
     expect(markup.match(/class="task-queue-board-state-label"/g)).toHaveLength(6);
-    expect(markup.match(/class="kanban-project-label"><span>Robot<\/span><\/h3>/g)).toHaveLength(1);
+    expect(markup).toContain('aria-expanded="true" class="kanban-project-toggle"');
+    expect(markup).toContain('>Robot</span></button></h3>');
     expect(markup).not.toContain("table-pagination");
     expect(markup).not.toContain("Unknown project");
-    expect(markup).toContain("task-queue-board-card-priority-accented");
-    expect(markup).toContain("--task-queue-board-card-priority-accent");
-    expect(markup).not.toContain('aria-label="Critical priority"');
-    expect(markup).not.toContain('aria-label="Low priority"');
-    expect(markup).toContain("Critical priority</span>");
-    expect(markup).toContain("Low priority</span>");
+    expect(markup).not.toContain("task-queue-board-card-priority-accented");
+    expect(markup).toContain('aria-label="Critical priority"');
+    expect(markup).toContain('aria-label="Low priority"');
     expect(markup).toContain('data-priority="critical"');
     expect(markup).toContain('data-priority="low"');
-    expect(markup).toContain('aria-label="Design discipline"');
-    expect(markup).toContain('alt="Alex Builder profile picture"');
+    expect(markup).not.toContain('aria-label="Design discipline"');
+    expect(markup).toContain('aria-label="Alex Builder"');
     expect(markup).toContain('src="https://example.com/alex.png"');
     expect(markup).toContain("profile-avatar-fallback");
     expect(markup).toContain(">Q<");
@@ -66,8 +63,10 @@ describe("Task Queue board", () => {
     expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(1);
     expect(markup).toContain('data-board-state="waiting-on-dependency"');
     expect(markup.match(/data-board-state="waiting-on-dependency"/g)).toHaveLength(1);
-    expect(markup.match(/data-board-state=/g)).toHaveLength(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
-    expect(markup).not.toContain("Task 16");
+    expect(markup.match(/data-board-state=/g)).toHaveLength(17);
+    expect(markup).toContain("Task 16");
+    expect(markup).toContain("Task 17");
+    expect(markup).toContain('aria-label="Outreach"');
   });
 
   it("renders task zoom with the shared workspace topbar controls", () => {
@@ -78,7 +77,6 @@ describe("Task Queue board", () => {
         bootstrap,
         workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         isAllProjectsView: false,
-        isNonRobotProject: false,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],
@@ -94,20 +92,13 @@ describe("Task Queue board", () => {
     expect(markup).toContain('d="M11 8v6"');
   });
 
-  it("hides task summaries once zoom is compact enough", () => {
-    expect(shouldHideTaskQueueSummary(1)).toBe(false);
-    expect(shouldHideTaskQueueSummary(0.9)).toBe(true);
-    expect(shouldHideTaskQueueSummary(0.8)).toBe(true);
-  });
-
   it("keeps the focused kanban view in the same order passed in by filters and sort", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
+        groupBy: "team",
         bootstrap,
-        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: "not-started",
-        isNonRobotProject: false,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],
@@ -116,9 +107,6 @@ describe("Task Queue board", () => {
         onFocusState: jest.fn(),
         openEditTaskModal: jest.fn(),
         projectsById: { "project-1": bootstrap.projects[0] },
-        taskQueueZoom: 1,
-        showProjectContextOnCards: true,
-        showProjectOnCards: true,
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
         tasks: [
           createTask(21, {
@@ -143,17 +131,16 @@ describe("Task Queue board", () => {
     expect(markup).toContain("Zulu priority task");
     expect(markup).toContain("Alpha priority task");
     expect(markup.indexOf("Zulu priority task")).toBeLessThan(markup.indexOf("Alpha priority task"));
-    expect(markup).toContain('aria-label="Design discipline"');
+    expect(markup).not.toContain('aria-label="Design discipline"');
   });
 
   it("enables drag-drop reassignment for task cards on direct status columns", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
+        groupBy: "team",
         bootstrap,
-        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: null,
-        isNonRobotProject: false,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],
@@ -163,9 +150,6 @@ describe("Task Queue board", () => {
         onReassignTaskStatus: jest.fn(),
         openEditTaskModal: jest.fn(),
         projectsById: { "project-1": bootstrap.projects[0] },
-        taskQueueZoom: 1,
-        showProjectContextOnCards: true,
-        showProjectOnCards: true,
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
         tasks: [createTask(1)],
         workstreamsById: {},
@@ -179,4 +163,26 @@ describe("Task Queue board", () => {
     expect(markup).toContain('data-kanban-drop-state="blocked"');
     expect(markup).toContain('data-kanban-drop-state="waiting-on-dependency"');
   });
+  it.each([null, "in-progress"] as const)("groups subsystem lanes with unique totals in focus %s", (focusedState) => {
+    const bootstrap = createBootstrap();
+    bootstrap.subsystems.push({ ...bootstrap.subsystems[0], id: "arm", name: "Arm" });
+    const markup = renderToStaticMarkup(React.createElement(TaskQueueKanbanBoard, {
+      groupBy: "subsystem", bootstrap, focusedState,
+      membersById: {}, projectsById: { "project-1": bootstrap.projects[0] },
+      subsystemsById: {}, workstreamsById: {},
+      onClearFocus: jest.fn(), onFocusState: jest.fn(), openEditTaskModal: jest.fn(),
+      tasks: [
+        createTask(1, { status: "in-progress", subsystemIds: ["subsystem-1", "arm"] }),
+        createTask(2, { status: "in-progress", subsystemIds: ["arm"] }),
+      ],
+    }));
+    expect(markup).toContain("Drive");
+    expect(markup).toContain("Arm");
+    expect(markup).not.toContain("Design");
+    expect(markup.match(/data-kanban-item-id="task-1"/g) ?? markup.match(/title="Task 1"/g)).toHaveLength(2);
+    expect(markup).toContain('task-queue-board-column-count kanban-swimlane-cell-count">1</span>');
+    expect(markup).toContain('task-queue-board-column-count kanban-swimlane-cell-count">2</span>');
+    expect(markup).toContain(focusedState ? 'task-queue-board-focused-count">2</span>' : 'task-queue-board-column-count">2</span>');
+  });
+
 });
