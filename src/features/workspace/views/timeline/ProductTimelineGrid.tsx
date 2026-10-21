@@ -46,7 +46,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   const inspectionTask = inspectedId ? tasks.find((task) => task.id === inspectedId) : undefined;
   const inspection = inspectionTask ? getProductTimelineInspection(inspectionTask, bootstrap) : null;
   const clampedZoom = Math.min(4, Math.max(1, zoom));
-  const gridWidth = shellWidth && workWidth ? workWidth + Math.max(1, shellWidth - workWidth) * clampedZoom : undefined;
+  const gridWidth = shellWidth ? workWidth + Math.max(1, shellWidth - workWidth) * clampedZoom : undefined;
   const style = { "--schedule-day-count": Math.max(1, days.length), "--schedule-zoom": clampedZoom, width: gridWidth } as CSSProperties;
   const toggle = (id: string) => setCollapsed((previous) => {
     const next = new Set(previous);
