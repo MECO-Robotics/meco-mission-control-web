@@ -126,6 +126,8 @@ it("signals an unresolved prerequisite, then prioritizes a recorded blocker", ()
   const task = { ...bootstrap.tasks[1], startDate: "2026-04-07", dueDate: "2026-04-08" };
   bootstrap.tasks[1] = task;
   const waiting = renderGrid({ bootstrap, tasks: [task] });
+  expect(waiting).toContain(`aria-haspopup="dialog" aria-label="Inspect handoffs for ${task.title}"`);
+  expect(waiting).not.toContain("<dialog");
   expect(waiting).toContain("timeline-task-status-logo-signal-waiting-on-dependency");
   expect(waiting).toContain("Waiting on prerequisite");
   const blocked = renderGrid({ bootstrap, tasks: [{ ...task, isBlocked: true }] });
