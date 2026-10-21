@@ -1,5 +1,5 @@
 import React from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import {
   IconCalendar,
@@ -11,8 +11,6 @@ import {
   IconTasks,
 } from "@/components/shared/Icons";
 import { Dumbbell, HeartHandshake, Megaphone, Paintbrush, Share2 } from "lucide-react";
-
-import type { BootstrapPayload } from "@/types/bootstrap";
 
 const DISCIPLINE_ICON_BY_CODE: Record<string, ReactNode> = {
   design: <IconEdit />,
@@ -54,32 +52,4 @@ export function getTaskQueueDisciplineIcon(disciplineCode: string | undefined) {
   }
 
   return DISCIPLINE_ICON_BY_CODE[disciplineCode] ?? <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5.5 6 9v6l6 3.5 6-3.5V9L12 5.5Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" /></svg>;
-}
-
-export function TaskDisciplineBadge({
-  accentColor,
-  discipline,
-}: {
-  accentColor: string;
-  discipline: Pick<BootstrapPayload["workTypes"][number], "code" | "name">;
-}) {
-  const label = `${discipline.name} discipline`;
-
-  return (
-    <span
-      aria-label={label}
-      className="task-queue-board-card-discipline"
-      role="img"
-      style={
-        {
-          color: accentColor,
-          background: `color-mix(in srgb, ${accentColor} 16%, transparent)`,
-          borderColor: `color-mix(in srgb, ${accentColor} 38%, transparent)`,
-        } as CSSProperties
-      }
-      title={label}
-    >
-      {getTaskQueueDisciplineIcon(discipline.code)}
-    </span>
-  );
 }

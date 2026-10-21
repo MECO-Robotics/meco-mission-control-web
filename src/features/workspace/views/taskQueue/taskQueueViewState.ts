@@ -39,7 +39,6 @@ export const TASK_SORT_OPTIONS: DropdownOption[] = [
 export const TASK_QUEUE_ZOOM_MIN = 0.6;
 export const TASK_QUEUE_ZOOM_MAX = 1.6;
 export const TASK_QUEUE_ZOOM_STEP = 0.1;
-export const TASK_QUEUE_COMPACT_ZOOM_THRESHOLD = 0.9;
 
 export function clampTaskQueueZoom(value: number) {
   const normalizedValue = Math.round(value * 10) / 10;
@@ -48,10 +47,6 @@ export function clampTaskQueueZoom(value: number) {
 
 export function formatTaskQueueZoomLabel(zoom: number) {
   return `${Math.round(zoom * 100)}%`;
-}
-
-export function shouldHideTaskQueueSummary(zoom: number) {
-  return zoom <= TASK_QUEUE_COMPACT_ZOOM_THRESHOLD;
 }
 
 export const getTaskQueueStatusToneClassName = getWorkspaceStatusToneClassName;
@@ -100,8 +95,6 @@ export interface TaskQueueViewState {
   taskSortIsDefault: boolean;
   taskQueueZoom: number;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
-  showProjectContextOnCards: boolean;
-  showProjectOnCards: boolean;
   showSubsystemIterationFilter: boolean;
 }
 

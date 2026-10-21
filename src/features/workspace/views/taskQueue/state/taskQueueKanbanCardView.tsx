@@ -1,64 +1,34 @@
-import type { ComponentPropsWithoutRef, CSSProperties } from "react";
+import { useState, type ComponentPropsWithoutRef } from "react";
+import { CircleHelp, TriangleAlert } from "lucide-react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatDate } from "@/lib/appUtils/common";
-import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
-
-import {
-  getMemberInitial,
-  getTaskCardPerson,
-  getTaskQueueCardContextAccentColor,
-  getTaskQueueCardContextLabel,
-  getTaskQueueCardPriorityPresentation,
-  getTaskPriorityLabel,
-} from "../taskQueueKanbanCardMeta";
-import { TaskDisciplineBadge } from "../taskQueueDisciplineBadge";
-import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
-import { shouldHideTaskQueueSummary } from "../taskQueueViewState";
 import { getTaskOpenBlockersForTask } from "@/features/workspace/shared/task/taskPlanning";
+import { readTaskAssigneeIds } from "../taskQueueKanbanCard";
+import { getMemberInitial, getTaskQueueCardContextLabel, TaskPriorityBadge } from "../taskQueueKanbanCardMeta";
+import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 
-function getTaskCardDateRelation(dateValue: string): "past" | "today" | "future" | "invalid" {
-  const parsedDate = new Date(`${dateValue}T00:00:00`);
-  if (!dateValue || Number.isNaN(parsedDate.getTime())) return "invalid";
+function getTaskCardDeadline(task: TaskRecord) {
+  const date = new Date(`${task.dueDate}T00:00:00`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(task.dueDate) || Number.isNaN(date.getTime()) || date.getDate() !== Number(task.dueDate.slice(-2))) {
+    return { text: "No due date", tone: "neutral" };
+  }
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  return parsedDate < today ? "past" : parsedDate.getTime() === today.getTime() ? "today" : "future";
-}
-
-function getTaskCardDueDatePillClassName(task: TaskRecord): string {
-  if (!task.dueDate) {
-    return "pill status-pill status-pill-neutral";
+  if (task.status !== "complete") {
+    if (date < today) return { text: `Overdue · ${formatDate(task.dueDate)}`, tone: "danger" };
+    if (date.getTime() === today.getTime()) return { text: "Due today", tone: "warning" };
   }
-
-  if (task.status === "complete") {
-    return "pill task-detail-deadline-pill task-detail-deadline-pill-success";
-  }
-
-  const dateRelation = getTaskCardDateRelation(task.dueDate);
-  if (dateRelation === "past") {
-    return "pill task-detail-deadline-pill task-detail-deadline-pill-danger";
-  }
-
-  if (dateRelation === "today") {
-    return "pill task-detail-deadline-pill task-detail-deadline-pill-warning";
-  }
-
-  return "pill task-detail-deadline-pill task-detail-deadline-pill-success";
+  return { text: `Due ${formatDate(task.dueDate)}`, tone: "neutral" };
 }
 
 interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "children" | "onClick" | "type"> {
   bootstrap: BootstrapPayload;
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  taskQueueZoom: number;
-  showProjectContextOnCards: boolean;
-  showProjectOnCards: boolean;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   task: TaskRecord;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
@@ -67,128 +37,79 @@ interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "c
 export function TaskQueueCard({
   bootstrap,
   className,
-  workTypesById,
   membersById,
   openEditTaskModal,
   projectsById,
-  taskQueueZoom,
-  showProjectContextOnCards,
-  showProjectOnCards,
-  style,
   subsystemsById,
   task,
   workstreamsById,
   ...buttonProps
 }: TaskQueueCardProps) {
-  const person = getTaskCardPerson(task, membersById);
-  const taskLogs = bootstrap.workLogs.filter(log => log.taskId === task.id);
-  const latestLog = [...taskLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
-  const needsHelp = taskLogs.some(log => /\b(needs?|needed)\s+help\b|\bhelp\s+needed\b|\brequest(?:ing|ed)?\s+help\b/i.test(log.notes));
-  const loggedHours = taskLogs.reduce((sum, log) => sum + log.hours, 0);
-  const disciplineAccentColor = task.workTypeId
-    ? getTimelineTaskDisciplineColor(task.workTypeId, workTypesById)
-    : null;
-  const priorityPresentation = getTaskQueueCardPriorityPresentation(task.priority);
-  const cardStyle = { ...style, ...priorityPresentation.style } as CSSProperties;
-  const boardState = getTaskQueueBoardState(task, bootstrap);
-  const dueDateText = task.dueDate ? `Due ${formatDate(task.dueDate)}` : "Not set";
-  const dueDatePillClassName = getTaskCardDueDatePillClassName(task);
-  const taskContextLabel = getTaskQueueCardContextLabel(
-    task,
-    projectsById[task.projectId]?.projectType,
-    subsystemsById,
-    workstreamsById,
-  );
-  const taskContextAccentColor = getTaskQueueCardContextAccentColor(
-    task,
-    projectsById[task.projectId]?.projectType,
-    subsystemsById,
-    workstreamsById,
-  );
-  const discipline = task.workTypeId ? workTypesById[task.workTypeId] ?? null : null;
-  const taskContextStyle = {
-    "--task-queue-board-card-context-accent": taskContextAccentColor,
-    "--task-queue-board-card-context-bg": `color-mix(in srgb, ${taskContextAccentColor} 24%, transparent)`,
-    "--task-queue-board-card-context-border": `color-mix(in srgb, ${taskContextAccentColor} 54%, transparent)`,
-  } as CSSProperties;
-  const hideSummary = shouldHideTaskQueueSummary(taskQueueZoom);
-  const taskPriorityLabel = `${getTaskPriorityLabel(task.priority)} priority`;
-  const openRisks = getTaskOpenBlockersForTask(task.id, bootstrap);
+  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
+  const assigneeIds = [...new Set(readTaskAssigneeIds(task))];
+  const person = membersById[assigneeIds[0]];
+  const assigneeNames = assigneeIds.map((id) => membersById[id]?.name ?? "Unavailable assignee").join(", ");
+  const deadline = getTaskCardDeadline(task);
+  const context = getTaskQueueCardContextLabel(task, projectsById[task.projectId]?.projectType, subsystemsById, workstreamsById);
+  const blockers = getTaskOpenBlockersForTask(task.id, bootstrap);
+  const needsHelp = bootstrap.risks.some((risk) => risk.category === "help" && risk.status !== "resolved" &&
+    risk.relatedTargets.some((target) => target.kind === "task" && target.id === task.id));
 
   return (
     <button
       {...buttonProps}
-      className={`task-queue-board-card editable-hover-target editable-hover-target-row ${priorityPresentation.className}${className ? ` ${className}` : ""}`}
-      data-board-state={boardState}
-      data-priority={priorityPresentation.dataPriority}
+      className={`task-queue-board-card${className ? ` ${className}` : ""}`}
+      data-board-state={getTaskQueueBoardState(task, bootstrap)}
+      data-priority={task.priority}
       data-tutorial-target="edit-task-row"
-      onClick={(milestone) => {
-        milestone.stopPropagation();
+      onClick={(event) => {
+        event.stopPropagation();
         openEditTaskModal(task);
       }}
-      style={cardStyle}
       type="button"
     >
-      <span className="task-queue-board-card-priority-label">{taskPriorityLabel}</span>
-      <div className="task-queue-board-card-header">
-        <strong>{task.title}</strong>
-        <span className="task-queue-board-card-header-side">
-          <span className={`task-queue-board-card-due ${dueDatePillClassName}`}>{dueDateText}</span>
-          {openRisks.length ? (
-            <small className="task-queue-board-card-blocker-count">
-              {openRisks.length} blocker{openRisks.length === 1 ? "" : "s"}
-            </small>
-          ) : latestLog ? (
-            <small className="task-queue-board-card-work-hours">{loggedHours.toFixed(1)}h logged</small>
+      <strong className="task-queue-board-card-title" title={task.title}>{task.title}</strong>
+      {context ? <span className="task-queue-board-card-context" title={context}>{context}</span> : null}
+      {blockers.length || needsHelp ? (
+        <span className="task-queue-board-card-exceptions">
+          {blockers.length ? (
+            <span className="task-queue-board-card-blocker-count">
+              <TriangleAlert aria-hidden="true" size={13} />
+              {blockers.length} blocker{blockers.length === 1 ? "" : "s"}
+            </span>
+          ) : null}
+          {needsHelp ? (
+            <span className="task-queue-board-card-help">
+              <CircleHelp aria-hidden="true" size={13} />Help requested
+            </span>
           ) : null}
         </span>
-      </div>
-      {!hideSummary ? (
-        <small className="task-queue-board-card-summary task-queue-board-card-summary-task">
-          {task.summary}
-        </small>
       ) : null}
-      <div
-        className={`task-queue-board-card-meta${showProjectOnCards ? "" : " task-queue-board-card-meta-person-only"}`}
-      >
-        {showProjectOnCards ? (
-          <span>{projectsById[task.projectId]?.name ?? "Unknown project"}</span>
-        ) : showProjectContextOnCards ? (
-          <span
-            className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
-            style={taskContextStyle}
-            title={taskContextLabel}
-          >
-            {taskContextLabel}
-          </span>
-        ) : null}
-        {discipline || person ? (
-          <div className="task-queue-board-card-meta-person-group">
-            {discipline ? (
-              <TaskDisciplineBadge accentColor={disciplineAccentColor ?? "#7a8799"} discipline={discipline} />
-            ) : null}
-            {person ? (
-              <span className="task-queue-board-card-person" title={person.name}>
-                {person.photoUrl ? (
-                  <img
-                    alt={`${person.name} profile picture`}
-                    className="profile-avatar"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    src={person.photoUrl}
-                  />
-                ) : (
-                  <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
-                    {getMemberInitial(person)}
-                  </span>
-                )}
+      <span className="task-queue-board-card-footer">
+        <span className="task-queue-board-card-schedule">
+          <TaskPriorityBadge priority={task.priority} />
+          <span className="task-queue-board-card-due" data-tone={deadline.tone}>{deadline.text}</span>
+        </span>
+        {assigneeIds.length ? (
+          <span aria-label={assigneeNames} className="task-queue-board-card-person" role="img" title={assigneeNames}>
+            {person?.photoUrl && person.photoUrl !== failedPhotoUrl ? (
+              <img
+                alt=""
+                className="profile-avatar"
+                loading="lazy"
+                onError={() => setFailedPhotoUrl(person.photoUrl ?? null)}
+                referrerPolicy="no-referrer"
+                src={person.photoUrl}
+              />
+            ) : (
+              <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                {person ? getMemberInitial(person) : "?"}
               </span>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-      {needsHelp ? <small className="pill status-pill status-pill-warning">Help requested</small> : null}
-      <EditableHoverIndicator className="task-queue-board-card-hover" />
+            )}
+            {assigneeIds.length > 1 ? <span aria-hidden="true" className="task-queue-board-card-assignee-count">+{assigneeIds.length - 1}</span> : null}
+          </span>
+        ) : <span className="task-queue-board-card-unassigned">Unassigned</span>}
+      </span>
     </button>
   );
 }

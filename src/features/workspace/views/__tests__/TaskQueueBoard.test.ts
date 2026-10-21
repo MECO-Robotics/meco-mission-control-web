@@ -4,7 +4,6 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
-import { shouldHideTaskQueueSummary } from "@/features/workspace/views/taskQueue/taskQueueViewState";
 import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -50,16 +49,13 @@ describe("Task Queue board", () => {
     expect(markup).toContain('>Robot</span></button></h3>');
     expect(markup).not.toContain("table-pagination");
     expect(markup).not.toContain("Unknown project");
-    expect(markup).toContain("task-queue-board-card-priority-accented");
-    expect(markup).toContain("--task-queue-board-card-priority-accent");
-    expect(markup).not.toContain('aria-label="Critical priority"');
-    expect(markup).not.toContain('aria-label="Low priority"');
-    expect(markup).toContain("Critical priority</span>");
-    expect(markup).toContain("Low priority</span>");
+    expect(markup).not.toContain("task-queue-board-card-priority-accented");
+    expect(markup).toContain('aria-label="Critical priority"');
+    expect(markup).toContain('aria-label="Low priority"');
     expect(markup).toContain('data-priority="critical"');
     expect(markup).toContain('data-priority="low"');
-    expect(markup).toContain('aria-label="Design discipline"');
-    expect(markup).toContain('alt="Alex Builder profile picture"');
+    expect(markup).not.toContain('aria-label="Design discipline"');
+    expect(markup).toContain('aria-label="Alex Builder"');
     expect(markup).toContain('src="https://example.com/alex.png"');
     expect(markup).toContain("profile-avatar-fallback");
     expect(markup).toContain(">Q<");
@@ -96,18 +92,11 @@ describe("Task Queue board", () => {
     expect(markup).toContain('d="M11 8v6"');
   });
 
-  it("hides task summaries once zoom is compact enough", () => {
-    expect(shouldHideTaskQueueSummary(1)).toBe(false);
-    expect(shouldHideTaskQueueSummary(0.9)).toBe(true);
-    expect(shouldHideTaskQueueSummary(0.8)).toBe(true);
-  });
-
   it("keeps the focused kanban view in the same order passed in by filters and sort", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
         bootstrap,
-        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: "not-started",
         membersById: {
           "member-1": bootstrap.members[0],
@@ -117,9 +106,6 @@ describe("Task Queue board", () => {
         onFocusState: jest.fn(),
         openEditTaskModal: jest.fn(),
         projectsById: { "project-1": bootstrap.projects[0] },
-        taskQueueZoom: 1,
-        showProjectContextOnCards: true,
-        showProjectOnCards: true,
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
         tasks: [
           createTask(21, {
@@ -144,7 +130,7 @@ describe("Task Queue board", () => {
     expect(markup).toContain("Zulu priority task");
     expect(markup).toContain("Alpha priority task");
     expect(markup.indexOf("Zulu priority task")).toBeLessThan(markup.indexOf("Alpha priority task"));
-    expect(markup).toContain('aria-label="Design discipline"');
+    expect(markup).not.toContain('aria-label="Design discipline"');
   });
 
   it("enables drag-drop reassignment for task cards on direct status columns", () => {
@@ -152,7 +138,6 @@ describe("Task Queue board", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
         bootstrap,
-        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: null,
         membersById: {
           "member-1": bootstrap.members[0],
@@ -163,9 +148,6 @@ describe("Task Queue board", () => {
         onReassignTaskStatus: jest.fn(),
         openEditTaskModal: jest.fn(),
         projectsById: { "project-1": bootstrap.projects[0] },
-        taskQueueZoom: 1,
-        showProjectContextOnCards: true,
-        showProjectOnCards: true,
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
         tasks: [createTask(1)],
         workstreamsById: {},
