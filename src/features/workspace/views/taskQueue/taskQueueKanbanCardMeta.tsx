@@ -75,10 +75,6 @@ export function TaskPriorityBadge({ priority }: { priority: TaskRecord["priority
   );
 }
 
-export function getMemberInitial(member: { name: string }) {
-  return member.name.trim().slice(0, 1).toUpperCase() || "?";
-}
-
 export function getTaskQueueCardContextLabel(
   task: TaskRecord,
   projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
