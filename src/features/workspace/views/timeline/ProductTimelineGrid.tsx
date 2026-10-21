@@ -109,6 +109,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
       </div>
       {milestoneLane && <div className="product-timeline-milestone-lane">{milestoneLane}</div>}
       <ProductTimelineDependencies dependencies={getProductTimelineTaskLinks(bootstrap)}>
+      {projects.length > 0 && <div className="product-timeline-day-grid" aria-hidden="true">{days.map((day) => <span key={day} />)}</div>}
       {projects.length ? projects.map((project) => {
         const projectKey = `project:${project.id}`;
         const projectTasks = Array.from(new Map(project.groups.flatMap((group) => group.tasks).map((task) => [task.id, task])).values());
