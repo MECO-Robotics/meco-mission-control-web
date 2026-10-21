@@ -106,6 +106,20 @@ it("omits rows and completion counts outside the selected period", () => {
   expect(markup).toContain("0 of 1 tasks complete");
 });
 
+it("emphasizes Saturday boundaries in week and partial-month views", () => {
+  const bootstrap = createBootstrap();
+  const weekDays = Array.from({ length: 7 }, (_, index) => `2026-05-${String(3 + index).padStart(2, "0")}`);
+  const task = { ...bootstrap.tasks[0], startDate: weekDays[0], dueDate: weekDays.at(-1)! };
+  const weekMarkup = renderGrid({ bootstrap, tasks: [task], days: weekDays });
+  expect(weekMarkup.match(/product-timeline-day[^"]*is-week-end/g)).toHaveLength(1);
+  expect(weekMarkup).toContain('<span class="is-week-end"></span>');
+
+  const monthDays = Array.from({ length: 30 }, (_, index) => `2026-04-${String(index + 1).padStart(2, "0")}`);
+  const monthMarkup = renderGrid({ bootstrap, tasks: [{ ...task, startDate: monthDays[0], dueDate: monthDays.at(-1)! }], days: monthDays });
+  expect(monthMarkup.match(/product-timeline-day[^"]*is-week-end/g)).toHaveLength(4);
+  expect(monthMarkup.match(/<span class="is-week-end"><\/span>/g)).toHaveLength(4);
+});
+
 it.each([
   ["not-started", "Not started"],
   ["in-progress", "In progress"],
