@@ -52,7 +52,7 @@ before using it. A CSS fallback must not silently establish a competing theme.
 | `--bg-row-alt` | `#f8fafc` | `#0f172a` | Secondary shell surfaces and neutral controls |
 | `--bg-row-stripe` | `#e2e8f0` | `#0b1220` | Neutral alternating record rows and board lanes |
 | `--border-base` | `#e5e7eb` | `#334155` | Standard separators and outlines |
-| `--border-grid` | `#64748b` | `#94a3b8` | Kanban horizontal structural separators across panel and zebra surfaces |
+| `--border-grid` | `#64748b` | `#94a3b8` | Kanban vertical structural separators across panel and zebra surfaces |
 | `--border-strong` | `#cbd5e1` | `#475569` | Emphasized separators |
 | `--text-title` | `#000000` | `#f8fafc` | Headings and primary labels |
 | `--text-copy` | `#475569` | `#e2e8f0` | Body copy and inactive navigation |
