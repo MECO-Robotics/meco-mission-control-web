@@ -79,7 +79,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   toggleSubsystem,
   openTaskDetailModal,
 }) => {
-  const groupBackground = subsystemIndex % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-alt)";
+  const groupBackground = subsystemIndex % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-stripe)";
   const accentColor = subsystem.color;
   const groupStyle = buildTimelineSubsystemHighlightStyle(accentColor, {
     boxShadow: `inset 3px 0 0 ${accentColor}`,

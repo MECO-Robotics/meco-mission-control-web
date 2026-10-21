@@ -78,9 +78,9 @@ before using it. A CSS fallback must not silently establish a competing theme.
 
 Shared zebra treatment uses `--bg-panel` for the first record and
 `--bg-row-stripe` for the second, counting only matching record siblings.
-Tables, board lanes, roster members, subsystem/workflow rows, Teams and Home's
-Your tasks quicklist use this neutral pair. Headers, inline forms and detail
-siblings do not advance the stripe. Selected and attention states retain their
+Tables, board lanes, Timeline project/subsystem bands, roster members,
+subsystem/workflow rows, Teams and Home's Your tasks quicklist use this neutral
+pair. Headers, inline forms and detail siblings do not advance the stripe. Selected and attention states retain their
 own semantic styling; `--row-tint` is not a zebra color. Other record lists and
 modal content do not receive new striping from this rule.
 
