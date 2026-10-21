@@ -84,8 +84,7 @@
 }
 
 .task-queue-board-card-footer,
-.task-queue-board-card-schedule,
-.task-queue-board-card-person {
+.task-queue-board-card-schedule {
   display: flex;
   align-items: center;
   gap: calc(0.35rem * var(--task-queue-zoom, 1));
@@ -108,20 +107,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-.task-queue-board-card-person,
-.task-queue-board-card-unassigned {
-  flex-shrink: 0;
+.task-queue-board-card-footer .task-assignee-summary {
+  --task-assignee-scale: var(--task-queue-zoom, 1);
   margin-left: auto;
-}
-
-.task-queue-board-card-person .profile-avatar {
-  width: calc(1.35rem * var(--task-queue-zoom, 1));
-  height: calc(1.35rem * var(--task-queue-zoom, 1));
-  font-size: calc(0.75rem * var(--task-queue-zoom, 1));
-}
-
-.task-queue-board-card-assignee-count {
-  font-variant-numeric: tabular-nums;
 }
 
 .task-queue-board-card-priority {

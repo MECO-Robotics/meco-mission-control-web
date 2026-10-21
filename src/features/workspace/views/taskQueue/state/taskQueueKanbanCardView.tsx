@@ -1,4 +1,4 @@
-import { useState, type ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import { CircleHelp, TriangleAlert } from "lucide-react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -6,8 +6,8 @@ import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatDate } from "@/lib/appUtils/common";
 import { getTaskOpenBlockersForTask } from "@/features/workspace/shared/task/taskPlanning";
-import { readTaskAssigneeIds } from "../taskQueueKanbanCard";
-import { getMemberInitial, getTaskQueueCardContextLabel, TaskPriorityBadge } from "../taskQueueKanbanCardMeta";
+import { TaskAssigneeSummary } from "@/features/workspace/shared/task/TaskAssigneeSummary";
+import { getTaskQueueCardContextLabel, TaskPriorityBadge } from "../taskQueueKanbanCardMeta";
 import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 
 function getTaskCardDeadline(task: TaskRecord) {
@@ -45,10 +45,6 @@ export function TaskQueueCard({
   workstreamsById,
   ...buttonProps
 }: TaskQueueCardProps) {
-  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
-  const assigneeIds = [...new Set(readTaskAssigneeIds(task))];
-  const person = membersById[assigneeIds[0]];
-  const assigneeNames = assigneeIds.map((id) => membersById[id]?.name ?? "Unavailable assignee").join(", ");
   const deadline = getTaskCardDeadline(task);
   const context = getTaskQueueCardContextLabel(task, projectsById[task.projectId]?.projectType, subsystemsById, workstreamsById);
   const blockers = getTaskOpenBlockersForTask(task.id, bootstrap);
@@ -90,25 +86,7 @@ export function TaskQueueCard({
           <TaskPriorityBadge priority={task.priority} />
           <span className="task-queue-board-card-due" data-tone={deadline.tone}>{deadline.text}</span>
         </span>
-        {assigneeIds.length ? (
-          <span aria-label={assigneeNames} className="task-queue-board-card-person" role="img" title={assigneeNames}>
-            {person?.photoUrl && person.photoUrl !== failedPhotoUrl ? (
-              <img
-                alt=""
-                className="profile-avatar"
-                loading="lazy"
-                onError={() => setFailedPhotoUrl(person.photoUrl ?? null)}
-                referrerPolicy="no-referrer"
-                src={person.photoUrl}
-              />
-            ) : (
-              <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
-                {person ? getMemberInitial(person) : "?"}
-              </span>
-            )}
-            {assigneeIds.length > 1 ? <span aria-hidden="true" className="task-queue-board-card-assignee-count">+{assigneeIds.length - 1}</span> : null}
-          </span>
-        ) : <span className="task-queue-board-card-unassigned">Unassigned</span>}
+        <TaskAssigneeSummary task={task} membersById={membersById} />
       </span>
     </button>
   );

@@ -19,18 +19,46 @@ function renderGrid(overrides: Partial<React.ComponentProps<typeof ProductTimeli
   }));
 }
 
-it("keeps a full name and ownership visible independently of the timing bar", () => {
+it("keeps the task name, assignee and team visible independently of the timing bar", () => {
   const bootstrap = createBootstrap();
   const task = { ...bootstrap.tasks[0], title: "Verify the complete sensor bundle before controls integration", startDate: "2026-04-07", dueDate: "2026-04-07" };
   bootstrap.responsibleGroups = [{ id: "electrical", seasonId: "season-1", name: "Electrical", projectIds: [task.projectId], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false }];
   task.responsibleGroupId = "electrical";
   const markup = renderGrid({ bootstrap, tasks: [task] });
   expect(markup).toContain(`>${task.title}</button>`);
-  expect(markup).toContain("Ada · Electrical");
+  expect(markup).toContain('aria-label="Ada"');
+  expect(markup).toContain(">A</span>");
+  expect(markup).toContain(">Electrical</span>");
   expect(markup).toContain("Drivebase");
   expect(markup).toContain("0 of 1 tasks complete");
   expect(markup).not.toContain(`aria-label="Inspect handoffs for ${task.title}"`);
   expect(markup).toContain("width:33.33333333333333%");
+});
+
+it("shows the first selected assignee's photo and counts unique additional assignees", () => {
+  const bootstrap = createBootstrap();
+  bootstrap.members[0].photoUrl = "https://example.com/ada.png";
+  bootstrap.members.push({ ...bootstrap.members[0], id: "member-2", name: "Grace", photoUrl: "https://example.com/grace.png" });
+  const task = { ...bootstrap.tasks[0], assigneeIds: ["member-2", "member-1", "member-2", "missing", "missing"] };
+  const markup = renderGrid({ bootstrap, tasks: [task] });
+  expect(markup).toContain('aria-label="Grace, Ada, Unavailable assignee"');
+  expect(markup).toContain('title="Grace, Ada, Unavailable assignee"');
+  expect(markup).toContain('src="https://example.com/grace.png"');
+  expect(markup).not.toContain("ada.png");
+  expect(markup.match(/<img /g)).toHaveLength(1);
+  expect(markup).toContain(">+2</span>");
+});
+
+it.each([
+  [[], "member-1", 'aria-label="Ada"', ">A</span>"],
+  [["missing"], "member-1", 'aria-label="Unavailable assignee"', ">?</span>"],
+  [[], null, "task-assignee-summary", ">Unassigned</span>"],
+] as const)("handles assignees %j with owner %s", (assigneeIds, ownerId, label, content) => {
+  const bootstrap = createBootstrap();
+  const markup = renderGrid({ bootstrap, tasks: [{ ...bootstrap.tasks[0], assigneeIds: [...assigneeIds], ownerId }] });
+  expect(markup).toContain(label);
+  expect(markup).toContain(content);
+  expect(markup).not.toContain("task-assignee-summary-count");
 });
 
 it("exposes date selection and puts the supplied milestone lane before work", () => {

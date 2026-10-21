@@ -96,7 +96,6 @@ export function getProductTimelineTaskContext(task: TaskRecord, bootstrap: Boots
   const targets = isRobot ? bootstrap.subsystems : bootstrap.workstreams;
   const unavailableTargets = normalizeTaskTargetIds(isRobot ? task.subsystemIds : task.workstreamIds).filter((id) => !targets.some((target) => target.id === id && target.projectId === task.projectId));
   return {
-    owner: task.ownerId ? bootstrap.members.find((member) => member.id === task.ownerId)?.name ?? "Unavailable owner" : "Unassigned",
     team: task.responsibleGroupId ? bootstrap.responsibleGroups.find((group) => group.id === task.responsibleGroupId)?.name ?? "Unavailable team" : null,
     state,
     unavailableTargets,

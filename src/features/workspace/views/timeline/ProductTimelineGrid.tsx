@@ -4,6 +4,8 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
 import { localTodayDate } from "@/lib/dateUtils";
+import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
+import { TaskAssigneeSummary } from "@/features/workspace/shared/task/TaskAssigneeSummary";
 import { useTimelineShellSizing } from "./hooks/useTimelineShellSizing";
 import { TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
 import { ProductTimelineDependencies } from "./ProductTimelineDependencies";
@@ -34,6 +36,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, viewInter
   const trackWidth = useTimelineShellSizing(datesRef);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [inspectedId, setInspectedId] = useState<string | null>(null);
+  const membersById = useMemo(() => indexRecordsById(bootstrap.members), [bootstrap.members]);
   const projects = useMemo(() => buildProductTimelineProjects(bootstrap, tasks, days, groupBy), [bootstrap, tasks, days, groupBy]);
   const today = localTodayDate();
   const inspectionTask = inspectedId ? tasks.find((task) => task.id === inspectedId) : undefined;
@@ -80,7 +83,10 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, viewInter
       <div className={`product-timeline-row product-timeline-task${selected ? " is-inspected" : ""}${relatedIds.has(task.id) ? " is-related" : ""}`} data-task-id={task.id} data-group-key={groupKey}>
         <div className="product-timeline-work">
           <button type="button" className="product-timeline-task-title" onClick={() => onOpenTask(task)}>{task.title}</button>
-          <span className="product-timeline-task-meta">{context.owner}{context.team ? ` · ${context.team}` : ""}</span>
+          <span className="product-timeline-task-assignees">
+            <TaskAssigneeSummary task={task} membersById={membersById} />
+            {context.team && <span>{context.team}</span>}
+          </span>
           {context.unavailableTargets.length > 0 && <span className="product-timeline-task-meta">Unavailable target: {context.unavailableTargets.join(", ")}</span>}
           <div className="product-timeline-task-state">
             <span className="product-timeline-status"><TimelineTaskStatusLogo compact signal={signal} status={task.status} />{context.state}</span>
