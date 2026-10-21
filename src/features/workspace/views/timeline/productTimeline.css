@@ -46,6 +46,7 @@
 .product-timeline-warning.is-overdue { color: var(--status-danger-text); }
 .product-timeline-day-grid { position: absolute; inset: 0 0 0 var(--schedule-work-width); display: grid; grid-template-columns: repeat(var(--schedule-day-count), minmax(0, 1fr)); z-index: 1; pointer-events: none; }
 .product-timeline-day-grid > span { border-right: 1px solid color-mix(in srgb, var(--border-grid) 30%, transparent); }
+.product-timeline-day.is-week-end, .product-timeline-day-grid > .is-week-end { border-right: 2px solid color-mix(in srgb, var(--border-grid) 60%, transparent); }
 .product-timeline-track { position: relative; min-width: 0; }
 .product-timeline-bar, .product-timeline-summary-span { position: absolute; top: 50%; transform: translateY(-50%); box-sizing: border-box; height: 32px; }
 .product-timeline-bar { min-width: 2px; border: 0; border-radius: 3px; padding: 0; background: var(--calendar-event-task-due); cursor: pointer; }

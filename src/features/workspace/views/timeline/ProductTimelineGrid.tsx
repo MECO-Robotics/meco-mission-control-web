@@ -6,6 +6,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
 import { ModalDialog } from "@/components/ModalDialog";
 import { localTodayDate } from "@/lib/dateUtils";
+import { endOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 import { TaskAssigneeSummary } from "@/features/workspace/shared/task/TaskAssigneeSummary";
 import { TeamIcon } from "@/features/workspace/shared/team/TeamIcon";
@@ -40,6 +41,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   const membersById = useMemo(() => indexRecordsById(bootstrap.members), [bootstrap.members]);
   const projects = useMemo(() => buildProductTimelineProjects(bootstrap, tasks, days, groupBy), [bootstrap, tasks, days, groupBy]);
   const today = localTodayDate();
+  const weekEnds = new Set(days.filter((day) => endOfTimelineWeek(day) === day));
   const contexts = useMemo(() => Object.fromEntries(tasks.map((task) => [task.id, getProductTimelineTaskContext(task, bootstrap, today)])), [bootstrap, tasks, today]);
   const inspectionTask = inspectedId ? tasks.find((task) => task.id === inspectedId) : undefined;
   const inspection = inspectionTask ? getProductTimelineInspection(inspectionTask, bootstrap) : null;
@@ -104,13 +106,13 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
       <div className="product-timeline-row product-timeline-header">
         <div ref={workHeaderRef} className="product-timeline-work">Work</div>
         <div className="product-timeline-dates">
-          {days.map((day) => <button type="button" key={day} className={`product-timeline-day${day === today ? " is-today" : ""}${day === selectedDate ? " is-selected" : ""}`} aria-label={`Show agenda for ${day}`} aria-pressed={day === selectedDate} title={dateLabel(day, { dateStyle: "full" })} onClick={() => onSelectDate(day)}>
+          {days.map((day) => <button type="button" key={day} className={`product-timeline-day${day === today ? " is-today" : ""}${day === selectedDate ? " is-selected" : ""}${weekEnds.has(day) ? " is-week-end" : ""}`} aria-label={`Show agenda for ${day}`} aria-pressed={day === selectedDate} title={dateLabel(day, { dateStyle: "full" })} onClick={() => onSelectDate(day)}>
             <span>{dateLabel(day, { weekday: "narrow" })}</span><span>{day.slice(8)}</span>
           </button>)}
         </div>
       </div>
       <ProductTimelineDependencies dependencies={getProductTimelineTaskLinks(bootstrap)}>
-      {projects.length > 0 && <div className="product-timeline-day-grid" aria-hidden="true">{days.map((day) => <span key={day} />)}</div>}
+      {projects.length > 0 && <div className="product-timeline-day-grid" aria-hidden="true">{days.map((day) => <span key={day} className={weekEnds.has(day) ? "is-week-end" : undefined} />)}</div>}
       {projects.length ? projects.map((project) => {
         const projectKey = `project:${project.id}`;
         const projectTasks = Array.from(new Map(project.groups.flatMap((group) => group.tasks).map((task) => [task.id, task])).values());
