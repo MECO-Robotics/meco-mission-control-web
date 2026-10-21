@@ -34,6 +34,7 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
       return [slots[index], (next: unknown) => { slots[index] = typeof next === "function" ? next(slots[index]) : next; }];
     }),
     jest.spyOn(React, "useRef").mockReturnValue({ current: null }),
+    jest.spyOn(React, "useId").mockReturnValue("schedule-agenda-test"),
     jest.spyOn(React, "useEffect").mockImplementation((effect) => { if (!cleanup.current) cleanup.current = effect() || undefined; }),
   ];
   const props: React.ComponentProps<typeof TimelineView> = {
@@ -45,6 +46,7 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
     cursor = 0;
     const view = TimelineView(props);
     return {
+      view,
       agenda: findElement<React.ComponentProps<typeof ScheduleAgendaPanel>>(view, ScheduleAgendaPanel).props,
       grid: findElement<React.ComponentProps<typeof ProductTimelineGrid>>(view, ProductTimelineGrid).props,
       toolbar: findElement<React.ComponentProps<typeof TimelineToolbar>>(view, TimelineToolbar).props,
@@ -52,6 +54,7 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
   };
   try {
     expect(render().agenda).toMatchObject({ presentation: "modal", isVisible: false });
+    expect(() => findElement(render().view, "button")).toThrow();
     expect(render().toolbar.groupBy).toBe("team");
     expect(render().grid.groupBy).toBe("team");
     const tasks = render().grid.tasks;
@@ -68,16 +71,28 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
     media.matches = false;
     onResize!();
     expect(render().agenda).toMatchObject({ presentation: "inline", isVisible: true });
+    const toggle = () => findElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(render().view, "button").props;
+    expect(toggle()).toMatchObject({ "aria-label": "Collapse agenda", "aria-controls": render().agenda.id, "aria-expanded": true });
+    toggle().onClick!({} as React.MouseEvent<HTMLButtonElement>);
+    expect(render().agenda.isVisible).toBe(false);
+    expect(render().toolbar.showAgenda).toBe(false);
+    expect(toggle()).toMatchObject({ "aria-label": "Expand agenda", "aria-expanded": false });
+    toggle().onClick!({} as React.MouseEvent<HTMLButtonElement>);
+    expect(render().agenda.isVisible).toBe(true);
+    expect(render().toolbar.showAgenda).toBe(true);
     render().toolbar.onShowAgendaChange(false);
     expect(render().agenda.isVisible).toBe(false);
+    expect(toggle()["aria-expanded"]).toBe(false);
     media.matches = true;
     onResize!();
     expect(render().agenda).toMatchObject({ presentation: "modal", isVisible: false });
+    expect(() => findElement(render().view, "button")).toThrow();
     media.matches = false;
     onResize!();
     expect(render().agenda).toMatchObject({ presentation: "inline", isVisible: false });
     render().grid.onSelectDate("2026-04-01");
     expect(render().agenda).toMatchObject({ presentation: "inline", isVisible: true, selectedDate: "2026-04-01" });
+    expect(toggle()["aria-expanded"]).toBe(true);
     render().toolbar.onGroupByChange("team");
     expect(render().grid.groupBy).toBe("team");
     expect(render().agenda).toMatchObject({ isVisible: true, selectedDate: "2026-04-01" });

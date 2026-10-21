@@ -30,19 +30,27 @@ it("starts on the current month, resets zoom on period changes, and preserves th
   expect(render().timelineZoom).toBe(1.25);
   render().handleTimelineIntervalChange("week", "2027-01-31");
   expect(render()).toMatchObject({ viewAnchorDate: "2027-01-31", viewInterval: "week", timelineZoom: 1 });
+  render().adjustTimelineZoom(1);
   render().shiftTimelinePeriod(1);
-  expect(render().viewAnchorDate).toBe("2027-02-07");
+  expect(render()).toMatchObject({ viewAnchorDate: "2027-02-07", timelineZoom: 1 });
   render().handleTimelineIntervalChange("month", "2027-01-31");
   render().shiftTimelinePeriod(1);
   expect(render().viewAnchorDate).toBe("2027-02-28");
 });
 
-it.each(["week", "month"] as const)("Fit preserves the period and Today preserves %s mode while resetting zoom", (interval) => {
+it("clamps zoom from fitted width to 400% without changing dates", () => {
+  const render = mountSchedule();
+  render().adjustTimelineZoom(-1);
+  expect(render().timelineZoom).toBe(1);
+  for (let step = 0; step < 20; step++) render().adjustTimelineZoom(1);
+  expect(render()).toMatchObject({ timelineZoom: 4, viewAnchorDate: "2026-10-21", viewInterval: "month" });
+  render().adjustTimelineZoom(-1);
+  expect(render().timelineZoom).toBe(3.75);
+});
+
+it.each(["week", "month"] as const)("Today preserves %s mode while resetting zoom", (interval) => {
   const render = mountSchedule();
   render().handleTimelineIntervalChange(interval, "2021-03-18");
-  render().adjustTimelineZoom(1);
-  render().fitTimeline();
-  expect(render()).toMatchObject({ viewAnchorDate: "2021-03-18", viewInterval: interval, timelineZoom: 1 });
   render().adjustTimelineZoom(1);
   render().goToToday();
   expect(render()).toMatchObject({ viewAnchorDate: "2026-10-21", viewInterval: interval, timelineZoom: 1 });
