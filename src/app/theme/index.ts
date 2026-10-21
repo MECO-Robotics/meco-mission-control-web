@@ -36,6 +36,7 @@ function getThemeVars(mode: ThemeMode) {
     "--row-tint": isDarkMode ? "rgba(59, 130, 246, 0.18)" : "rgba(22, 71, 142, 0.14)",
     "--bg-panel": isDarkMode ? "#1e293b" : "#ffffff",
     "--border-base": isDarkMode ? "#334155" : "#e5e7eb",
+    "--border-grid": isDarkMode ? "#94a3b8" : "#64748b",
     "--border-strong": isDarkMode ? "#475569" : "#cbd5e1",
     "--text-title": isDarkMode ? "#f8fafc" : "#000000",
     "--text-copy": isDarkMode ? "#e2e8f0" : "#475569",
