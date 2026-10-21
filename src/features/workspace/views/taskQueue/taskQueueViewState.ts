@@ -14,7 +14,6 @@ import {
   type TaskQueueViewStateLogicArgs,
 } from "./state/taskQueueViewStateLogic";
 import type { TaskQueueBoardState } from "./taskQueueKanbanBoardState";
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "./taskQueueKanbanBoardState";
 
 export type TaskSortField =
   | "disciplineId"
@@ -90,7 +89,6 @@ export interface TaskQueueViewState {
   setSubsystemFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSubsystemIterationFilter: Dispatch<SetStateAction<FilterSelection>>;
   setTaskQueueZoom: Dispatch<SetStateAction<number>>;
-  setVisibleTaskCount: Dispatch<SetStateAction<number>>;
   sortField: TaskSortField;
   sortOrder: "asc" | "desc";
   statusFilter: FilterSelection;
@@ -101,7 +99,6 @@ export interface TaskQueueViewState {
   taskFilterMotionClass: string;
   taskSortIsDefault: boolean;
   taskQueueZoom: number;
-  visibleTaskCount: number;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
   showProjectContextOnCards: boolean;
   showProjectOnCards: boolean;
@@ -127,7 +124,6 @@ export function useTaskQueueViewState({
   const [priorityFilter, setPriorityFilter] = useRememberedViewState<FilterSelection>("tasks.priorityFilter", []);
   const [searchFilter, setSearchFilter] = useRememberedViewState("tasks.searchFilter", "");
   const [focusedBoardState, setFocusedBoardState] = useRememberedViewState<TaskQueueBoardState | null>("tasks.focusedBoardState", null);
-  const [visibleTaskCount, setVisibleTaskCount] = useRememberedViewState("tasks.visibleTaskCount", TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
   const [taskQueueZoom, setTaskQueueZoom] = useRememberedViewState("tasks.taskQueueZoom", 1);
 
   const derived = useTaskQueueViewStateLogic({
@@ -145,7 +141,6 @@ export function useTaskQueueViewState({
     setFocusedBoardState,
     setProjectFilter,
     setSubsystemIterationFilter,
-    setVisibleTaskCount,
     sortField,
     sortOrder,
     statusFilter,
@@ -174,13 +169,11 @@ export function useTaskQueueViewState({
     setSubsystemFilter,
     setSubsystemIterationFilter,
     setTaskQueueZoom,
-    setVisibleTaskCount,
     sortField,
     sortOrder,
     statusFilter,
     subsystemFilter,
     subsystemIterationFilter,
     taskQueueZoom,
-    visibleTaskCount,
   };
 }

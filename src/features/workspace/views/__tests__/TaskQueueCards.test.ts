@@ -13,6 +13,22 @@ import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQ
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("Task Queue cards", () => {
+  it("uses each task's project type for context on a mixed board", () => {
+    const bootstrap = createBootstrap();
+    const outreach = { ...bootstrap.projects[0], id: "outreach", projectType: "outreach" as const, name: "Outreach" as const };
+    const workflow = { id: "sponsor", projectId: outreach.id, name: "Sponsor engagement", description: "", color: "#335577", isArchived: false };
+    for (const [project, label, color] of [[bootstrap.projects[0], "Drive (v1)", "#224466"], [outreach, workflow.name, workflow.color]] as const) {
+      const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
+        bootstrap, task: createTask(1, { projectId: project.id, workstreamIds: [workflow.id] }),
+        workTypesById: {}, membersById: {}, projectsById: { [project.id]: project },
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] }, workstreamsById: { [workflow.id]: workflow },
+        openEditTaskModal: jest.fn(), taskQueueZoom: 1, showProjectContextOnCards: true, showProjectOnCards: false,
+      }));
+      expect(markup).toContain(label);
+      expect(markup).toContain(`--task-queue-board-card-context-accent:${color}`);
+    }
+  });
+
   it("normalizes subsystem and workstream IDs consistently", () => {
     const task = createTask(1, {
       subsystemIds: ["subsystem-1", "", "subsystem-1"],
@@ -33,7 +49,7 @@ describe("Task Queue cards", () => {
         .join("-");
       const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
         bootstrap, task: createTask(1, { dueDate: dateValue }), workTypesById: {}, membersById: {}, projectsById: {},
-        subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
+        subsystemsById: {}, workstreamsById: {}, openEditTaskModal: jest.fn(),
         taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
       }));
       return markup.match(/task-detail-deadline-pill-(?:danger|warning|success)/)?.[0];
@@ -53,7 +69,7 @@ describe("Task Queue cards", () => {
     ];
     const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
       bootstrap, task: bootstrap.tasks[0], workTypesById: {}, membersById: {}, projectsById: {},
-      subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
+      subsystemsById: {}, workstreamsById: {}, openEditTaskModal: jest.fn(),
       taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
     }));
     expect(markup).toContain("3.5h logged");
@@ -75,7 +91,7 @@ describe("Task Queue cards", () => {
     const task = createTask(1);
     const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
       bootstrap, task, workTypesById: {}, membersById: {}, projectsById: {},
-      subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
+      subsystemsById: {}, workstreamsById: {}, openEditTaskModal: jest.fn(),
       taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
     }));
 
@@ -145,7 +161,6 @@ describe("Task Queue cards", () => {
         bootstrap,
         workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: null,
-        isNonRobotProject: false,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],

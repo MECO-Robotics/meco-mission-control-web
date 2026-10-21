@@ -19,7 +19,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
     isAllProjectsView,
-    isNonRobotProject,
     membersById,
     openCreateTaskModal,
     openCreateTaskModalFromTimeline,
@@ -105,7 +104,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           bootstrap={bootstrap}
           workTypesById={workTypesById}
           isAllProjectsView={isAllProjectsView}
-          isNonRobotProject={isNonRobotProject}
           membersById={membersById}
           openCreateTaskModal={openCreateTaskModal}
           openEditTaskModal={openTimelineTaskDetailsModal}

@@ -14,7 +14,6 @@ import {
 } from "@/features/workspace/shared/task/taskPlanning";
 
 export type TaskQueueBoardState = TaskStatus | "blocked" | "waiting-on-dependency";
-export const TASK_QUEUE_LAZY_LOAD_BATCH_SIZE = 15;
 
 export interface TaskQueueBoardColumn {
   label: string;
