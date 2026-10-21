@@ -114,6 +114,7 @@ function renderBoard(
   mockKanbanColumns.mockClear();
   renderToStaticMarkup(
     React.createElement(TaskQueueKanbanBoard, {
+        groupBy: "team",
       bootstrap,
       focusedState: null,
       membersById: { "member-1": bootstrap.members[0] },

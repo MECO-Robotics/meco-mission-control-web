@@ -44,6 +44,8 @@ export function TaskQueueView({
     disciplineFilter,
     disciplineOptions,
     focusedBoardState,
+    groupBy,
+    setGroupBy,
     ownerFilter,
     priorityFilter,
     processedTasks,
@@ -90,6 +92,8 @@ export function TaskQueueView({
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="task-queue-toolbar">
           <TaskQueueToolbar
+            groupBy={groupBy}
+            setGroupBy={setGroupBy}
             activeFilterCount={activeFilterCount}
             bootstrap={bootstrap}
             disciplineFilter={disciplineFilter}
@@ -134,6 +138,7 @@ export function TaskQueueView({
       </AppTopbarSlotPortal>
 
       <TaskQueueBoardSection
+        groupBy={groupBy}
         bootstrap={bootstrap}
         focusedBoardState={focusedBoardState}
         membersById={membersById}

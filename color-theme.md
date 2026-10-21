@@ -196,7 +196,7 @@ Workspace-generated colors are normalized to six-character hex values and fall b
 
 These colors are used for workstreams, subsystems, timeline grouping, and user-selected workspace accents. The fallback subsystem highlight is `#4F86C6`.
 
-Kanban project rails reuse sidebar project identity colors through `--kanban-project-accent` as opaque surface tints. Team icons reuse the timeline discipline palette through `--kanban-team-accent`. Names retain semantic text colors; icons mix their accent with the theme's title color for contrast. Cards remain neutral.
+Kanban project rails reuse sidebar project identity colors through `--kanban-project-accent` as opaque surface tints. Kanban lane icons use `--kanban-lane-accent`: teams reuse the timeline discipline palette, while subsystem/workstream groups reuse their configured workspace colors. Names retain semantic text colors; icons mix their accent with the theme's title color for contrast. Cards remain neutral.
 
 ## Timeline Discipline Colors
 

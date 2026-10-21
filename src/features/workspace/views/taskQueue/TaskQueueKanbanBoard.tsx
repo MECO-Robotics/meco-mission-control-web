@@ -19,10 +19,9 @@ import {
   type TaskQueueBoardState,
 } from "./taskQueueKanbanBoardState";
 import { TaskQueueCard } from "./state/taskQueueKanbanCardView";
-import { groupTaskQueueSwimlanes } from "./taskQueueSwimlanes";
-import { TaskQueueDisciplineLabel } from "./taskQueueDisciplineBadge";
+import { groupTaskQueueSwimlanes, type TaskQueueGroupBy } from "./taskQueueSwimlanes";
+import { TaskQueueSwimlaneLabel } from "./taskQueueSwimlaneLabel";
 import { getProjectIconColor } from "@/components/layout/sidebarProjectIcons";
-import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
@@ -52,6 +51,7 @@ function isTaskQueueEditIntentState(state: TaskQueueBoardState): state is TaskEd
 }
 
 interface TaskQueueKanbanBoardProps {
+  groupBy: TaskQueueGroupBy;
   bootstrap: BootstrapPayload;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
@@ -66,6 +66,7 @@ interface TaskQueueKanbanBoardProps {
 }
 
 export function TaskQueueKanbanBoard({
+  groupBy,
   tasks,
   focusedState,
   onClearFocus,
@@ -74,10 +75,6 @@ export function TaskQueueKanbanBoard({
   ...cardProps
 }: TaskQueueKanbanBoardProps) {
   const pendingTaskStatusDropIdsRef = useRef<Set<string>>(new Set());
-  const workTypesById = useMemo(
-    () => Object.fromEntries(cardProps.bootstrap.workTypes.map((workType) => [workType.id, workType])),
-    [cardProps.bootstrap.workTypes],
-  );
   const [pendingTaskStatusDropIds, setPendingTaskStatusDropIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
@@ -92,8 +89,8 @@ export function TaskQueueKanbanBoard({
   );
 
   const swimlanes = useMemo(
-    () => groupTaskQueueSwimlanes(focusedState === null ? tasks : focusedTasks, cardProps.bootstrap),
-    [cardProps.bootstrap, focusedState, focusedTasks, tasks],
+    () => groupTaskQueueSwimlanes(focusedState === null ? tasks : focusedTasks, cardProps.bootstrap, groupBy),
+    [cardProps.bootstrap, focusedState, focusedTasks, groupBy, tasks],
   );
   const boardSwimlanes = useMemo(
     () => swimlanes.map((project) => ({
@@ -102,11 +99,11 @@ export function TaskQueueKanbanBoard({
       accentColor: getProjectIconColor(cardProps.projectsById[project.id] ?? null),
       lanes: project.lanes.map((lane) => ({
         id: lane.id,
-        header: <TaskQueueDisciplineLabel name={lane.disciplineName} code={workTypesById[lane.id]?.code} accentColor={getTimelineTaskDisciplineColor(lane.id, workTypesById)} />,
+        header: <TaskQueueSwimlaneLabel {...lane.label} />,
         itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
       })),
     })),
-    [cardProps.bootstrap, cardProps.projectsById, swimlanes, workTypesById],
+    [cardProps.bootstrap, cardProps.projectsById, swimlanes],
   );
   const boardColumns = useMemo(
     () =>
@@ -194,7 +191,7 @@ export function TaskQueueKanbanBoard({
                 <KanbanProjectGroup key={project.id} label={project.projectName} accentColor={getProjectIconColor(cardProps.projectsById[project.id] ?? null)}>
                   {project.lanes.map((lane) => (
                     <KanbanSwimlane
-                      header={<TaskQueueDisciplineLabel name={lane.disciplineName} code={workTypesById[lane.id]?.code} accentColor={getTimelineTaskDisciplineColor(lane.id, workTypesById)} />}
+                      header={<TaskQueueSwimlaneLabel {...lane.label} />}
                       key={lane.id}
                     >
                       <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
