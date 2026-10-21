@@ -148,7 +148,7 @@
   padding: 0.75rem 0;
   border-right: 1px solid var(--border-grid);
   border-top: 1px solid var(--border-base);
-  background: var(--bg-row-alt);
+  background: color-mix(in srgb, var(--kanban-project-accent, var(--bg-row-alt)) 14%, var(--bg-row-alt));
   color: var(--text-title);
   font-size: calc(0.8rem * var(--task-queue-zoom, 1));
   font-weight: 700;
@@ -181,6 +181,7 @@
 
 .kanban-project-toggle svg {
   flex-shrink: 0;
+  color: color-mix(in srgb, var(--kanban-project-accent, var(--text-title)) 70%, var(--text-title));
   transform: rotate(180deg);
 }
 
@@ -263,6 +264,7 @@ summary.kanban-swimlane-label:focus-visible {
 
 .task-queue-team-label svg {
   display: block;
+  color: color-mix(in srgb, var(--kanban-team-accent, var(--text-copy)) 70%, var(--text-title));
   width: calc(0.9rem * var(--task-queue-zoom, 1));
   height: calc(0.9rem * var(--task-queue-zoom, 1));
 }

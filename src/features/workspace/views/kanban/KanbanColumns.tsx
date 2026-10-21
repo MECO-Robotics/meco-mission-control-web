@@ -41,6 +41,7 @@ interface KanbanColumnsProps<TState extends string, TItem> {
   swimlaneGroups?: readonly {
     id: string;
     label: string;
+    accentColor?: string;
     lanes: readonly {
       id: string;
       header: ReactNode;
@@ -169,7 +170,7 @@ export function KanbanColumns<TState extends string, TItem>({
         </div>
       ) : columns.map((column) => renderColumn(column, itemsByState[column.state], true))}
       {swimlaneGroups?.map((group) => (
-        <KanbanProjectGroup key={group.id} label={group.label}>
+        <KanbanProjectGroup key={group.id} label={group.label} accentColor={group.accentColor}>
           {group.lanes.map((lane) => (
             <KanbanSwimlane header={lane.header} key={lane.id}>
               <div className="kanban-swimlane-columns">

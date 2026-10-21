@@ -21,6 +21,8 @@ import {
 import { TaskQueueCard } from "./state/taskQueueKanbanCardView";
 import { groupTaskQueueSwimlanes } from "./taskQueueSwimlanes";
 import { TaskQueueDisciplineLabel } from "./taskQueueDisciplineBadge";
+import { getProjectIconColor } from "@/components/layout/sidebarProjectIcons";
+import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
@@ -72,6 +74,10 @@ export function TaskQueueKanbanBoard({
   ...cardProps
 }: TaskQueueKanbanBoardProps) {
   const pendingTaskStatusDropIdsRef = useRef<Set<string>>(new Set());
+  const workTypesById = useMemo(
+    () => Object.fromEntries(cardProps.bootstrap.workTypes.map((workType) => [workType.id, workType])),
+    [cardProps.bootstrap.workTypes],
+  );
   const [pendingTaskStatusDropIds, setPendingTaskStatusDropIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
@@ -93,13 +99,14 @@ export function TaskQueueKanbanBoard({
     () => swimlanes.map((project) => ({
       id: project.id,
       label: project.projectName,
+      accentColor: getProjectIconColor(cardProps.projectsById[project.id] ?? null),
       lanes: project.lanes.map((lane) => ({
         id: lane.id,
-        header: <TaskQueueDisciplineLabel name={lane.disciplineName} code={cardProps.bootstrap.workTypes.find(({ id }) => id === lane.id)?.code} />,
+        header: <TaskQueueDisciplineLabel name={lane.disciplineName} code={workTypesById[lane.id]?.code} accentColor={getTimelineTaskDisciplineColor(lane.id, workTypesById)} />,
         itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
       })),
     })),
-    [cardProps.bootstrap, swimlanes],
+    [cardProps.bootstrap, cardProps.projectsById, swimlanes, workTypesById],
   );
   const boardColumns = useMemo(
     () =>
@@ -184,10 +191,10 @@ export function TaskQueueKanbanBoard({
           <div className="task-queue-board-focused-groups">
             {swimlanes.length > 0 ? (
               swimlanes.map((project) => (
-                <KanbanProjectGroup key={project.id} label={project.projectName}>
+                <KanbanProjectGroup key={project.id} label={project.projectName} accentColor={getProjectIconColor(cardProps.projectsById[project.id] ?? null)}>
                   {project.lanes.map((lane) => (
                     <KanbanSwimlane
-                      header={<TaskQueueDisciplineLabel name={lane.disciplineName} code={cardProps.bootstrap.workTypes.find(({ id }) => id === lane.id)?.code} />}
+                      header={<TaskQueueDisciplineLabel name={lane.disciplineName} code={workTypesById[lane.id]?.code} accentColor={getTimelineTaskDisciplineColor(lane.id, workTypesById)} />}
                       key={lane.id}
                     >
                       <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
