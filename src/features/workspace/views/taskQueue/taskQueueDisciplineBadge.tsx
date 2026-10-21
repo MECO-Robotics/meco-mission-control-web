@@ -53,3 +53,12 @@ export function getTaskQueueDisciplineIcon(disciplineCode: string | undefined) {
 
   return DISCIPLINE_ICON_BY_CODE[disciplineCode] ?? <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5.5 6 9v6l6 3.5 6-3.5V9L12 5.5Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" /></svg>;
 }
+
+export function TaskQueueDisciplineLabel({ name, code }: { name: string; code?: string }) {
+  return (
+    <span className="task-queue-team-label">
+      <span aria-hidden="true">{getTaskQueueDisciplineIcon(code)}</span>
+      {name}
+    </span>
+  );
+}
