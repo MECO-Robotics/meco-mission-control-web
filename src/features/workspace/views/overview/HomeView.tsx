@@ -5,6 +5,8 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { buildAttentionQueue, type AttentionQueueRow } from "../attention/attentionQueue";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { HomeYourTasks } from "./HomeYourTasks";
+import { buildHomeYourTasks } from "./homeYourTasksModel";
 import { HomeWorkChart } from "./HomeWorkChart";
 import { HomeTaskStatusDistribution } from "./HomeTaskStatusDistribution";
 import { HomeDeadlineChart } from "./HomeDeadlineChart";
@@ -26,17 +28,19 @@ interface HomeViewProps {
   onOpenSchedule: (milestoneId: string) => void;
   projectId?: string | null;
   scopeLabel?: string;
+  signedInMemberId?: string | null;
   today?: Date;
 }
 
 export function HomeView({ activePersonFilter = [], bootstrap, onOpenActionItem, onOpenAllActions, onOpenTask,
-  onOpenSchedule, projectId = null, scopeLabel = "All projects", today = new Date() }: HomeViewProps) {
+  onOpenSchedule, signedInMemberId = null, projectId = null, scopeLabel = "All projects", today = new Date() }: HomeViewProps) {
   const [search, setSearch] = useRememberedViewState("home.search", "");
   const [workGroup, setWorkGroup] = useRememberedViewState<HomePressureBucket>("home.work.group", "team");
   const [selection, setSelection] = useState<HomeDashboardSelection | null>(null);
   const close = () => setSelection(null);
   const model = useMemo(() => buildHomeViewModel({ activePersonFilter, bootstrap, projectId, search }),
     [activePersonFilter, bootstrap, projectId, search]);
+  const yourTasks = buildHomeYourTasks(model.tasks, signedInMemberId);
   const workItems = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
     const scopedTaskIds = new Set(model.tasks.map(task => task.id));
@@ -54,17 +58,22 @@ export function HomeView({ activePersonFilter = [], bootstrap, onOpenActionItem,
     <TopbarResponsiveSearch ariaLabel="Search dashboard records" placeholder="Search tasks, risks and milestones…"
       compactPlaceholder="Search" value={search} onChange={value => { close(); setSearch(value); }} />
 
-    <div className="home-dashboard-lead-grid">
-      <HomeWorkChart groupBy={workGroup} onGroupChange={group => { close(); setWorkGroup(group); }} model={workload}
-        onSelectWorkload={(rowId, state) => setSelection({ kind: "workload", rowId, state })}
-        onSelectRisks={rowId => setSelection({ kind: "risks", rowId })} />
-      <HomeTaskStatusDistribution tasksByStatus={model.tasksByStatus} onSelect={status => setSelection({ kind: "tasks", status })} />
+    <div className="home-dashboard-layout">
+      <HomeYourTasks tasks={yourTasks} signedInMemberId={signedInMemberId} onOpenTask={onOpenTask} />
+      <div className="home-dashboard-charts">
+        <div className="home-dashboard-lead-grid">
+          <HomeWorkChart groupBy={workGroup} onGroupChange={group => { close(); setWorkGroup(group); }} model={workload}
+            onSelectWorkload={(rowId, state) => setSelection({ kind: "workload", rowId, state })}
+            onSelectRisks={rowId => setSelection({ kind: "risks", rowId })} />
+          <HomeTaskStatusDistribution tasksByStatus={model.tasksByStatus} onSelect={status => setSelection({ kind: "tasks", status })} />
+        </div>
+        <div className="home-dashboard-secondary-grid">
+          <HomeDeadlineChart model={deadlines} onSelect={key => setSelection({ kind: "deadline", key })} />
+        </div>
+        <HomeDependencyTree model={dependencies} bootstrap={bootstrap} onSelect={selectDependency}
+          onShowAll={() => setSelection({ kind: "dependency", key: null })} onOpenTask={onOpenTask} onOpenSchedule={onOpenSchedule} />
+      </div>
     </div>
-    <div className="home-dashboard-secondary-grid">
-      <HomeDeadlineChart model={deadlines} onSelect={key => setSelection({ kind: "deadline", key })} />
-    </div>
-    <HomeDependencyTree model={dependencies} bootstrap={bootstrap} onSelect={selectDependency}
-      onShowAll={() => setSelection({ kind: "dependency", key: null })} onOpenTask={onOpenTask} onOpenSchedule={onOpenSchedule} />
     {selection ? <HomeDashboardDetails selection={selection} model={model}
       workload={workload} deadlines={deadlines} dependencies={dependencies} bootstrap={bootstrap} scopeLabel={scopeLabel}
       onClose={close} onOpenTask={onOpenTask} onOpenSchedule={onOpenSchedule} onOpenActionItem={onOpenActionItem}
