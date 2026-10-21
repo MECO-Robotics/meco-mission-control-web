@@ -15,7 +15,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 | Area | Views | Consolidation |
 | --- | --- | --- |
 | Home | Action Required, next four milestone timeline, task status distribution | Uses selected project scope; one attention row per source record; Risks provides build review and linked work |
-| Work | Tasks, Schedule, Risks, Activity | Schedule combines Gantt with Agenda on its right; both share search and date controls, stacking on narrow screens; Activity filters work logs, changes, QA and milestone results |
+| Work | Tasks, Schedule, Risks, Activity | Schedule combines a product timeline with compact Agenda; both share search, filters and dates, with Agenda first on phones; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
 | Team | People, Teams | People combines directory, presence, availability and individual workload; Teams manages ResponsibleGroups, adds or reuses matching WorkType disciplines, and derives team workload/capacity |
 
@@ -80,6 +80,14 @@ When changing data contracts:
 - Preserve keyboard and responsive behavior in topbar and timeline interactions.
 - Use the shared topbar slots for functional search, filters, sort, view-specific controls, and create actions. Do not add duplicate in-view page headings or operational-summary prose; place instructions in Help/tutorial content. See [web-contributor-guide.md](web-contributor-guide.md#workspace-topbar-contract).
 - Keep empty, loading, rollback, and storage-failure states explicit.
+
+## Schedule
+
+Schedule organizes dated work by project, then robot subsystem or non-robot workstream, with a General group for work without an available target. A shared task can appear in each linked group; project counts use unique task identities and explicitly describe task completion. Readable task names, owner, responsible team and recorded status stay in one sticky Work column. Names and bars open the existing task editor; Handoffs reveals immediate prerequisites, downstream work and recorded blockers using complete workspace context.
+
+Week and Month show calendar days; Project span covers the actual filtered task, milestone and meeting dates. Month opens fitted to the available width. Fit restores the fitted view, fine zoom lives in the shared topbar View menu, and Today returns Project span to the current month. Date headers focus that day's Agenda rather than creating records. All creation actions remain in the shared plus menu.
+
+Milestones occupy a compact lane above work, opening the same milestone detail/editor as Agenda and deep links. Agenda uses compact date-grouped rows with bounded desktop scrolling, sits to the right when shown, and can be hidden through View. Phones default to Agenda and offer Timeline in View. Filtering by person or responsible team retains project/area structure. No automatic rescheduling, inferred capacity, or predictive readiness percentage is supplied.
 
 ## Implementation Guardrails
 

@@ -1,25 +1,7 @@
-import type { CSSProperties } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { DisciplineCode } from "@/types/common";
-import type { TaskRecord } from "@/types/recordsExecution";
-
-type TimelineTaskToneExtras = CSSProperties & Record<string, string | number | undefined>;
 
 const FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR = "#7a8799";
-const FALLBACK_TIMELINE_SUBSYSTEM_HIGHLIGHT_COLOR = "#4F86C6";
-
-function getReadableTextColor(background: string) {
-  const hex = background.match(/^#([\da-f]{6})$/i)?.[1];
-  if (!hex) return "#000000";
-  const channels = [0, 2, 4].map((offset) => {
-    const value = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
-    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-  });
-  const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
-  const whiteContrast = 1.05 / (luminance + 0.05);
-  const darkContrast = (luminance + 0.05) / 0.05;
-  return whiteContrast >= darkContrast ? "#ffffff" : "#000000";
-}
 
 const TIMELINE_TASK_DISCIPLINE_COLORS: Record<DisciplineCode, string> = {
   design: "#c67b1f",
@@ -65,86 +47,4 @@ export function getTimelineTaskDisciplineColor(
   return code && code in TIMELINE_TASK_DISCIPLINE_COLORS
     ? TIMELINE_TASK_DISCIPLINE_COLORS[code as DisciplineCode]
     : FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR;
-}
-
-function buildTimelineHighlightStyle(
-  accentColor: string,
-  extras?: TimelineTaskToneExtras,
-) {
-  return {
-    "--timeline-row-highlight-selected-fill": `color-mix(in srgb, ${accentColor} 14%, transparent)`,
-    "--timeline-row-highlight-hover-fill": `color-mix(in srgb, ${accentColor} 24%, transparent)`,
-    "--timeline-row-highlight-selected-stroke": `color-mix(in srgb, ${accentColor} 32%, transparent)`,
-    "--timeline-row-highlight-hover-stroke": `color-mix(in srgb, ${accentColor} 48%, transparent)`,
-    ...extras,
-  } as CSSProperties;
-}
-
-export function getTimelineRowHighlightSelectedFill(accentColor: string) {
-  return `color-mix(in srgb, ${accentColor} 14%, transparent)`;
-}
-
-export function getTimelineRowHighlightHoverFill(accentColor: string) {
-  return `color-mix(in srgb, ${accentColor} 24%, transparent)`;
-}
-
-export function buildTimelineTaskHighlightStyle(
-  disciplineId: string | null,
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
-  extras?: TimelineTaskToneExtras,
-) {
-  return buildTimelineHighlightStyle(
-    getTimelineTaskDisciplineColor(disciplineId, workTypesById),
-    extras,
-  );
-}
-
-export function buildTimelineSubsystemHighlightStyle(
-  subsystemColor: string | null | undefined,
-  extras?: TimelineTaskToneExtras,
-) {
-  return buildTimelineHighlightStyle(
-    subsystemColor ?? FALLBACK_TIMELINE_SUBSYSTEM_HIGHLIGHT_COLOR,
-    extras,
-  );
-}
-
-export function resolveTimelineRowHighlightStyle(
-  anchorKey: string,
-  tasksById: Record<string, TaskRecord>,
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
-) {
-  if (anchorKey.startsWith("task:")) {
-    const task = tasksById[anchorKey.slice(5)];
-    if (!task) {
-      return null;
-    }
-
-    return buildTimelineTaskHighlightStyle(task.workTypeId, workTypesById);
-  }
-
-  if (anchorKey.startsWith("subsystem:")) {
-    const subsystem = subsystemsById[anchorKey.slice(10)];
-    if (!subsystem) {
-      return null;
-    }
-
-    return buildTimelineSubsystemHighlightStyle(subsystem.color ?? "#4F86C6");
-  }
-
-  return null;
-}
-
-export function buildTimelineTaskToneStyle(
-  disciplineId: string | null,
-  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
-  extras?: TimelineTaskToneExtras,
-) {
-  const accentColor = getTimelineTaskDisciplineColor(disciplineId, workTypesById);
-  return buildTimelineTaskHighlightStyle(disciplineId, workTypesById, {
-    "--timeline-task-discipline-accent": accentColor,
-    "--timeline-task-bar-text-color": getReadableTextColor(accentColor),
-    ...extras,
-  });
 }

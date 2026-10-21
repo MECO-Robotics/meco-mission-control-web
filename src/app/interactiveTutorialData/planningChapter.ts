@@ -19,7 +19,7 @@ const planningSteps = [
   {
     id: "task-timeline",
     title: "Open the schedule",
-    instruction: "Choose Schedule in the sidebar. Gantt and Agenda are shown together.",
+    instruction: "Choose Schedule in the sidebar. Use View to choose Timeline on phones; larger screens show the timeline beside Agenda.",
     selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {

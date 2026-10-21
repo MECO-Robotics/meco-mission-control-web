@@ -1,82 +1,120 @@
-.schedule-agenda-list {
-  display: grid;
-  gap: 0.5rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.schedule-agenda-months {
-  display: grid;
-  gap: 1rem;
-}
-
-.schedule-agenda-month {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.schedule-agenda-month :is(h2, h3) {
-  background: var(--bg-panel);
-  color: var(--text-title);
-  font-size: 0.9rem;
-  font-weight: 800;
-  margin: 0;
-  padding: 0.35rem 0.15rem;
-}
-
-.schedule-agenda-list li {
-  align-items: center;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-base);
-  border-radius: 0.65rem;
-  display: grid;
-  gap: 0.2rem 0.75rem;
-  grid-template-columns: minmax(10rem, 0.7fr) minmax(12rem, 2fr) minmax(8rem, 0.7fr);
-  padding: 0.65rem 0.8rem;
-}
-
-.schedule-agenda-list time,
-.schedule-agenda-list small {
-  color: var(--text-copy);
-  font-size: 0.78rem;
-}
-
-
 .schedule-gantt-agenda {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 20rem;
   align-items: start;
+  display: grid;
   gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) 20rem;
   min-width: 0;
 }
 
-.schedule-gantt-agenda > .timeline-shell {
+.schedule-gantt-agenda[data-agenda-visible="false"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+  .schedule-gantt-agenda[data-agenda-visible="false"] > .schedule-agenda-panel {
+    display: none;
+  }
+}
+
+.schedule-gantt-agenda > .product-timeline-shell {
   min-width: 0;
 }
 
 .schedule-agenda-panel {
   border-inline-start: 1px solid var(--border-base);
+  max-height: calc(100dvh - 9rem);
   min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding-inline-start: 1rem;
+  scrollbar-color: var(--border-base) transparent;
+  scrollbar-gutter: stable;
 }
 
-.schedule-agenda-panel .schedule-agenda-list li {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.35rem;
+.schedule-agenda-panel[hidden] {
+  display: none;
+}
+
+.schedule-agenda-months,
+.schedule-agenda-month,
+.schedule-agenda-day {
+  display: grid;
+}
+
+.schedule-agenda-months {
+  gap: 1.25rem;
+}
+
+.schedule-agenda-month {
+  gap: 0.75rem;
+}
+
+.schedule-agenda-month :is(h2, h3) {
+  color: var(--text-title);
+  margin: 0;
+}
+
+.schedule-agenda-month h2 {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.schedule-agenda-month h3 {
+  color: var(--text-copy);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding-block-end: 0.2rem;
+}
+
+.schedule-agenda-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.schedule-agenda-list li {
+  border-block-end: 1px solid var(--border-base);
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
   overflow-wrap: anywhere;
+  padding-block: 0.5rem;
+}
+
+.schedule-agenda-list small {
+  color: var(--text-copy);
+  font-size: 0.75rem;
+}
+
+.schedule-agenda-focus {
+  align-items: center;
+  color: var(--text-title);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-block-end: 0.75rem;
 }
 
 .task-calendar-day-details-title {
   background: transparent;
   border: 0;
   color: var(--text-title);
-  cursor: pointer;
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 800;
+  font-size: 0.85rem;
+  font-weight: 700;
   padding: 0;
   text-align: left;
+}
+
+button.task-calendar-day-details-title {
+  cursor: pointer;
+}
+
+button.task-calendar-day-details-title:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .task-calendar-day-details-title:focus-visible {
@@ -91,15 +129,38 @@
   margin: 0;
 }
 
-@media (max-width: 1100px) {
-  .schedule-gantt-agenda {
+@media (max-width: 767px) {
+  .timeline-toolbar > .schedule-view-menu {
+    order: -1;
+  }
+
+  .schedule-gantt-agenda,
+  .schedule-gantt-agenda[data-agenda-visible="false"] {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .schedule-agenda-panel {
+  .schedule-gantt-agenda:not([data-mobile-presentation="timeline"]) > .product-timeline-shell,
+  .schedule-gantt-agenda[data-mobile-presentation="timeline"] > .schedule-agenda-panel {
+    display: none;
+  }
+
+  .schedule-gantt-agenda:not([data-mobile-presentation="timeline"]) > .schedule-agenda-panel {
     border-inline-start: 0;
-    border-block-start: 1px solid var(--border-base);
+    display: block;
+    max-height: none;
+    overflow: visible;
     padding-inline-start: 0;
-    padding-block-start: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .task-queue-filter-menu-item:has(> .schedule-mobile-view-option) {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .task-queue-filter-menu-item:has(> .schedule-desktop-view-option) {
+    display: none;
   }
 }

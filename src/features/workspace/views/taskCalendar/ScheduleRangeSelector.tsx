@@ -1,15 +1,11 @@
 import { SegmentedSelector } from "@/features/workspace/shared/topbar";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
-export type SchedulePresentation = "agenda" | "calendar" | "timeline";
+export type SchedulePresentation = "agenda" | "timeline";
 
 const TIMELINE_RANGES: Array<{ id: TimelineViewInterval; label: string }> = [
   { id: "week", label: "Week" },
   { id: "month", label: "Month" },
-  { id: "all", label: "All" },
-];
-
-const CALENDAR_RANGE: Array<{ id: TimelineViewInterval; label: string }> = [
-  { id: "month", label: "Month" },
+  { id: "all", label: "Project span" },
 ];
 
 export function ScheduleRangeSelector({
@@ -22,8 +18,6 @@ export function ScheduleRangeSelector({
   value: TimelineViewInterval;
 }) {
   const isTimeline = presentation === "timeline";
-  const options = presentation === "calendar" ? CALENDAR_RANGE : TIMELINE_RANGES;
-  const selectedRange = presentation === "calendar" ? "month" : value;
 
   return (
     <SegmentedSelector
@@ -31,8 +25,8 @@ export function ScheduleRangeSelector({
       collapsible={isTimeline}
       dataTutorialTarget={isTimeline ? "timeline-interval-select" : undefined}
       onChange={(range) => onChange?.(range)}
-      options={options}
-      value={selectedRange}
+      options={TIMELINE_RANGES}
+      value={value}
     />
   );
 }
