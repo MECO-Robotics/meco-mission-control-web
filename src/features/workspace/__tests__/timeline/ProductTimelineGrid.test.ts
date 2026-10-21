@@ -18,13 +18,18 @@ function renderGrid(overrides: Partial<React.ComponentProps<typeof ProductTimeli
   }));
 }
 
-it("keeps the task name, assignee and labeled team icon independent of the timing bar", () => {
+it("puts task title, status and team inside the timing bar while keeping assignees in the narrow column", () => {
   const bootstrap = createBootstrap();
   const task = { ...bootstrap.tasks[0], title: "Verify the complete sensor bundle before controls integration", startDate: "2026-04-07", dueDate: "2026-04-07" };
   bootstrap.responsibleGroups = [{ id: "electrical", seasonId: "season-1", name: "Electrical", icon: "zap", color: "#F4A261", projectIds: [task.projectId], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false }];
   task.responsibleGroupId = "electrical";
   const markup = renderGrid({ bootstrap, tasks: [task] });
-  expect(markup).toContain(`>${task.title}</button>`);
+  const bar = markup.match(/<button[^>]*class="product-timeline-bar[^>]*>[\s\S]*?<\/button>/)?.[0];
+  expect(bar).toContain(`>${task.title}</span>`);
+  expect(bar).toContain('aria-label="In progress"');
+  expect(bar).toContain('aria-label="Team: Electrical"');
+  expect(bar).not.toContain('task-assignee-summary');
+  expect(markup).not.toContain('product-timeline-task-title');
   expect(markup).toContain('aria-label="Ada"');
   expect(markup).toContain(">A</span>");
   expect(markup).toContain('role="img" aria-label="Team: Electrical" title="Team: Electrical"');
