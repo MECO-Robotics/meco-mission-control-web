@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { Network } from "lucide-react";
+import { Link2, Network, TriangleAlert } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
@@ -77,20 +77,18 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
     const span = getProductTimelineTaskSpan(task, days);
     const rowKey = `${groupKey}:${task.id}`;
     const signal = context.signal;
+    const warning = [context.overdueLabel, context.unavailableTargets.length ? `Unavailable target: ${context.unavailableTargets.join(", ")}` : ""].filter(Boolean).join(" · ");
     return <div key={rowKey} className="product-timeline-row product-timeline-task" data-task-id={task.id} data-group-key={groupKey}>
         <div className="product-timeline-work">
           <button type="button" className="product-timeline-task-title" title={context.description} onClick={() => onOpenTask(task)}>{task.title}</button>
           <span className="product-timeline-task-assignees">
-            <TaskAssigneeSummary task={task} membersById={membersById} />
+            <TaskAssigneeSummary compact task={task} membersById={membersById} />
             {context.team && <span className="product-timeline-task-team" role="img" aria-label={`Team: ${context.team}`} title={`Team: ${context.team}`}><Network size={14} aria-hidden="true" /></span>}
-            <span>{task.actualHours}h logged / {task.estimatedHours}h allocated</span>
+            <span className="product-timeline-status" role="img" aria-label={context.state} title={context.state}><TimelineTaskStatusLogo compact signal={signal} status={task.status} /></span>
+            {warning && <span className={`product-timeline-warning${context.overdue ? " is-overdue" : ""}`} role="img" aria-label={warning} title={warning}><TriangleAlert size={14} aria-hidden="true" /></span>}
+            {context.hasHandoffs && <button type="button" className="product-timeline-inspect" aria-haspopup="dialog" aria-label={`Inspect handoffs for ${task.title}`} title="Inspect handoffs" onClick={() => setInspectedId(task.id)}><Link2 size={14} aria-hidden="true" /></button>}
+            <span className="product-timeline-hours" role="img" aria-label={`${task.actualHours}h logged / ${task.estimatedHours}h allocated`} title={`${task.actualHours}h logged / ${task.estimatedHours}h allocated`}>{task.actualHours}h/{task.estimatedHours}h</span>
           </span>
-          {context.unavailableTargets.length > 0 && <span className="product-timeline-task-meta">Unavailable target: {context.unavailableTargets.join(", ")}</span>}
-          <div className="product-timeline-task-state">
-            <span className="product-timeline-status"><TimelineTaskStatusLogo compact signal={signal} status={task.status} />{context.state}</span>
-            {context.overdue && <span className="product-timeline-overdue">{context.overdueLabel}</span>}
-            {context.hasHandoffs && <button type="button" className="product-timeline-inspect" aria-haspopup="dialog" aria-label={`Inspect handoffs for ${task.title}`} onClick={() => setInspectedId(task.id)}>Handoffs</button>}
-          </div>
         </div>
         <div className="product-timeline-track">
           {span ? <button type="button" data-tutorial-target="timeline-task-bar" className={`product-timeline-bar${task.status === "complete" ? " is-complete" : ""}${span.spillsLeft ? " spills-left" : ""}${span.spillsRight ? " spills-right" : ""}`} data-status-signal={signal} style={{ ...buildTimelineTaskToneStyle(signal), left: `${span.start / days.length * 100}%`, width: `${span.span / days.length * 100}%` }} onClick={() => onOpenTask(task)} aria-label={`Open ${context.description}`} title={context.description} /> : null}

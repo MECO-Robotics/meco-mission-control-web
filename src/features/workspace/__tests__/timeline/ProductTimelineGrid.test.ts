@@ -54,7 +54,7 @@ it("shows the first selected assignee's photo and counts unique additional assig
 it.each([
   [[], "member-1", 'aria-label="Ada"', ">A</span>"],
   [["missing"], "member-1", 'aria-label="Unavailable assignee"', ">?</span>"],
-  [[], null, "task-assignee-summary", ">Unassigned</span>"],
+  [[], null, 'aria-label="Unassigned"', 'title="Unassigned"'],
 ] as const)("handles assignees %j with owner %s", (assigneeIds, ownerId, label, content) => {
   const bootstrap = createBootstrap();
   const markup = renderGrid({ bootstrap, tasks: [{ ...bootstrap.tasks[0], assigneeIds: [...assigneeIds], ownerId }] });
@@ -111,12 +111,12 @@ it.each([
   ["in-progress", "In progress"],
   ["waiting-for-qa", "Waiting for QA"],
   ["complete", "Complete"],
-] as const)("pairs the %s status glyph with readable state text", (status, label) => {
+] as const)("pairs the %s status glyph with an accessible state label", (status, label) => {
   const bootstrap = createBootstrap();
   const task = { ...bootstrap.tasks[0], status };
   const markup = renderGrid({ bootstrap, tasks: [task] });
   expect(markup).toContain(`timeline-task-status-logo-signal-${status}`);
-  expect(markup).toContain(`</svg></span>${label}</span>`);
+  expect(markup).toContain(`role="img" aria-label="${label}" title="${label}"`);
 });
 
 it("signals an unresolved prerequisite, then prioritizes a recorded blocker", () => {
@@ -130,7 +130,7 @@ it("signals an unresolved prerequisite, then prioritizes a recorded blocker", ()
   expect(waiting).toContain("Waiting on prerequisite");
   const blocked = renderGrid({ bootstrap, tasks: [{ ...task, isBlocked: true }] });
   expect(blocked).toContain("timeline-task-status-logo-signal-blocked");
-  expect(blocked).toContain("</svg></span>Blocked</span>");
+  expect(blocked).toContain('role="img" aria-label="Blocked" title="Blocked"');
   expect(blocked).not.toContain("Waiting on prerequisite");
 });
 

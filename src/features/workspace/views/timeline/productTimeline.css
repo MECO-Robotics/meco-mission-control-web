@@ -27,21 +27,23 @@
 .product-timeline-collapse[aria-expanded="true"] svg { transform: rotate(90deg); }
 .product-timeline-collapse span { min-width: 0; overflow-wrap: anywhere; }
 .product-timeline-count { display: block; padding-left: 1.2rem; margin-top: 0.15rem; color: var(--text-muted); font-size: 0.65rem; font-weight: 400; }
-.product-timeline-task .product-timeline-work { padding-left: 1.8rem; }
+.product-timeline-task .product-timeline-work { padding: 0.35rem 0.65rem 0.35rem 1.8rem; }
 .product-timeline-task { --schedule-row-background: var(--bg-panel); }
 .product-timeline-task:where(:nth-child(even of .product-timeline-task)) { --schedule-row-background: var(--bg-row-stripe); }
 .product-timeline-task > .product-timeline-work, .product-timeline-task > .product-timeline-track { background-color: var(--schedule-row-background); }
 .product-timeline-task-title, .product-timeline-related-title { display: block; max-width: 100%; padding: 0; border: 0; background: transparent; color: var(--text-link); text-align: left; font: inherit; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; cursor: pointer; }
 .product-timeline-task-title:hover, .product-timeline-related-title:hover { color: var(--text-link-hover); text-decoration: underline; text-underline-offset: 0.15em; }
-.product-timeline-task-meta { display: block; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.65rem; overflow-wrap: anywhere; }
-.product-timeline-task-assignees { --task-assignee-size: 1.125rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.65rem; overflow-wrap: anywhere; }
-.product-timeline-task-team { display: inline-flex; }
-.product-timeline-task-state { display: flex; align-items: center; flex-wrap: wrap; gap: 0.15rem 0.5rem; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.65rem; }
-.product-timeline-status { display: inline-flex; align-items: center; gap: 0.25rem; }
+.product-timeline-task-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.product-timeline-task-assignees { --task-assignee-size: 1rem; display: flex; align-items: center; gap: 2px; min-height: 18px; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.65rem; white-space: nowrap; }
+.product-timeline-task-assignees > * { flex-shrink: 0; }
+.product-timeline-task-assignees .product-timeline-hours { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.product-timeline-task-assignees .task-assignee-summary { gap: 2px; }
+.product-timeline-task-team, .product-timeline-status, .product-timeline-warning { display: inline-flex; align-items: center; }
 .product-timeline-status .timeline-task-status-logo.is-compact { --timeline-task-status-logo-background: var(--schedule-row-background); position: static; inset: auto; z-index: auto; flex: 0 0 auto; transform: none; background: transparent; box-shadow: none; }
-.product-timeline-inspect { border: 0; border-radius: 2px; padding: 0; background: transparent; color: var(--text-link); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 0.15em; }
+.product-timeline-inspect { display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 2px; padding: 2px; background: transparent; color: var(--text-link); font: inherit; cursor: pointer; }
 .product-timeline-inspect:hover { color: var(--text-link-hover); }
 .product-timeline-warning { color: var(--status-warning-text); }
+.product-timeline-warning.is-overdue { color: var(--status-danger-text); }
 .product-timeline-day-grid { position: absolute; inset: 0 0 0 var(--schedule-work-width); display: grid; grid-template-columns: repeat(var(--schedule-day-count), minmax(0, 1fr)); z-index: 1; pointer-events: none; }
 .product-timeline-day-grid > span { border-right: 1px solid var(--border-grid); }
 .product-timeline-track { position: relative; min-width: 0; }
@@ -73,7 +75,7 @@
   .product-timeline-grid { --schedule-track-min-width: calc(var(--schedule-day-count) * 24px); }
 }
 @media (max-width: 600px) {
-  .product-timeline-shell { --schedule-work-width: 180px; max-height: calc(100dvh - 9rem); }
+  .product-timeline-shell { --schedule-work-width: 200px; max-height: calc(100dvh - 9rem); }
   .product-timeline-work { padding: 0.4rem; }
   .product-timeline-task .product-timeline-work { padding-left: 1.1rem; }
 }
@@ -84,7 +86,6 @@
   border: 1px solid color-mix(in srgb, var(--timeline-task-bar-text-color, var(--status-neutral-text)) 30%, transparent);
 }
 .product-timeline-bar.is-complete { background: var(--status-success-bg); }
-.product-timeline-overdue { color: var(--status-danger-text); font-weight: 600; }
 .product-timeline-summary-span { color: var(--status-neutral-text); font: inherit; font-size: 0.65rem; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: pointer; }
 .workspace-popover { display: inline-flex; min-width: 0; }
 .workspace-popover > button { display: inline-flex; gap: 4px; align-items: center; }
