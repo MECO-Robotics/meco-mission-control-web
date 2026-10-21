@@ -60,9 +60,11 @@ it.each([
   expect(markup).not.toContain("task-assignee-summary-count");
 });
 
-it("exposes date selection and puts the supplied milestone lane before work", () => {
+it("exposes date selection and puts the supplied milestone lane before dates and work", () => {
   const markup = renderGrid({ milestoneLane: React.createElement("span", null, "Integration ready") });
   expect(markup).toContain('aria-label="Show agenda for 2026-04-07" aria-pressed="true"');
+  expect(markup).toContain("Integration ready");
+  expect(markup.indexOf("Integration ready")).toBeLessThan(markup.indexOf("product-timeline-header"));
   expect(markup.indexOf("Integration ready")).toBeLessThan(markup.indexOf("Drivebase"));
   expect(markup).toContain('aria-expanded="true"');
 });
