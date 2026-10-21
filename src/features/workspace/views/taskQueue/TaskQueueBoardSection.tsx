@@ -16,7 +16,10 @@ import {
 } from "./taskQueueViewState";
 import type { TaskQueueBoardState } from "./taskQueueKanbanBoardState";
 
+import type { TaskQueueGroupBy } from "./taskQueueSwimlanes";
+
 interface TaskQueueBoardSectionProps {
+  groupBy: TaskQueueGroupBy;
   bootstrap: BootstrapPayload;
   focusedBoardState: TaskQueueBoardState | null;
   membersById: Record<string, BootstrapPayload["members"][number]>;
@@ -33,6 +36,7 @@ interface TaskQueueBoardSectionProps {
 }
 
 export function TaskQueueBoardSection({
+  groupBy,
   bootstrap,
   focusedBoardState,
   membersById,
@@ -72,6 +76,7 @@ export function TaskQueueBoardSection({
     >
       {processedTasks.length > 0 ? (
         <TaskQueueKanbanBoard
+          groupBy={groupBy}
           bootstrap={bootstrap}
           focusedState={focusedBoardState}
           membersById={membersById}

@@ -255,16 +255,16 @@ summary.kanban-swimlane-label:focus-visible {
   align-self: center;
 }
 
-.task-queue-team-label {
+.task-queue-lane-label {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   min-width: 0;
 }
 
-.task-queue-team-label svg {
+.task-queue-lane-label svg {
   display: block;
-  color: color-mix(in srgb, var(--kanban-team-accent, var(--text-copy)) 70%, var(--text-title));
+  color: color-mix(in srgb, var(--kanban-lane-accent, var(--text-copy)) 70%, var(--text-title));
   width: calc(0.9rem * var(--task-queue-zoom, 1));
   height: calc(0.9rem * var(--task-queue-zoom, 1));
 }

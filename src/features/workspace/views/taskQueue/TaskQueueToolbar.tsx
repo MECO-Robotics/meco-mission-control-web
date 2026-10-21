@@ -19,7 +19,11 @@ import {
   type TaskSortField,
 } from "./taskQueueViewState";
 
+import { TASK_QUEUE_GROUP_OPTIONS, DEFAULT_TASK_QUEUE_GROUP_BY, type TaskQueueGroupBy } from "./taskQueueSwimlanes";
+
 interface TaskQueueToolbarProps {
+  groupBy: TaskQueueGroupBy;
+  setGroupBy: Dispatch<SetStateAction<TaskQueueGroupBy>>;
   activeFilterCount: number;
   bootstrap: BootstrapPayload;
   disciplineFilter: FilterSelection;
@@ -53,6 +57,8 @@ interface TaskQueueToolbarProps {
 }
 
 export function TaskQueueToolbar({
+  groupBy,
+  setGroupBy,
   activeFilterCount,
   bootstrap,
   disciplineFilter,
@@ -114,12 +120,25 @@ export function TaskQueueToolbar({
               subsystemIterationOptions={subsystemIterationOptions}
             />
             <CompactFilterMenu
-              activeCount={taskSortIsDefault ? 0 : 1}
+              activeCount={(taskSortIsDefault ? 0 : 1) + (groupBy === DEFAULT_TASK_QUEUE_GROUP_BY ? 0 : 1)}
               ariaLabel="Sort tasks"
               buttonLabel="Sort"
-              className="task-queue-sort-menu"
+              className="task-queue-sort-menu task-queue-group-sort-menu"
               icon={<IconSort />}
               items={[
+                {
+                  label: "Group by",
+                  content: (
+                    <select
+                      aria-label="Group tasks by"
+                      className="task-queue-sort-menu-select"
+                      onChange={(event) => setGroupBy(event.target.value as TaskQueueGroupBy)}
+                      value={groupBy}
+                    >
+                      {TASK_QUEUE_GROUP_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
+                    </select>
+                  ),
+                },
                 {
                   label: "Sort by",
                   labelControl: (

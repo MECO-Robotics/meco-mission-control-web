@@ -96,6 +96,7 @@ describe("Task Queue board", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
+        groupBy: "team",
         bootstrap,
         focusedState: "not-started",
         membersById: {
@@ -137,6 +138,7 @@ describe("Task Queue board", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
+        groupBy: "team",
         bootstrap,
         focusedState: null,
         membersById: {
@@ -161,4 +163,26 @@ describe("Task Queue board", () => {
     expect(markup).toContain('data-kanban-drop-state="blocked"');
     expect(markup).toContain('data-kanban-drop-state="waiting-on-dependency"');
   });
+  it.each([null, "in-progress"] as const)("groups subsystem lanes with unique totals in focus %s", (focusedState) => {
+    const bootstrap = createBootstrap();
+    bootstrap.subsystems.push({ ...bootstrap.subsystems[0], id: "arm", name: "Arm" });
+    const markup = renderToStaticMarkup(React.createElement(TaskQueueKanbanBoard, {
+      groupBy: "subsystem", bootstrap, focusedState,
+      membersById: {}, projectsById: { "project-1": bootstrap.projects[0] },
+      subsystemsById: {}, workstreamsById: {},
+      onClearFocus: jest.fn(), onFocusState: jest.fn(), openEditTaskModal: jest.fn(),
+      tasks: [
+        createTask(1, { status: "in-progress", subsystemIds: ["subsystem-1", "arm"] }),
+        createTask(2, { status: "in-progress", subsystemIds: ["arm"] }),
+      ],
+    }));
+    expect(markup).toContain("Drive");
+    expect(markup).toContain("Arm");
+    expect(markup).not.toContain("Design");
+    expect(markup.match(/data-kanban-item-id="task-1"/g) ?? markup.match(/title="Task 1"/g)).toHaveLength(2);
+    expect(markup).toContain('task-queue-board-column-count kanban-swimlane-cell-count">1</span>');
+    expect(markup).toContain('task-queue-board-column-count kanban-swimlane-cell-count">2</span>');
+    expect(markup).toContain(focusedState ? 'task-queue-board-focused-count">2</span>' : 'task-queue-board-column-count">2</span>');
+  });
+
 });

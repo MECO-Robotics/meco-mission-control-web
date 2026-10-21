@@ -93,6 +93,11 @@
   min-width: min(13rem, 92vw);
 }
 
+.topbar-responsive-search-actions .task-queue-group-sort-menu .task-queue-filter-menu-popover {
+  width: min(15rem, 92vw);
+  min-width: min(15rem, 92vw);
+}
+
 .topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-item {
   grid-template-columns: 4.75rem minmax(0, 1fr);
   gap: 0.4rem;

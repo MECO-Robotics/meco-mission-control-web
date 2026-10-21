@@ -15,6 +15,8 @@ import {
 } from "./state/taskQueueViewStateLogic";
 import type { TaskQueueBoardState } from "./taskQueueKanbanBoardState";
 
+import { DEFAULT_TASK_QUEUE_GROUP_BY, type TaskQueueGroupBy } from "./taskQueueSwimlanes";
+
 export type TaskSortField =
   | "disciplineId"
   | "dueDate"
@@ -62,6 +64,8 @@ export interface TaskQueueViewStateArgs {
 }
 
 export interface TaskQueueViewState {
+  groupBy: TaskQueueGroupBy;
+  setGroupBy: Dispatch<SetStateAction<TaskQueueGroupBy>>;
   activeFilterCount: number;
   disciplineFilter: FilterSelection;
   disciplineOptions: DropdownOption[];
@@ -106,6 +110,7 @@ export function useTaskQueueViewState({
   membersById,
   subsystemsById,
 }: TaskQueueViewStateArgs): TaskQueueViewState {
+  const [groupBy, setGroupBy] = useRememberedViewState<TaskQueueGroupBy>("tasks.groupBy", DEFAULT_TASK_QUEUE_GROUP_BY);
   const [sortField, setSortField] = useRememberedViewState<TaskSortField>("tasks.sortField", "dueDate");
   const [sortOrder, setSortOrder] = useRememberedViewState<"asc" | "desc">("tasks.sortOrder", "asc");
   const [projectFilter, setProjectFilter] = useRememberedViewState<FilterSelection>("tasks.projectFilter", []);
@@ -144,6 +149,8 @@ export function useTaskQueueViewState({
 
   return {
     ...derived,
+    groupBy,
+    setGroupBy,
     disciplineFilter,
     focusedBoardState,
     ownerFilter,
