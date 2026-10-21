@@ -43,7 +43,8 @@ describe("KanbanColumns", () => {
     expect(markup.match(/<article>second<\/article>/g)).toHaveLength(1);
     expect(markup).toContain("No items");
     expect(markup).toContain("Software");
-    expect(markup.match(/class="kanban-project-label"><span>Robot<\/span><\/h3>/g)).toHaveLength(1);
+    expect(markup).toContain('aria-expanded="true" class="kanban-project-toggle"');
+    expect(markup).toContain('>Robot</span></button></h3>');
     expect(markup.match(/class="kanban-project-group"/g)).toHaveLength(2);
   });
 
