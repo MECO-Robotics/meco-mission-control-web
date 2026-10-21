@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { ModalDialog } from "@/components/ModalDialog";
 import { formatLocalDate } from "@/lib/dateUtils";
 import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
@@ -23,6 +24,8 @@ interface ScheduleAgendaPanelProps {
   onClearSelectedDate?: () => void;
   triggerCreateMilestoneToken?: number;
   isVisible?: boolean;
+  presentation?: "inline" | "modal";
+  onClose?: () => void;
   startDate: string;
   endDate: string | null;
   events: TaskCalendarEvent[];
@@ -63,6 +66,8 @@ export const ScheduleAgendaPanel = forwardRef<ScheduleAgendaHandle, ScheduleAgen
   onClearSelectedDate,
   triggerCreateMilestoneToken = 0,
   isVisible = true,
+  presentation = "inline",
+  onClose = () => {},
   startDate,
   endDate,
   events,
@@ -216,8 +221,7 @@ export const ScheduleAgendaPanel = forwardRef<ScheduleAgendaHandle, ScheduleAgen
     }
   };
 
-  return (
-    <>
+  const agenda = (
       <aside aria-label="Schedule agenda" className="schedule-agenda-panel" hidden={!isVisible}>
         {selectedDate && (
           <div className="schedule-agenda-focus">
@@ -233,6 +237,20 @@ export const ScheduleAgendaPanel = forwardRef<ScheduleAgendaHandle, ScheduleAgen
         ) : <ScheduleAgendaMonthList groups={agendaMonths} onOpenEvent={openEvent} />}
 
       </aside>
+  );
+  return (
+    <>
+      {presentation === "modal" ? isVisible && (
+        <ModalDialog label="Schedule agenda" onClose={onClose} dismissOnBackdrop>
+          <section className="modal-card schedule-agenda-modal">
+            <div className="panel-header compact-header roster-modal-header">
+              <h3>Agenda</h3>
+              <button aria-label="Close agenda" className="secondary-action" onClick={onClose} type="button">Close</button>
+            </div>
+            {agenda}
+          </section>
+        </ModalDialog>
+      ) : agenda}
       <MilestonesMilestoneModal
         activeMilestone={milestoneModalState.activeMilestone}
         bootstrap={bootstrap}

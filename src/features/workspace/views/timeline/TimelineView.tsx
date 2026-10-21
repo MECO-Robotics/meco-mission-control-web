@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -47,7 +47,15 @@ export function TimelineView({
   const [localSearchFilter, setLocalSearchFilter] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showAgenda, setShowAgenda] = useState(true);
-  const [mobilePresentation, setMobilePresentation] = useState<"agenda" | "timeline">("agenda");
+  const [mobileAgendaOpen, setMobileAgendaOpen] = useState(false);
+  const [isPhone, setIsPhone] = useState(() => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(max-width: 767px)").matches);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => { setIsPhone(media.matches); if (!media.matches) setMobileAgendaOpen(false); };
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   const searchFilter = controlledSearchFilter ?? localSearchFilter;
   const filterControls = useTimelineViewFilters({ activePersonFilter, bootstrap, isAllProjectsView });
   const data = useTimelineViewData({ activePersonFilter, bootstrap, isAllProjectsView, searchFilter,
@@ -56,7 +64,7 @@ export function TimelineView({
     onIntervalChange: state.handleTimelineIntervalChange, shiftTimelinePeriod: state.shiftTimelinePeriod,
     viewAnchorDate: state.viewAnchorDate, viewInterval: state.viewInterval });
   const navigate = (operation: () => void) => { setSelectedDate(null); operation(); };
-  const selectDate = (day: string) => { setSelectedDate(day); setShowAgenda(true); setMobilePresentation("agenda"); };
+  const selectDate = (day: string) => { setSelectedDate(day); if (isPhone) setMobileAgendaOpen(true); else setShowAgenda(true); };
   const fit = () => {
     state.fitTimeline();
     contentRef.current?.querySelector(".product-timeline-shell")?.scrollTo({ left: 0 });
@@ -83,7 +91,7 @@ export function TimelineView({
             onToday={() => navigate(navigation.handleToday)} onFit={fit}
             timelinePeriodLabel={data.timelinePeriodLabel} timelineZoom={state.timelineZoom} viewInterval={state.viewInterval}
             showAgenda={showAgenda} onShowAgendaChange={setShowAgenda}
-            mobilePresentation={mobilePresentation} onMobilePresentationChange={setMobilePresentation}
+            isPhone={isPhone} onOpenAgenda={() => setMobileAgendaOpen(true)}
           />
           <WorkspaceTopbarAddMenu actions={buildTopbarAddMenuActions(
             makeAddMenuAction("Add meeting", () => window.dispatchEvent(new Event("mission-control:open-meeting")), <IconCalendar />),
@@ -92,12 +100,13 @@ export function TimelineView({
           )} ariaLabel="Add schedule item" title="Add schedule item" />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
-      <div className="schedule-gantt-agenda" data-agenda-visible={showAgenda} data-mobile-presentation={mobilePresentation} ref={contentRef}>
+      <div className="schedule-gantt-agenda" data-agenda-visible={!isPhone && showAgenda} ref={contentRef}>
         <ProductTimelineGrid bootstrap={bootstrap} tasks={data.tasks} days={data.days} viewInterval={state.viewInterval}
           zoom={state.timelineZoom} selectedDate={selectedDate} onSelectDate={selectDate} onOpenTask={openTaskDetailModal}
           isAllProjectsView={isAllProjectsView}
           milestoneLane={<TimelineMilestoneLane days={data.days} milestones={data.milestones} onOpenMilestone={(id) => agendaRef.current?.openMilestone(id)} />} />
         <ScheduleAgendaPanel ref={agendaRef} bootstrap={bootstrap} isAllProjectsView={isAllProjectsView}
+          presentation={isPhone ? "modal" : "inline"} isVisible={isPhone ? mobileAgendaOpen : showAgenda} onClose={() => setMobileAgendaOpen(false)}
           startDate={data.days[0] ?? state.viewAnchorDate} endDate={data.days.at(-1) ?? null} events={data.agendaEvents}
           selectedDate={selectedDate} onClearSelectedDate={() => setSelectedDate(null)} triggerCreateMilestoneToken={triggerCreateMilestoneToken}
           onSaveMeeting={onSaveMeeting} onSaveTimelineMilestone={onSaveTimelineMilestone}

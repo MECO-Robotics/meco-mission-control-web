@@ -5,6 +5,9 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
 import { localTodayDate } from "@/lib/dateUtils";
 import { useTimelineShellSizing } from "./hooks/useTimelineShellSizing";
+import { TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
+import { ProductTimelineDependencies } from "./ProductTimelineDependencies";
+import { getProductTimelineTaskLinks } from "./model/productTimelineDependencies";
 import { buildProductTimelineProjects, getProductTimelineDateLabelIndices, getProductTimelineInspection, getProductTimelineTaskContext, getProductTimelineTaskSpan } from "./model/productTimelineModel";
 
 interface ProductTimelineGridProps {
@@ -23,8 +26,10 @@ interface ProductTimelineGridProps {
 export function ProductTimelineGrid({ bootstrap, tasks, days, viewInterval, zoom = 1, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const workHeaderRef = useRef<HTMLDivElement | null>(null);
+  const datesRef = useRef<HTMLDivElement | null>(null);
   const shellWidth = useTimelineShellSizing(shellRef);
   const workWidth = useTimelineShellSizing(workHeaderRef);
+  const trackWidth = useTimelineShellSizing(datesRef);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [inspectedId, setInspectedId] = useState<string | null>(null);
   const projects = useMemo(() => buildProductTimelineProjects(bootstrap, tasks, days), [bootstrap, tasks, days]);
@@ -34,8 +39,8 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, viewInterval, zoom
   const relatedIds = new Set(inspection ? [...inspection.incoming, ...inspection.downstream].flatMap((item) => item.task ? [item.task.id] : []) : []);
   const clampedZoom = Math.min(4, Math.max(1, zoom));
   const gridWidth = shellWidth && workWidth ? workWidth + Math.max(1, shellWidth - workWidth) * clampedZoom : undefined;
-  const dateLabelIndices = getProductTimelineDateLabelIndices(days, gridWidth && workWidth ? gridWidth - workWidth : 0);
-  const style = { "--schedule-day-count": Math.max(1, days.length), width: gridWidth } as CSSProperties;
+  const dateLabelIndices = getProductTimelineDateLabelIndices(days, trackWidth);
+  const style = { "--schedule-day-count": Math.max(1, days.length), "--schedule-zoom": clampedZoom, width: gridWidth } as CSSProperties;
   const toggle = (id: string) => setCollapsed((previous) => {
     const next = new Set(previous);
     if (next.has(id)) next.delete(id); else next.add(id);
@@ -68,14 +73,15 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, viewInterval, zoom
     const span = getProductTimelineTaskSpan(task, days);
     const rowKey = `${groupKey}:${task.id}`;
     const selected = inspectedId === task.id;
+    const signal = context.blocked ? "blocked" : context.waiting ? "waiting-on-dependency" : task.status;
     return <React.Fragment key={rowKey}>
-      <div className={`product-timeline-row product-timeline-task${selected ? " is-inspected" : ""}${relatedIds.has(task.id) ? " is-related" : ""}`} data-task-id={task.id}>
+      <div className={`product-timeline-row product-timeline-task${selected ? " is-inspected" : ""}${relatedIds.has(task.id) ? " is-related" : ""}`} data-task-id={task.id} data-group-key={groupKey}>
         <div className="product-timeline-work">
           <button type="button" className="product-timeline-task-title" onClick={() => onOpenTask(task)}>{task.title}</button>
           <span className="product-timeline-task-meta">{context.owner}{context.team ? ` · ${context.team}` : ""}</span>
           {context.unavailableTargets.length > 0 && <span className="product-timeline-task-meta">Unavailable target: {context.unavailableTargets.join(", ")}</span>}
           <div className="product-timeline-task-state">
-            <span>{context.state}</span>
+            <span className="product-timeline-status"><TimelineTaskStatusLogo compact signal={signal} status={task.status} />{context.state}</span>
             {context.blocked && <span className="product-timeline-warning">Blocked</span>}
             {context.waiting && <span className="product-timeline-warning">Waiting on prerequisite</span>}
             {context.overdue && <span className="product-timeline-warning">Overdue</span>}
@@ -95,16 +101,17 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, viewInterval, zoom
   };
 
   return <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
-    <div className="product-timeline-grid" style={style}>
+    <div className={`product-timeline-grid${viewInterval === "all" ? " is-project-span" : ""}`} style={style}>
       <div className="product-timeline-row product-timeline-header">
         <div ref={workHeaderRef} className="product-timeline-work">Work</div>
-        <div className={`product-timeline-dates${viewInterval === "all" ? " is-project-span" : ""}`}>
+        <div ref={datesRef} className={`product-timeline-dates${viewInterval === "all" ? " is-project-span" : ""}`}>
           {days.map((day, index) => <button type="button" key={day} className={`product-timeline-day${day === today ? " is-today" : ""}${day === selectedDate ? " is-selected" : ""}`} aria-label={`Show agenda for ${day}`} aria-pressed={day === selectedDate} title={dateLabel(day, { dateStyle: "full" })} onClick={() => onSelectDate(day)}>
             {viewInterval === "all" ? (dateLabelIndices.has(index) ? <span>{dateLabel(day, { month: "short", day: "numeric" })}</span> : null) : <><span>{dateLabel(day, { weekday: "narrow" })}</span><span>{day.slice(8)}</span></>}
           </button>)}
         </div>
       </div>
       {milestoneLane && <div className="product-timeline-milestone-lane">{milestoneLane}</div>}
+      <ProductTimelineDependencies dependencies={getProductTimelineTaskLinks(bootstrap)}>
       {projects.length ? projects.map((project) => {
         const projectKey = `project:${project.id}`;
         const projectTasks = Array.from(new Map(project.groups.flatMap((group) => group.tasks).map((task) => [task.id, task])).values());
@@ -116,6 +123,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, viewInterval, zoom
           })}
         </React.Fragment>;
       }) : <p className="product-timeline-empty">No tasks match this schedule.</p>}
+      </ProductTimelineDependencies>
     </div>
   </div>;
 }

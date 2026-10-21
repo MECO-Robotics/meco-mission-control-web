@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ProductTimelineGrid } from "../../views/timeline/ProductTimelineGrid";
-import { createBootstrap } from "./timelineTestFixtures";
+import { createBootstrap, createBootstrapWithDependency } from "./timelineTestFixtures";
 
 function renderGrid(overrides: Partial<React.ComponentProps<typeof ProductTimelineGrid>> = {}) {
   const bootstrap = createBootstrap();
@@ -62,4 +62,43 @@ it("omits rows and completion counts outside the selected period", () => {
   expect(markup).not.toContain("Later work");
   expect(markup).not.toContain("Outside period");
   expect(markup).toContain("0 of 1 tasks complete");
+});
+
+it.each([
+  ["not-started", "Not started"],
+  ["in-progress", "In progress"],
+  ["waiting-for-qa", "Waiting for QA"],
+  ["complete", "Complete"],
+] as const)("pairs the %s status glyph with readable state text", (status, label) => {
+  const bootstrap = createBootstrap();
+  const task = { ...bootstrap.tasks[0], status };
+  const markup = renderGrid({ bootstrap, tasks: [task] });
+  expect(markup).toContain(`timeline-task-status-logo-signal-${status}`);
+  expect(markup).toContain(`</svg></span>${label}</span>`);
+});
+
+it("signals an unresolved prerequisite, then prioritizes a recorded blocker", () => {
+  const bootstrap = createBootstrapWithDependency();
+  const task = { ...bootstrap.tasks[1], startDate: "2026-04-07", dueDate: "2026-04-08" };
+  bootstrap.tasks[1] = task;
+  const waiting = renderGrid({ bootstrap, tasks: [task] });
+  expect(waiting).toContain("timeline-task-status-logo-signal-waiting-on-dependency");
+  expect(waiting).toContain("Waiting on prerequisite");
+  const blocked = renderGrid({ bootstrap, tasks: [{ ...task, isBlocked: true }] });
+  expect(blocked).toContain("timeline-task-status-logo-signal-blocked");
+  expect(blocked).toContain(">Blocked</span>");
+  expect(blocked).toContain("Waiting on prerequisite");
+});
+
+it("shows completed work as complete despite stale blocker and prerequisite flags", () => {
+  const bootstrap = createBootstrapWithDependency();
+  const task = { ...bootstrap.tasks[1], startDate: "2026-04-07", dueDate: "2026-04-08", status: "complete" as const, isBlocked: true };
+  bootstrap.tasks[1] = task;
+  const markup = renderGrid({ bootstrap, tasks: [task] });
+  expect(markup).toContain("timeline-task-status-logo-signal-complete");
+  expect(markup).not.toContain("timeline-task-status-logo-signal-blocked");
+  expect(markup).not.toContain("timeline-task-status-logo-signal-waiting-on-dependency");
+  expect(markup).not.toContain(">Blocked</span>");
+  expect(markup).not.toContain("Waiting on prerequisite");
+  expect(markup).toContain("1 of 1 tasks complete");
 });
