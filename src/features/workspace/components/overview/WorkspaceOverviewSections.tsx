@@ -25,6 +25,7 @@ export function WorkspaceHomeSection(props: WorkspaceContentPanelsViewProps) {
       <HomeView
         activePersonFilter={props.activePersonFilter}
         bootstrap={props.bootstrap}
+        signedInMemberId={props.localActorMemberId ?? null}
         onOpenActionItem={openActionItem}
         onOpenAllActions={() => props.onOpenDrilldownTarget({ tab: "risks" })}
         onOpenTask={openTask}
