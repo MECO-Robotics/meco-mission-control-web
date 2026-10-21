@@ -96,10 +96,12 @@
 .timeline-legend-list .timeline-task-status-logo { position: static; transform: none; flex: 0 0 18px; width: 18px; height: 18px; }
 .timeline-legend-list .timeline-task-overdue { color: var(--status-danger-text); }
 
-.product-timeline-shell.is-compact { --schedule-work-width: 0px; }
-.product-timeline-shell.is-compact .product-timeline-task > .product-timeline-work,
-.product-timeline-shell.is-compact .product-timeline-header > .product-timeline-work { display: none; }
-.product-timeline-shell.is-compact .product-timeline-task > .product-timeline-track,
-.product-timeline-shell.is-compact .product-timeline-dates { grid-column: 2; }
-.product-timeline-shell.is-compact .schedule-milestone-label { grid-column: 1 / -1; width: max-content; max-width: 100cqi; box-sizing: border-box; }
-.product-timeline-shell.is-compact .schedule-milestone-track { grid-column: 2; }
+@container (max-width: 720px) {
+  .product-timeline-grid { --schedule-work-width: 0px; }
+  .product-timeline-task > .product-timeline-work,
+  .product-timeline-header > .product-timeline-work { display: none; }
+  .product-timeline-task > .product-timeline-track,
+  .product-timeline-dates { grid-column: 2; }
+  .schedule-milestone-label { grid-column: 1 / -1; width: max-content; max-width: 100cqi; box-sizing: border-box; }
+  .schedule-milestone-track { grid-column: 2; }
+}

@@ -24,7 +24,6 @@ interface ProductTimelineGridProps {
   days: string[];
   groupBy: GroupBy;
   zoom?: number;
-  compact?: boolean;
   selectedDate: string | null;
   onSelectDate: (day: string) => void;
   onOpenTask: (task: TaskRecord) => void;
@@ -32,7 +31,7 @@ interface ProductTimelineGridProps {
   isAllProjectsView: boolean;
 }
 
-export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1, compact = true, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
+export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const workHeaderRef = useRef<HTMLDivElement | null>(null);
   const shellWidth = useTimelineShellSizing(shellRef);
@@ -102,7 +101,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   };
 
   return <>
-    <div ref={shellRef} className={`product-timeline-shell${compact ? " is-compact" : ""}`} data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
+    <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
     <div className="product-timeline-grid" style={style}>
       {milestoneLane && <div className="product-timeline-milestone-lane">{milestoneLane}</div>}
       <div className="product-timeline-row product-timeline-header">

@@ -49,7 +49,6 @@ export function TimelineView({
   const [groupBy, setGroupBy] = useState<GroupBy>("team");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showAgenda, setShowAgenda] = useState(true);
-  const [compact, setCompact] = useState(true);
   const [mobileAgendaOpen, setMobileAgendaOpen] = useState(false);
   const [isPhone, setIsPhone] = useState(() => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(max-width: 767px)").matches);
   useEffect(() => {
@@ -90,7 +89,6 @@ export function TimelineView({
             onShiftPeriod={(direction) => navigate(() => navigation.handleShiftPeriod(direction))}
             onToday={() => navigate(navigation.handleToday)}
             timelinePeriodLabel={data.timelinePeriodLabel} timelineZoom={state.timelineZoom} viewInterval={state.viewInterval}
-            compact={compact} onCompactChange={setCompact}
             showAgenda={showAgenda} onShowAgendaChange={setShowAgenda}
             isPhone={isPhone} onOpenAgenda={() => setMobileAgendaOpen(true)}
           />
@@ -103,7 +101,7 @@ export function TimelineView({
       </AppTopbarSlotPortal>
       <div className="schedule-gantt-agenda" data-agenda-visible={!isPhone && showAgenda}>
         <ProductTimelineGrid bootstrap={bootstrap} tasks={data.tasks} days={data.days} groupBy={groupBy}
-          zoom={state.timelineZoom} compact={compact} selectedDate={selectedDate} onSelectDate={selectDate} onOpenTask={openTaskDetailModal}
+          zoom={state.timelineZoom} selectedDate={selectedDate} onSelectDate={selectDate} onOpenTask={openTaskDetailModal}
           isAllProjectsView={isAllProjectsView}
           milestoneLane={<TimelineMilestoneLane days={data.days} milestones={data.milestones} onOpenMilestone={(id) => agendaRef.current?.openMilestone(id)} />} />
         {!isPhone && <button
