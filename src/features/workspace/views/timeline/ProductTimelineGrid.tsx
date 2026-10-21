@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { Network } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
@@ -81,7 +82,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
           <button type="button" className="product-timeline-task-title" title={context.description} onClick={() => onOpenTask(task)}>{task.title}</button>
           <span className="product-timeline-task-assignees">
             <TaskAssigneeSummary task={task} membersById={membersById} />
-            {context.team && <span>{context.team}</span>}
+            {context.team && <span className="product-timeline-task-team" role="img" aria-label={`Team: ${context.team}`} title={`Team: ${context.team}`}><Network size={14} aria-hidden="true" /></span>}
           </span>
           {context.unavailableTargets.length > 0 && <span className="product-timeline-task-meta">Unavailable target: {context.unavailableTargets.join(", ")}</span>}
           <div className="product-timeline-task-state">

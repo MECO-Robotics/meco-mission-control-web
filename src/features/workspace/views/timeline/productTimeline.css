@@ -35,6 +35,7 @@
 .product-timeline-task-title:hover, .product-timeline-related-title:hover { color: var(--text-link-hover); text-decoration: underline; text-underline-offset: 0.15em; }
 .product-timeline-task-meta { display: block; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.65rem; overflow-wrap: anywhere; }
 .product-timeline-task-assignees { --task-assignee-size: 1.125rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.65rem; overflow-wrap: anywhere; }
+.product-timeline-task-team { display: inline-flex; }
 .product-timeline-task-state { display: flex; align-items: center; flex-wrap: wrap; gap: 0.15rem 0.5rem; margin-top: 0.2rem; color: var(--text-muted); font-size: 0.65rem; }
 .product-timeline-status { display: inline-flex; align-items: center; gap: 0.25rem; }
 .product-timeline-status .timeline-task-status-logo.is-compact { --timeline-task-status-logo-background: var(--schedule-row-background); position: static; inset: auto; z-index: auto; flex: 0 0 auto; transform: none; background: transparent; box-shadow: none; }
