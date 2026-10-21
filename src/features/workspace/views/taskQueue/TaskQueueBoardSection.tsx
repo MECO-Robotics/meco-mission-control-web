@@ -8,7 +8,6 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { KanbanScrollFrame } from "../kanban/KanbanScrollFrame";
 import { TaskQueueKanbanBoard } from "./TaskQueueKanbanBoard";
 import {
-  useTaskQueueBoardLazyLoading,
   useTaskQueueBoardZoomInput,
 } from "./useTaskQueueBoardInteractions";
 import {
@@ -22,7 +21,6 @@ interface TaskQueueBoardSectionProps {
   bootstrap: BootstrapPayload;
   workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   focusedBoardState: TaskQueueBoardState | null;
-  isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
@@ -30,13 +28,11 @@ interface TaskQueueBoardSectionProps {
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   setFocusedBoardState: Dispatch<SetStateAction<TaskQueueBoardState | null>>;
   setTaskQueueZoom: Dispatch<SetStateAction<number>>;
-  setVisibleTaskCount: Dispatch<SetStateAction<number>>;
   showProjectContextOnCards: boolean;
   showProjectOnCards: boolean;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   taskFilterMotionClass: string;
   taskQueueZoom: number;
-  visibleTaskCount: number;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
 }
 
@@ -44,7 +40,6 @@ export function TaskQueueBoardSection({
   bootstrap,
   workTypesById,
   focusedBoardState,
-  isNonRobotProject,
   membersById,
   openEditTaskModal,
   onReassignTaskStatus,
@@ -52,16 +47,13 @@ export function TaskQueueBoardSection({
   projectsById,
   setFocusedBoardState,
   setTaskQueueZoom,
-  setVisibleTaskCount,
   showProjectContextOnCards,
   showProjectOnCards,
   subsystemsById,
   taskFilterMotionClass,
   taskQueueZoom,
-  visibleTaskCount,
   workstreamsById,
 }: TaskQueueBoardSectionProps) {
-  const loadMoreRef = useRef<HTMLDivElement>(null);
   const taskQueueBoardShellRef = useRef<HTMLDivElement>(null);
   const zoomBoard = useCallback(
     (direction: 1 | -1) => {
@@ -70,9 +62,6 @@ export function TaskQueueBoardSection({
     [setTaskQueueZoom],
   );
   const isFocused = focusedBoardState !== null;
-  const boardTasks = isFocused ? processedTasks : processedTasks.slice(0, visibleTaskCount);
-  const hasMoreTasks = !isFocused && visibleTaskCount < processedTasks.length;
-  const loadedTaskLabel = `${Math.min(visibleTaskCount, processedTasks.length)} of ${processedTasks.length}`;
   const isCompactZoom = shouldHideTaskQueueSummary(taskQueueZoom);
   const boardStyle = {
     "--task-queue-zoom": taskQueueZoom,
@@ -81,14 +70,6 @@ export function TaskQueueBoardSection({
   } as CSSProperties;
 
   useTaskQueueBoardZoomInput(taskQueueBoardShellRef, zoomBoard);
-  useTaskQueueBoardLazyLoading({
-    isFocused,
-    loadMoreRef,
-    processedTaskCount: processedTasks.length,
-    boardShellRef: taskQueueBoardShellRef,
-    setVisibleTaskCount,
-    visibleTaskCount,
-  });
 
   return (
     <KanbanScrollFrame
@@ -98,12 +79,11 @@ export function TaskQueueBoardSection({
       shellRef={taskQueueBoardShellRef}
       style={boardStyle}
     >
-      {boardTasks.length > 0 ? (
+      {processedTasks.length > 0 ? (
         <TaskQueueKanbanBoard
           bootstrap={bootstrap}
           workTypesById={workTypesById}
           focusedState={focusedBoardState}
-          isNonRobotProject={isNonRobotProject}
           membersById={membersById}
           openEditTaskModal={openEditTaskModal}
           projectsById={projectsById}
@@ -114,23 +94,13 @@ export function TaskQueueBoardSection({
           onFocusState={setFocusedBoardState}
           onReassignTaskStatus={onReassignTaskStatus}
           subsystemsById={subsystemsById}
-          tasks={boardTasks}
+          tasks={processedTasks}
           workstreamsById={workstreamsById}
         />
       ) : (
         <p className="empty-state">No tasks match the current filters.</p>
       )}
-      {!isFocused ? (
-        <div className="task-queue-board-footer">
-          <p className="task-queue-board-load-status">
-            Showing {loadedTaskLabel} tasks
-            {hasMoreTasks ? " - scroll to load more." : "."}
-          </p>
-          {hasMoreTasks ? (
-            <div aria-hidden="true" className="task-queue-board-load-sentinel" ref={loadMoreRef} />
-          ) : null}
-        </div>
-      ) : null}
+
     </KanbanScrollFrame>
   );
 }

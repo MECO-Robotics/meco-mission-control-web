@@ -21,7 +21,6 @@ interface TaskQueueViewProps {
   bootstrap: BootstrapPayload;
   workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   isAllProjectsView: boolean;
-  isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openCreateTaskModal: () => void;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
@@ -34,7 +33,6 @@ export function TaskQueueView({
   bootstrap,
   workTypesById,
   isAllProjectsView,
-  isNonRobotProject,
   membersById,
   openCreateTaskModal,
   openEditTaskModal,
@@ -64,7 +62,6 @@ export function TaskQueueView({
     setStatusFilter,
     setSubsystemFilter,
     setSubsystemIterationFilter,
-    setVisibleTaskCount,
     sortField,
     sortOrder,
     statusFilter,
@@ -75,7 +72,6 @@ export function TaskQueueView({
     taskQueueZoom,
     taskFilterMotionClass,
     taskSortIsDefault,
-    visibleTaskCount,
     workstreamsById,
     showProjectContextOnCards,
     showProjectOnCards,
@@ -143,7 +139,6 @@ export function TaskQueueView({
         bootstrap={bootstrap}
         workTypesById={workTypesById}
         focusedBoardState={focusedBoardState}
-        isNonRobotProject={isNonRobotProject}
         membersById={membersById}
         openEditTaskModal={openEditTaskModal}
         onReassignTaskStatus={onReassignTaskStatus}
@@ -152,12 +147,10 @@ export function TaskQueueView({
         taskQueueZoom={taskQueueZoom}
         setFocusedBoardState={setFocusedBoardState}
         setTaskQueueZoom={setTaskQueueZoom}
-        setVisibleTaskCount={setVisibleTaskCount}
         showProjectContextOnCards={showProjectContextOnCards}
         showProjectOnCards={showProjectOnCards}
         subsystemsById={subsystemsById}
         taskFilterMotionClass={taskFilterMotionClass}
-        visibleTaskCount={visibleTaskCount}
         workstreamsById={workstreamsById}
       />
     </section>

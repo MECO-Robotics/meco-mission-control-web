@@ -4,22 +4,24 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
 import { shouldHideTaskQueueSummary } from "@/features/workspace/views/taskQueue/taskQueueViewState";
 import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("Task Queue board", () => {
-  it("renders the first lazy-load batch and groups blocked tasks into the blocked column", () => {
+  it("renders every project beyond the former batch limit and groups blocked tasks", () => {
     const bootstrap = createBootstrap();
+    bootstrap.projects.push({ ...bootstrap.projects[0], id: "outreach", name: "Outreach", projectType: "outreach" });
+    bootstrap.workTypes.push({ id: "outreach:writing", projectType: "outreach", code: "writing", name: "Writing", isActive: true });
+    bootstrap.workstreams.push({ id: "sponsor", projectId: "outreach", name: "Sponsor engagement", description: "", color: "#335577", isArchived: false });
+    bootstrap.tasks.push(createTask(17, { projectId: "outreach", workTypeId: "outreach:writing", subsystemIds: [], workstreamIds: ["sponsor"] }));
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueView, {
         activePersonFilter: [],
         bootstrap,
         workTypesById: { "work-type-design": bootstrap.workTypes[0] },
-        isAllProjectsView: false,
-        isNonRobotProject: false,
+        isAllProjectsView: true,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],
@@ -31,8 +33,6 @@ describe("Task Queue board", () => {
     );
 
     expect(markup).toContain("task-queue-board");
-    expect(markup).toContain("task-queue-board-load-status");
-    expect(markup).toContain("task-queue-board-load-sentinel");
     expect(markup).toContain("task-queue-board-card-due");
     expect(markup).toContain("workspace-topbar-zoom-controls");
     expect(markup).toContain("workspace-topbar-zoom-label");
@@ -66,8 +66,10 @@ describe("Task Queue board", () => {
     expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(1);
     expect(markup).toContain('data-board-state="waiting-on-dependency"');
     expect(markup.match(/data-board-state="waiting-on-dependency"/g)).toHaveLength(1);
-    expect(markup.match(/data-board-state=/g)).toHaveLength(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
-    expect(markup).not.toContain("Task 16");
+    expect(markup.match(/data-board-state=/g)).toHaveLength(17);
+    expect(markup).toContain("Task 16");
+    expect(markup).toContain("Task 17");
+    expect(markup).toContain('aria-label="Outreach"');
   });
 
   it("renders task zoom with the shared workspace topbar controls", () => {
@@ -78,7 +80,6 @@ describe("Task Queue board", () => {
         bootstrap,
         workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         isAllProjectsView: false,
-        isNonRobotProject: false,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],
@@ -107,7 +108,6 @@ describe("Task Queue board", () => {
         bootstrap,
         workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: "not-started",
-        isNonRobotProject: false,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],
@@ -153,7 +153,6 @@ describe("Task Queue board", () => {
         bootstrap,
         workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: null,
-        isNonRobotProject: false,
         membersById: {
           "member-1": bootstrap.members[0],
           "member-2": bootstrap.members[1],

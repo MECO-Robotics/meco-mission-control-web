@@ -163,7 +163,7 @@ Favor minimal UI: reuse existing elements and layouts, and minimize added surfac
 
 Before implementing an additional feature, inspect and reuse the existing modules, components, and layouts that already own the relevant behavior. Extend a shared owner when the behavior is genuinely shared; keep domain-specific data and presentation at the view boundary. Do not rebuild an existing layout or interaction in parallel. For Kanban views, reuse `KanbanColumns`, `KanbanScrollFrame`, and their drag behavior, supplying view-specific columns and cards.
 
-KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom, focus selection and lazy loading stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element.
+KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom and focus selection stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element. Kanban groups the complete filtered task set by project and discipline so every project and status count remains visible; do not truncate tasks before grouping. Card context uses each task’s project type, showing robot subsystems or non-robot workstreams on mixed boards.
 
 For UI work, match existing dense Mission Control patterns. Use restrained
 controls, stable dimensions, and predictable responsive behavior. Avoid adding

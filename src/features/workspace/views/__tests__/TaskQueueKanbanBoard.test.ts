@@ -117,7 +117,6 @@ function renderBoard(
       bootstrap,
       workTypesById: { "work-type-design": bootstrap.workTypes[0] },
       focusedState: null,
-      isNonRobotProject: false,
       membersById: { "member-1": bootstrap.members[0] },
       onClearFocus: jest.fn(),
       onFocusState: jest.fn(),

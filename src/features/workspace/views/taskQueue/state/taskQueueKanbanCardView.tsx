@@ -53,7 +53,6 @@ function getTaskCardDueDatePillClassName(task: TaskRecord): string {
 interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "children" | "onClick" | "type"> {
   bootstrap: BootstrapPayload;
   workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
-  isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
@@ -69,7 +68,6 @@ export function TaskQueueCard({
   bootstrap,
   className,
   workTypesById,
-  isNonRobotProject,
   membersById,
   openEditTaskModal,
   projectsById,
@@ -97,13 +95,13 @@ export function TaskQueueCard({
   const dueDatePillClassName = getTaskCardDueDatePillClassName(task);
   const taskContextLabel = getTaskQueueCardContextLabel(
     task,
-    isNonRobotProject ? "operations" : "robot",
+    projectsById[task.projectId]?.projectType,
     subsystemsById,
     workstreamsById,
   );
   const taskContextAccentColor = getTaskQueueCardContextAccentColor(
     task,
-    isNonRobotProject ? "operations" : "robot",
+    projectsById[task.projectId]?.projectType,
     subsystemsById,
     workstreamsById,
   );
