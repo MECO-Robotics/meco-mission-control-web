@@ -8,4 +8,4 @@
 .product-timeline-dependency.is-satisfied, .product-timeline-dependency-marker.is-satisfied { color: var(--text-muted); }
 .product-timeline-dependency.is-advisory, .product-timeline-dependency-marker.is-advisory { color: var(--text-muted); }
 .product-timeline-dependency-marker path { fill: currentColor; }
-.product-timeline-dependencies .product-timeline-work, .product-timeline-dependencies .product-timeline-inspection { z-index: 4; }
+.product-timeline-dependencies .product-timeline-work { z-index: 4; }

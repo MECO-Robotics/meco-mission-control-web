@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
+import { ModalDialog } from "@/components/ModalDialog";
 import { localTodayDate } from "@/lib/dateUtils";
 import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 import { TaskAssigneeSummary } from "@/features/workspace/shared/task/TaskAssigneeSummary";
@@ -41,7 +42,6 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, viewInter
   const today = localTodayDate();
   const inspectionTask = inspectedId ? tasks.find((task) => task.id === inspectedId) : undefined;
   const inspection = inspectionTask ? getProductTimelineInspection(inspectionTask, bootstrap) : null;
-  const relatedIds = new Set(inspection ? [...inspection.incoming, ...inspection.downstream].flatMap((item) => item.task ? [item.task.id] : []) : []);
   const clampedZoom = Math.min(4, Math.max(1, zoom));
   const gridWidth = shellWidth && workWidth ? workWidth + Math.max(1, shellWidth - workWidth) * clampedZoom : undefined;
   const dateLabelIndices = getProductTimelineDateLabelIndices(days, trackWidth);
@@ -77,10 +77,8 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, viewInter
     const context = getProductTimelineTaskContext(task, bootstrap, today);
     const span = getProductTimelineTaskSpan(task, days);
     const rowKey = `${groupKey}:${task.id}`;
-    const selected = inspectedId === task.id;
     const signal = context.blocked ? "blocked" : context.waiting ? "waiting-on-dependency" : task.status;
-    return <React.Fragment key={rowKey}>
-      <div className={`product-timeline-row product-timeline-task${selected ? " is-inspected" : ""}${relatedIds.has(task.id) ? " is-related" : ""}`} data-task-id={task.id} data-group-key={groupKey}>
+    return <div key={rowKey} className="product-timeline-row product-timeline-task" data-task-id={task.id} data-group-key={groupKey}>
         <div className="product-timeline-work">
           <button type="button" className="product-timeline-task-title" onClick={() => onOpenTask(task)}>{task.title}</button>
           <span className="product-timeline-task-assignees">
@@ -93,22 +91,17 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, viewInter
             {context.blocked && <span className="product-timeline-warning">Blocked</span>}
             {context.waiting && <span className="product-timeline-warning">Waiting on prerequisite</span>}
             {context.overdue && <span className="product-timeline-warning">Overdue</span>}
-            {context.hasHandoffs && <button type="button" className="product-timeline-inspect" aria-expanded={selected} aria-label={`Inspect handoffs for ${task.title}`} onClick={() => setInspectedId(selected ? null : task.id )}>Handoffs</button>}
+            {context.hasHandoffs && <button type="button" className="product-timeline-inspect" aria-haspopup="dialog" aria-label={`Inspect handoffs for ${task.title}`} onClick={() => setInspectedId(task.id)}>Handoffs</button>}
           </div>
         </div>
         <div className="product-timeline-track">
           {span ? <button type="button" data-tutorial-target="timeline-task-bar" className={`product-timeline-bar${task.status === "complete" ? " is-complete" : ""}${span.spillsLeft ? " spills-left" : ""}${span.spillsRight ? " spills-right" : ""}`} style={{ left: `${span.start / days.length * 100}%`, width: `${span.span / days.length * 100}%` }} onClick={() => onOpenTask(task)} aria-label={`Open ${task.title}, ${task.startDate} to ${task.dueDate}`} title={`${task.title}: ${task.startDate} to ${task.dueDate}`} /> : null}
         </div>
-      </div>
-      {selected && inspection && <div className="product-timeline-inspection" aria-label={`Handoffs for ${task.title}`}>
-        {inspection.blockers.length > 0 && <div><strong>Recorded blockers</strong><ul>{inspection.blockers.map((risk) => <li key={risk.id}>{risk.title}</li>)}</ul></div>}
-        {task.isBlocked && !inspection.blockers.length && <p>Recorded as blocked. Open task details for context.</p>}
-        {([ ["Prerequisites", inspection.incoming], ["Downstream work", inspection.downstream] ] as const).map(([label, items]) => <div key={label}><strong>{label}</strong>{items.length ? <ul>{items.map((item) => <li key={item.id}>{item.task ? <button type="button" className="product-timeline-related-title" onClick={() => onOpenTask(item.task!)}>{item.label}</button> : <span>{item.label}</span>}<span className="product-timeline-relationship">{item.state}</span></li>)}</ul> : <p>None recorded.</p>}</div>)}
-      </div>}
-    </React.Fragment>;
+      </div>;
   };
 
-  return <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
+  return <>
+    <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
     <div className={`product-timeline-grid${viewInterval === "all" ? " is-project-span" : ""}`} style={style}>
       <div className="product-timeline-row product-timeline-header">
         <div ref={workHeaderRef} className="product-timeline-work">Work</div>
@@ -133,5 +126,19 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, viewInter
       }) : <p className="product-timeline-empty">No tasks match this schedule.</p>}
       </ProductTimelineDependencies>
     </div>
-  </div>;
+    </div>
+    {inspectionTask && inspection && <ModalDialog label={`Handoffs for ${inspectionTask.title}`} onClose={() => setInspectedId(null)} dismissOnBackdrop>
+      <section className="modal-card product-timeline-handoffs-modal">
+        <div className="panel-header compact-header roster-modal-header">
+          <h3>Handoffs for {inspectionTask.title}</h3>
+          <button type="button" className="secondary-action" aria-label="Close handoffs" onClick={() => setInspectedId(null)}>Close</button>
+        </div>
+        <div className="product-timeline-handoffs-body">
+          {inspection.blockers.length > 0 && <div><strong>Recorded blockers</strong><ul>{inspection.blockers.map((risk) => <li key={risk.id}>{risk.title}</li>)}</ul></div>}
+          {inspectionTask.isBlocked && !inspection.blockers.length && <p>Recorded as blocked. Open task details for context.</p>}
+          {([ ["Prerequisites", inspection.incoming], ["Downstream work", inspection.downstream] ] as const).map(([label, items]) => <div key={label}><strong>{label}</strong>{items.length ? <ul>{items.map((item) => <li key={item.id}>{item.task ? <button type="button" className="product-timeline-related-title" onClick={() => { setInspectedId(null); onOpenTask(item.task!); }}>{item.label}</button> : <span>{item.label}</span>}<span className="product-timeline-relationship">{item.state}</span></li>)}</ul> : <p>None recorded.</p>}</div>)}
+        </div>
+      </section>
+    </ModalDialog>}
+  </>;
 }

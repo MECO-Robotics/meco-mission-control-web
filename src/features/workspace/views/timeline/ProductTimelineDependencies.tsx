@@ -61,7 +61,7 @@ export function ProductTimelineDependencies({ dependencies, children }: ProductT
     schedule();
     const observer = new ResizeObserver(schedule);
     observer.observe(wrapper);
-    wrapper.querySelectorAll(".product-timeline-row, .product-timeline-inspection").forEach((row) => observer.observe(row));
+    wrapper.querySelectorAll(".product-timeline-row").forEach((row) => observer.observe(row));
     return () => {
       observer.disconnect();
       cancelAnimationFrame(frame);
