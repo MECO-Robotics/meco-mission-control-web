@@ -174,3 +174,14 @@ it("renders the effective status tone and full dates on short blocked bars", () 
   expect(markup).toContain('--timeline-task-bar-text-color:var(--status-danger-text)');
   expect(markup).toContain('Blocked');
 });
+
+it("labels Sunday week starts while retaining daily agenda controls", () => {
+  const days = ["2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07"];
+  const markup = renderGrid({ days });
+  const headers = markup.match(/<button[^>]*class="product-timeline-day[^>]*>/g)!;
+  expect(headers).toHaveLength(4);
+  expect(headers.filter((header) => header.includes("is-week-start"))).toHaveLength(1);
+  expect(headers[1]).toContain('aria-label="Show agenda for 2026-04-05"');
+  expect(headers[1]).toContain("is-week-start");
+  expect(headers[2]).not.toContain("is-week-start");
+});
