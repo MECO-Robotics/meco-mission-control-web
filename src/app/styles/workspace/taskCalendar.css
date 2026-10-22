@@ -1,4 +1,5 @@
 .schedule-gantt-agenda {
+  position: relative;
   align-items: start;
   display: grid;
   gap: 0.5rem;
@@ -138,13 +139,13 @@ button.task-calendar-day-details-title:hover {
 }
 
 @media (max-width: 767px) {
-  .timeline-toolbar > .schedule-view-menu {
-    order: -1;
-  }
-
   .schedule-gantt-agenda,
   .schedule-gantt-agenda[data-agenda-visible="false"] {
     grid-template-columns: minmax(0, 1fr);
   }
 
 }
+
+.schedule-agenda-toggle.is-floating { position: absolute; inset-inline-end: 0; top: 50%; transform: translateY(-50%); z-index: 7; min-width: 2.75rem; background: var(--bg-panel); border: 1px solid var(--border-base); border-radius: 0.5rem 0 0 0.5rem; }
+.modal-scrim.schedule-agenda-drawer { padding: 0; place-items: stretch end; }
+.modal-card.schedule-agenda-modal { width: min(24rem, calc(100vw - 2.5rem)); height: 100%; max-height: 100dvh; box-sizing: border-box; border-radius: 0; overflow-y: auto; }

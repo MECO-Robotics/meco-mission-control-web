@@ -87,7 +87,7 @@ Schedule organizes dated work by project, then responsible team by default. The 
 
 Week and Month are the only Gantt date ranges and show calendar days. Month opens fitted to the available width. The shared topbar zoom controls adjust the timeline from 100% to 400%; changing periods, switching ranges or choosing Today resets zoom to 100%. Today returns to the current week or month while preserving the selected range. Date headers label week starts (Sunday); hovering or keyboard-focusing another date reveals its day number. Hovering the timeline highlights the day column and task row as a crosshair; scrolling or leaving clears the day highlight. Date headers focus that day's Agenda rather than creating records. All creation actions remain in the shared plus menu.
 
-Milestones occupy a compact lane above work, opening the same milestone detail/editor as Agenda and deep links. Agenda uses compact date-grouped rows with bounded desktop scrolling and sits to the right when shown. A desktop arrow between the timeline and Agenda collapses or expands it; View's Agenda checkbox shares the same visibility state. Collapsing Agenda gives its width to the timeline while retaining the expand arrow. Selecting a date reopens Agenda. Phones keep the timeline visible with horizontal scrolling; selecting a date or choosing Open agenda in View opens Agenda in a modal. Filtering by person or responsible team retains project/area structure. No automatic rescheduling, inferred capacity, or predictive readiness percentage is supplied.
+Milestones occupy a compact lane above work, opening the same milestone detail/editor as Agenda and deep links. Agenda uses compact date-grouped rows with bounded desktop scrolling and sits to the right when shown. A desktop arrow between the timeline and Agenda collapses or expands it; The topbar has no Legend or View control. Collapsing Agenda gives its width to the timeline while retaining the expand arrow. Selecting a date reopens Agenda. Phones keep the timeline visible with horizontal scrolling; selecting a date or using the floating arrow at the chart’s right edge opens Agenda in a modal drawer anchored to the right. Filtering by person or responsible team retains project/area structure. No automatic rescheduling, inferred capacity, or predictive readiness percentage is supplied.
 
 ## Implementation Guardrails
 
@@ -163,7 +163,6 @@ unmet hard prerequisites. Overdue labels count local calendar days past due
 without replacing status color. Collapsed groups show a clickable summary bar aligned to their visible date
 range, with task count and completion percentage over a proportional completion
 fill. The tooltip and accessible description include completion, blocked and
-overdue counts plus the full date range. Clicking expands the lane. A shared-topbar legend
-explains the colors. Current agenda, milestone lane, team/subsystem grouping,
+overdue counts plus the full date range. Clicking expands the lane. Status colors pair with the task’s status glyph. Current agenda, milestone lane, team/subsystem grouping,
 assignee summaries, dependency arrows and handoff modal remain authoritative.
 No API/schema migration or reseed is required.

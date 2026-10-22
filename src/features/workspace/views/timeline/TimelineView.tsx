@@ -89,8 +89,6 @@ export function TimelineView({
             onShiftPeriod={(direction) => navigate(() => navigation.handleShiftPeriod(direction))}
             onToday={() => navigate(navigation.handleToday)}
             timelinePeriodLabel={data.timelinePeriodLabel} timelineZoom={state.timelineZoom} viewInterval={state.viewInterval}
-            showAgenda={showAgenda} onShowAgendaChange={setShowAgenda}
-            isPhone={isPhone} onOpenAgenda={() => setMobileAgendaOpen(true)}
           />
           <WorkspaceTopbarAddMenu actions={buildTopbarAddMenuActions(
             makeAddMenuAction("Add meeting", () => window.dispatchEvent(new Event("mission-control:open-meeting")), <IconCalendar />),
@@ -104,13 +102,13 @@ export function TimelineView({
           zoom={state.timelineZoom} selectedDate={selectedDate} onSelectDate={selectDate} onOpenTask={openTaskDetailModal}
           isAllProjectsView={isAllProjectsView}
           milestoneLane={<TimelineMilestoneLane days={data.days} milestones={data.milestones} onOpenMilestone={(id) => agendaRef.current?.openMilestone(id)} />} />
-        {!isPhone && <button
-          aria-controls={agendaId} aria-expanded={showAgenda} aria-label={showAgenda ? "Collapse agenda" : "Expand agenda"}
-          className="icon-button schedule-agenda-toggle" onClick={() => setShowAgenda((visible) => !visible)}
-          title={showAgenda ? "Collapse agenda" : "Expand agenda"} type="button"
+        <button
+          aria-controls={agendaId} aria-expanded={isPhone ? mobileAgendaOpen : showAgenda} aria-haspopup={isPhone ? "dialog" : undefined} aria-label={isPhone ? "Open agenda" : showAgenda ? "Collapse agenda" : "Expand agenda"}
+          className={`icon-button schedule-agenda-toggle${isPhone ? " is-floating" : ""}`} onClick={() => isPhone ? setMobileAgendaOpen(true) : setShowAgenda((visible) => !visible)}
+          title={isPhone ? "Open agenda" : showAgenda ? "Collapse agenda" : "Expand agenda"} type="button"
         >
-          {showAgenda ? <IconChevronRight /> : <IconChevronLeft />}
-        </button>}
+          {!isPhone && showAgenda ? <IconChevronRight /> : <IconChevronLeft />}
+        </button>
         <ScheduleAgendaPanel id={agendaId} ref={agendaRef} bootstrap={bootstrap} isAllProjectsView={isAllProjectsView}
           presentation={isPhone ? "modal" : "inline"} isVisible={isPhone ? mobileAgendaOpen : showAgenda} onClose={() => setMobileAgendaOpen(false)}
           startDate={data.days[0] ?? state.viewAnchorDate} endDate={data.days.at(-1) ?? null} events={data.agendaEvents}

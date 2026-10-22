@@ -19,7 +19,7 @@ function findElement<P>(node: unknown, type: unknown): React.ReactElement<P> {
   throw new Error("Expected Schedule element was missing");
 }
 
-it("keeps Gantt available, opens phone Agenda for dates and View, and preserves desktop visibility across resize", () => {
+it("keeps Gantt available, opens phone Agenda for dates and the floating arrow, and preserves desktop visibility across resize", () => {
   const previousWindow = globalThis.window;
   let onResize: (() => void) | undefined;
   const media = { matches: true, addEventListener: jest.fn((_name, callback) => { onResize = callback; }), removeEventListener: jest.fn() };
@@ -52,9 +52,10 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
       toolbar: findElement<React.ComponentProps<typeof TimelineToolbar>>(view, TimelineToolbar).props,
     };
   };
+  const toggle = () => findElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(render().view, "button").props;
   try {
     expect(render().agenda).toMatchObject({ presentation: "modal", isVisible: false });
-    expect(() => findElement(render().view, "button")).toThrow();
+    expect(toggle()).toMatchObject({ "aria-label": "Open agenda", "aria-haspopup": "dialog" });
     expect(render().toolbar.groupBy).toBe("team");
     expect(render().grid.groupBy).toBe("team");
     const tasks = render().grid.tasks;
@@ -66,27 +67,24 @@ it("keeps Gantt available, opens phone Agenda for dates and View, and preserves 
     expect(render().agenda).toMatchObject({ presentation: "modal", isVisible: true, selectedDate: "2026-04-30" });
     render().agenda.onClose!();
     expect(render().agenda.isVisible).toBe(false);
-    render().toolbar.onOpenAgenda();
+    toggle().onClick!({} as React.MouseEvent<HTMLButtonElement>);
     expect(render().agenda.isVisible).toBe(true);
     media.matches = false;
     onResize!();
     expect(render().agenda).toMatchObject({ presentation: "inline", isVisible: true });
-    const toggle = () => findElement<React.ButtonHTMLAttributes<HTMLButtonElement>>(render().view, "button").props;
     expect(toggle()).toMatchObject({ "aria-label": "Collapse agenda", "aria-controls": render().agenda.id, "aria-expanded": true });
     toggle().onClick!({} as React.MouseEvent<HTMLButtonElement>);
     expect(render().agenda.isVisible).toBe(false);
-    expect(render().toolbar.showAgenda).toBe(false);
     expect(toggle()).toMatchObject({ "aria-label": "Expand agenda", "aria-expanded": false });
     toggle().onClick!({} as React.MouseEvent<HTMLButtonElement>);
     expect(render().agenda.isVisible).toBe(true);
-    expect(render().toolbar.showAgenda).toBe(true);
-    render().toolbar.onShowAgendaChange(false);
+    toggle().onClick!({} as React.MouseEvent<HTMLButtonElement>);
     expect(render().agenda.isVisible).toBe(false);
     expect(toggle()["aria-expanded"]).toBe(false);
     media.matches = true;
     onResize!();
     expect(render().agenda).toMatchObject({ presentation: "modal", isVisible: false });
-    expect(() => findElement(render().view, "button")).toThrow();
+    expect(toggle()).toMatchObject({ "aria-label": "Open agenda", "aria-haspopup": "dialog" });
     media.matches = false;
     onResize!();
     expect(render().agenda).toMatchObject({ presentation: "inline", isVisible: false });

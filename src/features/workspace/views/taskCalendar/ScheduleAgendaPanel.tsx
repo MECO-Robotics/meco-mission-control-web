@@ -243,7 +243,7 @@ export const ScheduleAgendaPanel = forwardRef<ScheduleAgendaHandle, ScheduleAgen
   return (
     <>
       {presentation === "modal" ? isVisible && (
-        <ModalDialog label="Schedule agenda" onClose={onClose} dismissOnBackdrop>
+        <ModalDialog label="Schedule agenda" onClose={onClose} dismissOnBackdrop className="modal-scrim schedule-agenda-drawer">
           <section className="modal-card schedule-agenda-modal">
             <div className="panel-header compact-header roster-modal-header">
               <h3>Agenda</h3>
