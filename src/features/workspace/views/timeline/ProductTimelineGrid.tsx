@@ -6,7 +6,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronRight } from "@/components/shared/Icons";
 import { ModalDialog } from "@/components/ModalDialog";
 import { localTodayDate } from "@/lib/dateUtils";
-import { endOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { endOfTimelineWeek, startOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 import { TaskAssigneeSummary } from "@/features/workspace/shared/task/TaskAssigneeSummary";
 import { TeamIcon } from "@/features/workspace/shared/team/TeamIcon";
@@ -33,6 +33,8 @@ interface ProductTimelineGridProps {
 
 export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1, selectedDate, onSelectDate, onOpenTask, milestoneLane, isAllProjectsView }: ProductTimelineGridProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
+  const datesRef = useRef<HTMLDivElement | null>(null);
+  const [hoveredDay, setHoveredDay] = useState<string | null>(null);
   const workHeaderRef = useRef<HTMLDivElement | null>(null);
   const shellWidth = useTimelineShellSizing(shellRef);
   const workWidth = useTimelineShellSizing(workHeaderRef);
@@ -56,7 +58,7 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   const dateLabel = (day: string, options: Intl.DateTimeFormatOptions) => new Date(`${day}T12:00:00`).toLocaleDateString(undefined, options);
 
   const summary = (name: string, records: TaskRecord[], id: string, project = false) => (
-    <div className={`product-timeline-row product-timeline-summary${project ? " is-project" : ""}`} key={id}>
+    <div className={`product-timeline-row product-timeline-summary${project ? " is-project" : ""}${collapsed.has(id) ? " is-collapsed" : ""}`} key={id}>
       <div className="product-timeline-work">
         <button type="button" className="product-timeline-collapse" aria-expanded={!collapsed.has(id)} onClick={() => toggle(id)}>
           <IconChevronRight /><span>{name}</span>
@@ -101,19 +103,26 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   };
 
   return <>
-    <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}>
+    <div ref={shellRef} className="product-timeline-shell" data-tutorial-target="timeline-grid" role="region" aria-label="Product timeline" tabIndex={0}
+      onPointerMove={(event) => {
+        const dates = datesRef.current?.getBoundingClientRect();
+        const overTrack = event.target instanceof Element && event.target.closest(".product-timeline-dates, .product-timeline-track, .schedule-milestone-track");
+        const index = dates && dates.width > 0 ? Math.floor((event.clientX - dates.left) / dates.width * days.length) : -1;
+        setHoveredDay(event.pointerType !== "touch" && overTrack && index >= 0 && index < days.length ? days[index] : null);
+      }}
+      onPointerLeave={() => setHoveredDay(null)} onPointerCancel={() => setHoveredDay(null)} onScroll={() => setHoveredDay(null)}>
     <div className="product-timeline-grid" style={style}>
       {milestoneLane && <div className="product-timeline-milestone-lane">{milestoneLane}</div>}
       <div className="product-timeline-row product-timeline-header">
         <div ref={workHeaderRef} className="product-timeline-work">Work</div>
-        <div className="product-timeline-dates">
-          {days.map((day) => <button type="button" key={day} className={`product-timeline-day${day === today ? " is-today" : ""}${day === selectedDate ? " is-selected" : ""}${weekEnds.has(day) ? " is-week-end" : ""}`} aria-label={`Show agenda for ${day}`} aria-pressed={day === selectedDate} title={dateLabel(day, { dateStyle: "full" })} onClick={() => onSelectDate(day)}>
+        <div ref={datesRef} className="product-timeline-dates">
+          {days.map((day) => <button type="button" key={day} className={`product-timeline-day${day === today ? " is-today" : ""}${day === selectedDate ? " is-selected" : ""}${weekEnds.has(day) ? " is-week-end" : ""}${day === startOfTimelineWeek(day) ? " is-week-start" : ""}${day === hoveredDay ? " is-hovered" : ""}`} aria-label={`Show agenda for ${day}`} aria-pressed={day === selectedDate} title={dateLabel(day, { dateStyle: "full" })} onClick={() => onSelectDate(day)}>
             <span>{dateLabel(day, { weekday: "narrow" })}</span><span>{day.slice(8)}</span>
           </button>)}
         </div>
       </div>
       <ProductTimelineDependencies dependencies={getProductTimelineTaskLinks(bootstrap)}>
-      {projects.length > 0 && <div className="product-timeline-day-grid" aria-hidden="true">{days.map((day) => <span key={day} className={weekEnds.has(day) ? "is-week-end" : undefined} />)}</div>}
+      {projects.length > 0 && <div className="product-timeline-day-grid" aria-hidden="true">{days.map((day) => <span key={day} className={[weekEnds.has(day) ? "is-week-end" : "", day === hoveredDay ? "is-hovered" : ""].filter(Boolean).join(" ") || undefined} />)}</div>}
       {projects.length ? projects.map((project) => {
         const projectKey = `project:${project.id}`;
         const projectTasks = Array.from(new Map(project.groups.flatMap((group) => group.tasks).map((task) => [task.id, task])).values());
