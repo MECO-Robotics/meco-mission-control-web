@@ -160,8 +160,10 @@ Bars use semantic status colors with task titles, status glyphs and team icons
 inside each bar. Narrow charts have no left column; wider charts reveal the sticky
 task-metadata column automatically, without a view toggle. Complete overrides stale blockers; otherwise open blockers precede
 unmet hard prerequisites. Overdue labels count local calendar days past due
-without replacing status color. Collapsed groups retain one neutral, clickable
-Group span with completion, blocked and overdue counts. A shared-topbar legend
+without replacing status color. Collapsed groups show a clickable summary bar aligned to their visible date
+range, with task count and completion percentage over a proportional completion
+fill. The tooltip and accessible description include completion, blocked and
+overdue counts plus the full date range. Clicking expands the lane. A shared-topbar legend
 explains the colors. Current agenda, milestone lane, team/subsystem grouping,
 assignee summaries, dependency arrows and handoff modal remain authoritative.
 No API/schema migration or reseed is required.
