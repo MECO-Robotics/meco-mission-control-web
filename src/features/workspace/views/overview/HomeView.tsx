@@ -6,7 +6,7 @@ import { buildAttentionQueue, type AttentionQueueRow } from "../attention/attent
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { HomeYourTasks } from "./HomeYourTasks";
-import { buildHomeYourTasks } from "./homeYourTasksModel";
+import { buildHomeUnassignedTasks, buildHomeYourTasks } from "./homeYourTasksModel";
 import { HomeWorkChart } from "./HomeWorkChart";
 import { HomeTaskStatusDistribution } from "./HomeTaskStatusDistribution";
 import { HomeDeadlineChart } from "./HomeDeadlineChart";
@@ -41,6 +41,7 @@ export function HomeView({ activePersonFilter = [], bootstrap, onOpenActionItem,
   const model = useMemo(() => buildHomeViewModel({ activePersonFilter, bootstrap, projectId, search }),
     [activePersonFilter, bootstrap, projectId, search]);
   const yourTasks = buildHomeYourTasks(model.tasks, signedInMemberId);
+  const unassignedTasks = buildHomeUnassignedTasks(model.tasks);
   const workItems = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
     const scopedTaskIds = new Set(model.tasks.map(task => task.id));
@@ -59,7 +60,7 @@ export function HomeView({ activePersonFilter = [], bootstrap, onOpenActionItem,
       compactPlaceholder="Search" value={search} onChange={value => { close(); setSearch(value); }} />
 
     <div className="home-dashboard-layout">
-      <HomeYourTasks tasks={yourTasks} signedInMemberId={signedInMemberId} onOpenTask={onOpenTask} />
+      <HomeYourTasks tasks={yourTasks} unassignedTasks={unassignedTasks} signedInMemberId={signedInMemberId} onOpenTask={onOpenTask} />
       <div className="home-dashboard-charts">
         <div className="home-dashboard-lead-grid">
           <HomeWorkChart groupBy={workGroup} onGroupChange={group => { close(); setWorkGroup(group); }} model={workload}
