@@ -1,6 +1,5 @@
-import { TimelineStatusLegend } from "./components/TimelineStatusLegend";
 import React from "react";
-import { ArrowDownUp, Settings2 } from "lucide-react";
+import { ArrowDownUp } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
@@ -45,10 +44,6 @@ interface TimelineToolbarProps {
   timelinePeriodLabel: string;
   timelineZoom: number;
   viewInterval: TimelineViewInterval;
-  showAgenda: boolean;
-  onShowAgendaChange: (value: boolean) => void;
-  isPhone: boolean;
-  onOpenAgenda: () => void;
 }
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
@@ -82,10 +77,6 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   timelinePeriodLabel,
   timelineZoom,
   viewInterval,
-  showAgenda,
-  onShowAgendaChange,
-  isPhone,
-  onOpenAgenda,
 }) => (
   <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
     <TopbarResponsiveSearch
@@ -162,23 +153,6 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       toolbarClassName="workspace-topbar-zoom-slot-actions"
       value={formatTimelineZoomLabel(timelineZoom)}
     />
-    <TimelineStatusLegend />
-    <CompactFilterMenu
-      className="schedule-view-menu"
-      ariaLabel="Schedule view options"
-      buttonLabel="View"
-      icon={<Settings2 size={14} />}
-      items={[
-        {
-          label: "Agenda",
-          content: isPhone ? <button className="secondary-action" onClick={onOpenAgenda} type="button">Open agenda</button> : (
-            <label className="schedule-desktop-view-option">
-              <input checked={showAgenda} onChange={(event) => onShowAgendaChange(event.target.checked)} type="checkbox" />
-              Show beside timeline
-            </label>
-          ),
-        },
-      ]}
-    />
+
   </div>
 );

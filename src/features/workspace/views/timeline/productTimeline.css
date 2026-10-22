@@ -83,13 +83,6 @@
 }
 .product-timeline-bar.is-complete { background: var(--status-success-bg); }
 .product-timeline-summary-span { color: var(--status-neutral-text); font: inherit; font-size: 0.65rem; padding: 0 4px; overflow: hidden; white-space: nowrap; cursor: pointer; }
-.workspace-popover { display: inline-flex; min-width: 0; }
-.workspace-popover > button { display: inline-flex; gap: 4px; align-items: center; }
-.workspace-popover-panel { padding: 12px; width: 300px; font-size: 0.8rem; color: var(--text-copy); }
-.timeline-legend-list { list-style: none; padding: 0; margin: 8px 0 0; }
-.timeline-legend-list li { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-.timeline-legend-list .timeline-task-status-logo { position: static; transform: none; flex: 0 0 18px; width: 18px; height: 18px; }
-.timeline-legend-list .timeline-task-overdue { color: var(--status-danger-text); }
 
 @container (max-width: 720px) {
   .product-timeline-grid { --schedule-work-width: 0px; }
