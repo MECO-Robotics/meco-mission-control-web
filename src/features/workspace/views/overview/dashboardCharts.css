@@ -7,6 +7,7 @@
 .home-your-tasks .home-your-task-button { display: grid; gap: 0.25rem; padding: 0.6rem 0.75rem; border: 1px solid var(--border-base); border-radius: 6px; background: var(--bg-panel); text-align: left; overflow-wrap: anywhere; }
 .home-your-tasks .workspace-record-list > :nth-child(2n of li) > .home-your-task-button { background: var(--bg-row-stripe); }
 .home-your-tasks .home-your-task-button:is(:hover, :focus-visible) { border-color: var(--border-strong); }
+.home-unassigned-tasks { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border-base); }
 .home-your-task-button strong { color: var(--text-title); font-size: 0.82rem; }
 .home-your-task-meta, .home-your-task-date { color: var(--text-copy); font-size: 0.75rem; }
 
