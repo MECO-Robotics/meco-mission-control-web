@@ -108,3 +108,7 @@
   .product-timeline-task:hover { --schedule-row-background: var(--meco-soft-blue); }
 }
 .product-timeline-task:focus-within { --schedule-row-background: var(--meco-soft-blue); }
+
+.product-timeline-summary-span::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--schedule-completion); background: var(--status-success-bg); pointer-events: none; }
+.product-timeline-summary-label { position: relative; display: block; overflow: hidden; text-overflow: ellipsis; }
+.product-timeline-summary-span:hover { border-color: var(--text-link); }

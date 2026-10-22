@@ -57,13 +57,19 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
   });
   const dateLabel = (day: string, options: Intl.DateTimeFormatOptions) => new Date(`${day}T12:00:00`).toLocaleDateString(undefined, options);
 
-  const summary = (name: string, records: TaskRecord[], id: string, project = false) => (
+  const summary = (name: string, records: TaskRecord[], id: string, project = false) => {
+    const complete = records.filter((task) => task.status === "complete").length;
+    const blocked = records.filter((task) => contexts[task.id].blocked).length;
+    const overdue = records.filter((task) => contexts[task.id].overdue).length;
+    const progress = records.length ? Math.round(complete / records.length * 100) : 0;
+    const details = `${complete} of ${records.length} tasks complete · ${blocked} blocked · ${overdue} overdue`;
+    return (
     <div className={`product-timeline-row product-timeline-summary${project ? " is-project" : ""}${collapsed.has(id) ? " is-collapsed" : ""}`} key={id}>
       <div className="product-timeline-work">
         <button type="button" className="product-timeline-collapse" aria-expanded={!collapsed.has(id)} onClick={() => toggle(id)}>
           <IconChevronRight /><span>{name}</span>
         </button>
-        <span className="product-timeline-count">{records.filter((task) => task.status === "complete").length} of {records.length} tasks complete · {records.filter((task) => contexts[task.id].blocked).length} blocked · {records.filter((task) => contexts[task.id].overdue).length} overdue</span>
+        <span className="product-timeline-count">{details}</span>
       </div>
       <div className="product-timeline-track">
         {collapsed.has(id) && (() => {
@@ -71,11 +77,13 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
           if (!spans.length) return null;
           const start = Math.min(...spans.map((span) => span.start));
           const end = Math.max(...spans.map((span) => span.start + span.span));
-          return <button type="button" aria-label={`Expand ${name}`} onClick={() => toggle(id)} className="product-timeline-summary-span" style={{ left: `${start / days.length * 100}%`, width: `${(end - start) / days.length * 100}%` }}>Group span</button>;
+          const dates = `${records.reduce((first, task) => task.startDate < first ? task.startDate : first, records[0].startDate)} – ${records.reduce((last, task) => task.dueDate > last ? task.dueDate : last, records[0].dueDate)}`;
+          return <button type="button" aria-label={`Expand ${name}`} aria-description={`${details} · ${dates}`} title={`${name} · ${details} · ${dates}`} onClick={() => toggle(id)} className="product-timeline-summary-span" style={{ "--schedule-completion": `${progress}%`, left: `${start / days.length * 100}%`, width: `${(end - start) / days.length * 100}%` } as CSSProperties}><span className="product-timeline-summary-label">{records.length} {records.length === 1 ? "task" : "tasks"} · {progress}% complete</span></button>;
         })()}
       </div>
     </div>
   );
+  };
 
   const renderTask = (task: TaskRecord, groupKey: string) => {
     const context = contexts[task.id];
