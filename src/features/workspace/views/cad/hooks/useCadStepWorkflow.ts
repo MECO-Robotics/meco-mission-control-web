@@ -14,6 +14,7 @@ import {
   findLatestSuccessfulStepImportRun,
 } from "./cadStepWorkflowDerivations";
 import { useCadSnapshotDetails } from "./useCadSnapshotDetails";
+import { loadBundledMainAssembly } from "../viewer/loadBundledCadFile";
 import type {
   CadHierarchyReviewDecision,
   CadStepImportRunRecord,
@@ -38,7 +39,7 @@ export function useCadStepWorkflow({
   seasonId?: string | null;
 }) {
   const [stepFile, setStepFile] = useState<File | null>(null);
-  const [stepLabel, setStepLabel] = useState("Robot STEP iteration");
+  const [stepLabel, setStepLabel] = useState("MECO 2026 Main Assembly");
   const [cadSnapshots, setCadSnapshots] = useState<CadStepSnapshotRecord[]>([]);
   const [cadImportRuns, setCadImportRuns] = useState<CadStepImportRunRecord[]>([]);
   const [selectedCadSnapshotId, setSelectedCadSnapshotId] = useState("");
@@ -53,6 +54,21 @@ export function useCadStepWorkflow({
   const groupRepeatedInstancesRef = useRef(groupRepeatedInstances);
   const latestCadSnapshotScopeRef = useRef({ projectId, seasonId });
   latestCadSnapshotScopeRef.current = { projectId, seasonId };
+
+  useEffect(() => {
+    const isSeedRobotScope = projectId === "project-robot-2026" && (!seasonId || seasonId === "season-2026-meco");
+    if (!isSeedRobotScope) {
+      setStepFile(null);
+      return;
+    }
+    let isActive = true;
+    void loadBundledMainAssembly().then((file) => {
+      if (isActive) setStepFile((current) => current ?? file);
+    }).catch((error: unknown) => {
+      if (isActive) setMessage(error instanceof Error ? error.message : String(error));
+    });
+    return () => { isActive = false; };
+  }, [projectId, seasonId]);
 
   const selectCadSnapshot = useCallback((snapshotId: string) => {
     selectedCadSnapshotIdRef.current = snapshotId;

@@ -20,7 +20,8 @@ export function loadCadGeometry(file: File, signal: AbortSignal): Promise<CadMes
     const cleanup = () => { clearTimeout(timeout); worker.terminate(); signal.removeEventListener("abort", abort); };
     const fail = (error: Error) => { cleanup(); reject(error); };
     const abort = () => fail(new DOMException("Canceled", "AbortError"));
-    const timeout = setTimeout(() => fail(new Error("Preparing the geometry took too long. Try exporting a smaller assembly.")), 120_000);
+    const timeoutMs = file.size >= 40 * 1024 * 1024 ? 300_000 : 120_000;
+    const timeout = setTimeout(() => fail(new Error("Preparing the geometry took too long. Try exporting a smaller assembly.")), timeoutMs);
     signal.addEventListener("abort", abort, { once: true });
     worker.onerror = () => fail(new Error("The geometry reader could not start. Reload the page and try again."));
     worker.onmessage = (event: MessageEvent<CadGeometryResult>) => {

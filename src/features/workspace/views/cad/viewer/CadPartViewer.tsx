@@ -5,6 +5,7 @@ import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspa
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
 import type { CadMesh } from "./cadGeometry";
+import { loadBundledMainAssembly } from "./loadBundledCadFile";
 import "./cadPartViewer.css";
 
 const CadPartScene = lazy(() => import("./CadPartScene"));
@@ -81,20 +82,40 @@ export function CadPartViewer({
 export function CadFileViewer({
   importPlacement = "inline",
   embeddedInMap = false,
+  loadSeedMainAssembly = false,
   onOpenCadWorkspace,
   additionalTopbarActions = [],
   onOrbitingChange,
   ...imageTargets
 }: {
   embeddedInMap?: boolean;
+  loadSeedMainAssembly?: boolean;
   importPlacement?: "inline" | "topbar";
   onOpenCadWorkspace?: () => void;
   additionalTopbarActions?: TopbarAddMenuAction[];
   onOrbitingChange?: (isOrbiting: boolean) => void;
 } & CadPartImageTargets) {
   const [file, setFile] = useState<File | null>(null);
+  const [seedLoadMessage, setSeedLoadMessage] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!loadSeedMainAssembly) {
+      setFile(null);
+      setSeedLoadMessage(null);
+      return;
+    }
+    let isActive = true;
+    setSeedLoadMessage("Loading the 2026 robot assembly…");
+    void loadBundledMainAssembly().then((seededFile) => {
+      if (!isActive) return;
+      setFile((current) => current ?? seededFile);
+      setSeedLoadMessage(null);
+    }).catch((error: unknown) => {
+      if (isActive) setSeedLoadMessage(error instanceof Error ? error.message : String(error));
+    });
+    return () => { isActive = false; };
+  }, [loadSeedMainAssembly]);
   return <div className={`cad-local-viewer${embeddedInMap ? " cad-local-viewer-embedded" : ""}`}>
     {!embeddedInMap ? <TopbarResponsiveSearch ariaLabel="Search CAD parts" onChange={setSearch} placeholder="Search CAD parts…" value={search} /> : null}
     {importPlacement === "topbar" ? (
@@ -124,6 +145,7 @@ export function CadFileViewer({
         <input type="file" accept=".step,.stp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </label>
     )}
+    {seedLoadMessage ? <p role={file ? "alert" : "status"}>{seedLoadMessage}</p> : null}
     <CadPartViewer file={file} search={search} onOrbitingChange={onOrbitingChange} {...imageTargets} />
   </div>;
 }
