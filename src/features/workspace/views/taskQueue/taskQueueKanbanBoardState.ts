@@ -21,6 +21,7 @@ export interface TaskQueueBoardColumn {
 }
 
 export const TASK_QUEUE_BOARD_COLUMNS: readonly TaskQueueBoardColumn[] = [
+  { state: "unrecorded", label: "Unrecorded" },
   { state: "not-started", label: "Not started" },
   { state: "in-progress", label: "In progress" },
   { state: "blocked", label: "Blocked" },
@@ -30,6 +31,7 @@ export const TASK_QUEUE_BOARD_COLUMNS: readonly TaskQueueBoardColumn[] = [
 ] as const;
 
 export const TASK_QUEUE_STATUS_OPTIONS: DropdownOption[] = [
+  { id: "unrecorded", name: "Unrecorded", icon: React.createElement(TimelineTaskStatusLogo, { compact: true, signal: "unrecorded", status: "unrecorded" }) },
   ...(["not-started", "in-progress", "waiting-for-qa", "complete"] as const).map((status) => ({
     id: status,
     name:
@@ -67,6 +69,7 @@ export const TASK_QUEUE_STATUS_OPTIONS: DropdownOption[] = [
 ] as const;
 
 const BOARD_STATE_SORT_VALUES: Record<TaskQueueBoardState, number> = {
+  unrecorded: 0,
   "not-started": 1,
   "in-progress": 2,
   blocked: 3,
@@ -96,6 +99,8 @@ export function getTaskQueueBoardState(
 
 export function formatTaskQueueBoardState(state: TaskQueueBoardState) {
   switch (state) {
+    case "unrecorded":
+      return "Unrecorded";
     case "not-started":
       return "Not started";
     case "in-progress":
@@ -118,6 +123,7 @@ export function groupTasksByBoardState(
   bootstrap: BootstrapPayload,
 ) {
   const grouped: Record<TaskQueueBoardState, TaskRecord[]> = {
+    unrecorded: [],
     "not-started": [],
     "in-progress": [],
     blocked: [],

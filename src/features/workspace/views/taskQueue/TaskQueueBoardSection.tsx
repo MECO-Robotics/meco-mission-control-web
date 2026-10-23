@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskStatus } from "@/types/common";
+import type { TaskWorkflowStatus } from "@/types/common";
 import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { KanbanScrollFrame } from "../kanban/KanbanScrollFrame";
@@ -24,7 +24,7 @@ interface TaskQueueBoardSectionProps {
   focusedBoardState: TaskQueueBoardState | null;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
-  onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
+  onReassignTaskStatus?: (task: TaskRecord, status: TaskWorkflowStatus) => void | Promise<void>;
   processedTasks: TaskRecord[];
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   setFocusedBoardState: Dispatch<SetStateAction<TaskQueueBoardState | null>>;

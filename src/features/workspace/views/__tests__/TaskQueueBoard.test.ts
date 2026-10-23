@@ -15,6 +15,7 @@ describe("Task Queue board", () => {
     bootstrap.workTypes.push({ id: "outreach:writing", projectType: "outreach", code: "writing", name: "Writing", isActive: true });
     bootstrap.workstreams.push({ id: "sponsor", projectId: "outreach", name: "Sponsor engagement", description: "", color: "#335577", isArchived: false });
     bootstrap.tasks.push(createTask(17, { projectId: "outreach", workTypeId: "outreach:writing", subsystemIds: [], workstreamIds: ["sponsor"] }));
+    bootstrap.tasks.push(createTask(18, { status: "unrecorded" }));
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueView, {
         activePersonFilter: [],
@@ -39,12 +40,13 @@ describe("Task Queue board", () => {
     expect(markup).toContain("workspace-topbar-zoom-slot-actions");
     expect(markup).toContain("task-queue-board-column-header-icon");
     expect(markup).toContain("timeline-task-status-logo-signal-not-started");
+    expect(markup).toContain("timeline-task-status-logo-signal-unrecorded");
     expect(markup).toContain("timeline-task-status-logo-signal-in-progress");
     expect(markup).toContain("timeline-task-status-logo-signal-waiting-for-qa");
     expect(markup).toContain("timeline-task-status-logo-signal-complete");
     expect(markup).toContain("timeline-task-status-logo-signal-blocked");
     expect(markup).toContain("timeline-task-status-logo-signal-waiting-on-dependency");
-    expect(markup.match(/class="task-queue-board-state-label"/g)).toHaveLength(6);
+    expect(markup.match(/class="task-queue-board-state-label"/g)).toHaveLength(7);
     expect(markup).toContain('aria-expanded="true" class="kanban-project-toggle"');
     expect(markup).toContain('>Robot</span></button></h3>');
     expect(markup).not.toContain("table-pagination");
@@ -63,7 +65,8 @@ describe("Task Queue board", () => {
     expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(1);
     expect(markup).toContain('data-board-state="waiting-on-dependency"');
     expect(markup.match(/data-board-state="waiting-on-dependency"/g)).toHaveLength(1);
-    expect(markup.match(/data-board-state=/g)).toHaveLength(17);
+    expect(markup.match(/data-board-state=/g)).toHaveLength(18);
+    expect(markup).toContain('data-board-state="unrecorded"');
     expect(markup).toContain("Task 16");
     expect(markup).toContain("Task 17");
     expect(markup).toContain('aria-label="Outreach"');

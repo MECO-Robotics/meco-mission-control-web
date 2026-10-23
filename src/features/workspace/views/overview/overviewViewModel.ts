@@ -12,6 +12,7 @@ export interface HomeViewModel {
 }
 
 export const HOME_TASK_STATUSES: readonly { id: TaskStatus; label: string; tone: string }[] = [
+  { id: "unrecorded", label: "Unrecorded", tone: "neutral" },
   { id: "not-started", label: "Not started", tone: "neutral" },
   { id: "in-progress", label: "In progress", tone: "info" },
   { id: "waiting-for-qa", label: "Waiting for QA", tone: "warning" },

@@ -2,6 +2,7 @@ import type { DropdownOption } from "./workspaceTypes";
 import type { TaskStatus } from "@/types/common";
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  unrecorded: "Unrecorded",
   "not-started": "Not started",
   "in-progress": "In progress",
   "waiting-for-qa": "QA",

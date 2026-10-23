@@ -82,6 +82,7 @@ export function getProductTimelineTaskContext(task: TaskRecord, bootstrap: Boots
   const waiting = getTaskWaitingOnDependencies(task.id, bootstrap);
   const signal = getTimelineTaskStatusSignal(task, bootstrap);
   const state = ({
+    unrecorded: "Unrecorded",
     "not-started": "Not started", "in-progress": "In progress", "waiting-for-qa": "Waiting for QA",
     complete: "Complete", blocked: "Blocked", "waiting-on-dependency": "Waiting on prerequisite",
   })[signal];

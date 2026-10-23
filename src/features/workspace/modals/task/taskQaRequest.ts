@@ -11,6 +11,7 @@ export function getTaskQaRequestBlockReason(
   const member = bootstrap.members.find((candidate) => candidate.id === memberId);
   if (!member || !(member.role === "student" || member.role === "lead")) return "Only assigned students and leads can request QA for this task.";
   if (task.status === "not-started") return "Start this task before requesting QA.";
+  if (task.status === "unrecorded") return "Record task progress before requesting QA.";
   if (task.status === "complete") return "Completed tasks cannot request QA.";
   if (task.isBlocked || task.isWaitingOnDependency) return "Resolve this task’s blocker before requesting QA.";
   const existing = bootstrap.qaRequests.find((request) =>

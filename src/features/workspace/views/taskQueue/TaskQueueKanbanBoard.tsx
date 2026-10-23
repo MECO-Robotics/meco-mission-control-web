@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskStatus } from "@/types/common";
+import type { TaskWorkflowStatus } from "@/types/common";
 import type { OpenEditTaskModalOptions, TaskEditIntentState } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 
@@ -27,6 +27,7 @@ const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
   { signal: TimelineTaskStatusSignal; status: TaskRecord["status"] }
 > = {
+  unrecorded: { signal: "unrecorded", status: "unrecorded" },
   "not-started": { signal: "not-started", status: "not-started" },
   "in-progress": { signal: "in-progress", status: "in-progress" },
   blocked: { signal: "blocked", status: "not-started" },
@@ -35,15 +36,15 @@ const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   complete: { signal: "complete", status: "complete" },
 };
 
-const TASK_QUEUE_DIRECT_STATUS_STATES: readonly TaskStatus[] = [
+const TASK_QUEUE_DIRECT_STATUS_STATES: readonly TaskWorkflowStatus[] = [
   "not-started",
   "in-progress",
   "waiting-for-qa",
   "complete",
 ];
 
-function isTaskQueueDirectStatusState(state: TaskQueueBoardState): state is TaskStatus {
-  return TASK_QUEUE_DIRECT_STATUS_STATES.includes(state as TaskStatus);
+function isTaskQueueDirectStatusState(state: TaskQueueBoardState): state is TaskWorkflowStatus {
+  return TASK_QUEUE_DIRECT_STATUS_STATES.includes(state as TaskWorkflowStatus);
 }
 
 function isTaskQueueEditIntentState(state: TaskQueueBoardState): state is TaskEditIntentState {
@@ -62,7 +63,7 @@ interface TaskQueueKanbanBoardProps {
   focusedState: TaskQueueBoardState | null;
   onClearFocus: () => void;
   onFocusState: (state: TaskQueueBoardState) => void;
-  onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
+  onReassignTaskStatus?: (task: TaskRecord, status: TaskWorkflowStatus) => void | Promise<void>;
 }
 
 export function TaskQueueKanbanBoard({
@@ -140,7 +141,7 @@ export function TaskQueueKanbanBoard({
     setPendingTaskStatusDropIds(nextPendingIds);
   };
 
-  const runTaskStatusDrop = async (task: TaskRecord, state: TaskStatus) => {
+  const runTaskStatusDrop = async (task: TaskRecord, state: TaskWorkflowStatus) => {
     if (!onReassignTaskStatus || pendingTaskStatusDropIdsRef.current.has(task.id)) {
       return;
     }
@@ -218,6 +219,7 @@ export function TaskQueueKanbanBoard({
       boardClassName="task-queue-board"
       canDragItem={(task) => !pendingTaskStatusDropIds.has(task.id)}
       canDropItem={(task, state, sourceState) => {
+        if (state === "unrecorded") return false;
         if (pendingTaskStatusDropIds.has(task.id)) {
           return false;
         }

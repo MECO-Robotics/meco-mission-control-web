@@ -1,6 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { SubsystemRecord } from "@/types/recordsOrganization";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
+import { formatTaskStatusLabel } from "@/features/workspace/shared/model/workspaceOptions";
 
 import { resolveCadSourceIndicator, type CadSourceIndicatorModel } from "./cadSourceIndicator";
 import { resolveSubsystemLayout } from "./robotMapLayout";
@@ -179,7 +180,7 @@ export function buildRobotConfigurationViewModel(
         .map<RobotConfigurationDrilldownLinkModel>((task) => ({
           id: task.id,
           label: task.title,
-          meta: `${task.status} / ${task.priority}`,
+          meta: `${formatTaskStatusLabel(task.status)} / ${task.priority}`,
         }))
         .sort(sortLinks);
       const linkedTaskIds = new Set(linkedTasks.map((task) => task.id));

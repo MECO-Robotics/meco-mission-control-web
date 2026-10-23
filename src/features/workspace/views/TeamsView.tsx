@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Archive, ArchiveRestore, Ellipsis, Pencil, Trash2 } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { MEMBER_ROLE_LABELS } from "@/types/common";
+import { formatTaskStatusLabel } from "@/features/workspace/shared/model/workspaceOptions";
 import type { ResponsibleGroupPayload } from "@/types/payloads";
 import type { ResponsibleGroupIcon } from "@/types/recordsOrganization";
 import { createResponsibleGroup, deleteResponsibleGroup, updateResponsibleGroup } from "@/lib/auth/records/responsibleGroups";
@@ -233,7 +234,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
           </details>
         </header>
         <div className="team-load">{memberSection("Primary", primaryMembers)}{memberSection("Secondary", secondaryMembers)}{contributorMembers.length ? memberSection("Assigned contributors", contributorMembers) : null}</div>
-        <details open={taskDrilldown?.groupId === group.id}><summary>{taskDrilldown?.groupId === group.id ? `${taskDrilldown.filter[0].toUpperCase()}${taskDrilldown.filter.slice(1)} tasks` : "Tasks"}</summary>{drilldownTasks.length ? drilldownTasks.map(task => <button className="ghost-button" key={task.id} onClick={() => onOpenTask(task)}>{task.title} · {task.status}</button>) : <p>No tasks match this metric.</p>}</details>
+        <details open={taskDrilldown?.groupId === group.id}><summary>{taskDrilldown?.groupId === group.id ? `${taskDrilldown.filter[0].toUpperCase()}${taskDrilldown.filter.slice(1)} tasks` : "Tasks"}</summary>{drilldownTasks.length ? drilldownTasks.map(task => <button className="ghost-button" key={task.id} onClick={() => onOpenTask(task)}>{task.title} · {formatTaskStatusLabel(task.status)}</button>) : <p>No tasks match this metric.</p>}</details>
       </article>;
     }) : <p className="empty-state">{search || archiveFilter !== "all" ? "No teams match these filters." : "No teams in this season yet."}</p>}</div>
   </section>;

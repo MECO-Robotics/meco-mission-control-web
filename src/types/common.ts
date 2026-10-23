@@ -57,7 +57,8 @@ export type DisciplineCode =
   | "social_media";
 
 export type TaskPriority = "critical" | "high" | "medium" | "low";
-export type TaskStatus = "not-started" | "in-progress" | "waiting-for-qa" | "complete";
+export type TaskStatus = "unrecorded" | "not-started" | "in-progress" | "waiting-for-qa" | "complete";
+export type TaskWorkflowStatus = Exclude<TaskStatus, "unrecorded">;
 export type TaskPlanningState = "ready" | "waiting-on-dependency" | "blocked" | "overdue" | "at-risk";
 export type ReadinessStatus = "not-ready" | "blocked" | "qa" | "ready";
 export type MilestoneStatus = "planned" | "active" | "complete";

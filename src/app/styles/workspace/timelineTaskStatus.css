@@ -126,6 +126,11 @@
   color: var(--status-neutral-text);
 }
 
+.timeline-task-status-icon-button[data-status-signal="unrecorded"] .timeline-task-status-caption {
+  background: color-mix(in srgb, var(--status-neutral-bg) 86%, transparent);
+  color: var(--status-neutral-text);
+}
+
 .timeline-task-status-icon-button[data-status-signal="in-progress"] .timeline-task-status-caption {
   background: color-mix(in srgb, var(--status-warning-bg) 86%, transparent);
   color: var(--status-warning-text);
@@ -157,6 +162,10 @@
 }
 
 .timeline-task-status-logo-not-started {
+  color: var(--status-neutral-text);
+}
+
+.timeline-task-status-logo-signal-unrecorded {
   color: var(--status-neutral-text);
 }
 

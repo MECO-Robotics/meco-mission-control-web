@@ -85,6 +85,16 @@ function createBootstrap({
 describe("milestoneTaskState", () => {
   it.each([
     {
+      name: "unrecorded",
+      expected: "unrecorded",
+      tasks: [createTask("task-1", "unrecorded", "milestone-1")],
+    },
+    {
+      name: "unrecorded and not-started",
+      expected: "not-started",
+      tasks: [createTask("task-1", "unrecorded", "milestone-1"), createTask("task-2", "not-started", "milestone-1")],
+    },
+    {
       name: "not-started",
       expected: "not-started",
       tasks: [createTask("task-1", "not-started", "milestone-1")],
@@ -156,7 +166,9 @@ describe("milestoneTaskState", () => {
 
     expect(state).toBe(expected);
     expect(getMilestoneTaskBoardStateLabel(state)).toBe(
-      expected === "not-started"
+      expected === "unrecorded"
+        ? "Unrecorded"
+        : expected === "not-started"
         ? "Not started"
         : expected === "in-progress"
           ? "In progress"

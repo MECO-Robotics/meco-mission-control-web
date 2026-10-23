@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { TimelineTaskStatusSignal } from "../timelineGridBodyUtils";
 export const TIMELINE_STATUS_TONES: Record<TimelineTaskStatusSignal, string> = {
-  "not-started": "neutral", "in-progress": "warning", "waiting-for-qa": "info",
+  unrecorded: "neutral", "not-started": "neutral", "in-progress": "warning", "waiting-for-qa": "info",
   complete: "success", blocked: "danger", "waiting-on-dependency": "warning",
 };
 export function buildTimelineTaskToneStyle(signal: TimelineTaskStatusSignal): CSSProperties {

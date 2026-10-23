@@ -222,7 +222,13 @@ export function getMilestoneTaskBoardState(
 ): TaskQueueBoardState {
   const states = tasks.map((task) => getTaskQueueBoardState(task, bootstrap));
 
-  if (states.length === 0 || states.every((state) => state === "not-started")) {
+  if (states.length > 0 && states.every((state) => state === "unrecorded")) {
+    return "unrecorded";
+  }
+
+  if (states.length === 0 || states.every((state) => state === "not-started" || state === "unrecorded")) {
+    if (states.includes("not-started")) return "not-started";
+    if (states.includes("unrecorded")) return "unrecorded";
     return "not-started";
   }
 
@@ -258,6 +264,8 @@ export function getMilestoneTaskBoardStateForMilestone(
 
 export function getMilestoneTaskBoardStateLabel(state: TaskQueueBoardState) {
   switch (state) {
+    case "unrecorded":
+      return "Unrecorded";
     case "not-started":
       return "Not started";
     case "in-progress":

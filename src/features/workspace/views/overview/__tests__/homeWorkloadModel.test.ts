@@ -19,16 +19,18 @@ it("partitions pressure signals from ordinary unfinished work without treating u
     { ...base, id: "blocked", isBlocked: true }, { ...base, id: "overdue", dueDate: "2026-10-19" },
     { ...base, id: "soon", dueDate: "2026-10-25" }, { ...base, id: "qa", status: "waiting-for-qa" },
     { ...base, id: "new", status: "not-started" }, { ...base, id: "ordinary" },
+    { ...base, id: "unrecorded", status: "unrecorded" },
     { ...base, id: "complete", status: "complete" },
   ];
   const items = buildAttentionQueue({ bootstrap, activePersonFilter: [], today, includeAllUnfinishedTasks: true });
   const groups = buildHomePressureGroups(items, "team", bootstrap);
   const model = buildHomeWorkloadModel({ tasks: bootstrap.tasks, groups });
-  expect(model.taskCount).toBe(6);
+  expect(model.taskCount).toBe(7);
   expect(model.attentionCount).toBe(4);
   expect(model.rows[0].tasksByState.attention.map(task => task.id).sort()).toEqual(["blocked", "overdue", "qa", "soon"]);
   expect(model.rows[0].tasksByState["in-progress"].map(task => task.id)).toEqual(["ordinary"]);
   expect(model.rows[0].tasksByState["not-started"].map(task => task.id)).toEqual(["new"]);
+  expect(model.rows[0].tasksByState.unrecorded.map(task => task.id)).toEqual(["unrecorded"]);
 });
 
 it("keeps risk-only groups, separate unique record totals, overlapping attribution and exact drilldown subsets", () => {

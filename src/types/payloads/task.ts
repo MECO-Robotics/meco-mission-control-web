@@ -5,6 +5,7 @@ import type {
   TaskDependencyType,
   TaskPriority,
   TaskStatus,
+  TaskWorkflowStatus,
 } from "../common";
 import type { ManufacturingDetailsRecord } from "../recordsExecution";
 
@@ -43,6 +44,8 @@ export interface TaskPayload {
   manufacturingDetails: ManufacturingDetailsRecord | null;
   taskDependencies?: TaskDependencyDraft[];
 }
+
+export type TaskPatchPayload = Omit<TaskPayload, "status"> & { status: TaskWorkflowStatus };
 
 export interface TaskDependencyPayload {
   taskId: string;
