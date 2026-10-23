@@ -6,9 +6,25 @@ import { normalizeSubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 
 export const purchaseToPayload = (item: PurchaseItemRecord): PurchaseItemPayload => ({
-  ...item,
+  taskId: item.taskId,
+  kind: item.kind,
+  title: item.title,
   partDefinitionId: item.partDefinitionId ?? null,
+  materialId: item.materialId,
+  quantity: item.quantity,
+  quotes: item.quotes,
+  selectedQuoteId: item.selectedQuoteId,
+  approvalStatus: item.approvalStatus,
+  approvedById: item.approvedById,
+  approvedAt: item.approvedAt,
+  purchaseOrderNumber: item.purchaseOrderNumber,
+  orderStatus: item.orderStatus,
   finalCost: item.finalCost ?? null,
+  expectedDeliveryDate: item.expectedDeliveryDate,
+  trackingNumber: item.trackingNumber,
+  trackingUrl: item.trackingUrl,
+  orderedAt: item.orderedAt,
+  deliveredAt: item.deliveredAt,
 });
 
 export const materialToPayload = (item: MaterialRecord): MaterialPayload => ({

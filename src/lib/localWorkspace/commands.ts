@@ -317,9 +317,11 @@ function receiveLocalPurchase(snapshot: BootstrapPayload, itemId: string, body: 
   if (discretePart && !Number.isSafeInteger(quantity)) throw localCommandError("Part-instance receipts require a whole number.", 400);
   if (!["ordered", "shipped", "delivered"].includes(item.orderStatus)) throw localCommandError("Only ordered purchases can be received.", 409);
   const received = receipts.reduce((total, receipt) => total + receipt.quantity, 0);
+  if (item.quantity === null) throw localCommandError("This purchase has no recorded quantity, so it cannot be received until its quantity is verified.", 409);
   if (received + quantity > item.quantity + Number.EPSILON * Math.max(1, item.quantity, received, quantity) * 8) throw localCommandError("Receipt quantity exceeds the remaining purchase quantity.", 409);
-  const task = snapshot.tasks.find((candidate) => candidate.id === item.taskId);
-  if (!task) throw localCommandError("Purchase item or linked task not found.", 404);
+  const task = item.taskId ? snapshot.tasks.find((candidate) => candidate.id === item.taskId) : undefined;
+  const projectId = task?.projectId ?? item.projectId ?? undefined;
+  if ((!task && item.taskId) || !projectId) throw localCommandError("Purchase item or linked project not found.", 404);
   const isMaterialPurchase = item.kind !== "manufacturing-service" && item.partDefinitionId === null && item.materialId !== null;
   const material = isMaterialPurchase ? snapshot.materials.find((candidate) => candidate.id === item.materialId) : undefined;
   if (isMaterialPurchase && !material) throw localCommandError("Linked stock material not found.", 404);
@@ -330,7 +332,7 @@ function receiveLocalPurchase(snapshot: BootstrapPayload, itemId: string, body: 
     for (let index = 0; index < quantity; index += 1) {
       const partInstanceId = newLocalId();
       partInstanceIds.push(partInstanceId);
-      snapshot.partInstances.push({ id: partInstanceId, partDefinitionId: item.partDefinitionId!, intendedSubsystemId: task.subsystemIds[0] ?? null, intendedMechanismId: null, location: { kind: "stock", location } });
+      snapshot.partInstances.push({ id: partInstanceId, partDefinitionId: item.partDefinitionId!, intendedSubsystemId: task?.subsystemIds[0] ?? null, intendedMechanismId: null, location: { kind: "stock", location } });
     }
   }
   const receipt = { id: newLocalId(), operationId, quantity, location, receivedAt: new Date().toISOString(), partInstanceIds };
@@ -340,7 +342,7 @@ function receiveLocalPurchase(snapshot: BootstrapPayload, itemId: string, body: 
       id: newLocalId(), operationId, materialId: material.id, movementType: "receipt", quantityDelta: quantity,
       reason: `Received through purchase ${item.title}`, recordedAt: receipt.receivedAt,
       actorMemberId: snapshot.members.some((member) => member.id === actorMemberId) ? actorMemberId ?? null : null,
-      purchaseItemId: item.id, purchaseReceiptId: receipt.id, taskId: item.taskId,
+      purchaseItemId: item.id, purchaseReceiptId: receipt.id, ...(item.taskId ? { taskId: item.taskId } : {}), projectId,
     });
     const wasEmpty = material.onHandQuantity === 0;
     recalculateLocalMaterialBalance(snapshot, material.id);
@@ -563,7 +565,8 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
     if (typeof item.hours !== "number" || !Number.isFinite(item.hours) || item.hours <= 0) throw new Error("Work log hours must be a positive number.");
   }
   if (resource === "task-dependencies" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Dependency Task does not exist.");
-  if (resource === "purchases" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Purchasing records must link to a procurement or manufacturing Task.");
+  if (resource === "purchases" && item.taskId !== null && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Purchasing records must link to a procurement or manufacturing Task.");
+  if (resource === "purchases" && item.taskId === null && !item.sourceReference) throw new Error("Purchasing records must link to a procurement Task or a source record.");
   if (method === "POST") rows.push(item); else rows[index] = item;
   refreshLocalTaskState(snapshot);
   return { item };

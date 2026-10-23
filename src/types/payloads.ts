@@ -77,12 +77,12 @@ export interface WorkLogPayload {
 }
 
 export interface PurchaseItemPayload {
-  taskId: string;
+  taskId: string | null;
   kind: "cots-goods" | "manufacturing-service";
   title: string;
   partDefinitionId: string | null;
   materialId: string | null;
-  quantity: number;
+  quantity: number | null;
   quotes: Array<{ id: string; vendorId: string; reference: string | null; amount: { amount: number; currency: string | null } | null; url?: string; expiresAt?: string | null; quotedAt: string | null }>;
   selectedQuoteId: string | null;
   approvalStatus: "pending" | "approved" | "rejected";

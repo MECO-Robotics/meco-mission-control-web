@@ -129,11 +129,11 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     const purchaseItems = bootstrap.purchaseItems.filter((item) => {
-      const task = context.tasksById[item.taskId];
+      const task = item.taskId ? context.tasksById[item.taskId] : undefined;
       const selectedQuote = getSelectedPurchaseQuote(item);
       const searchable = [item.title, task?.title ?? "", bootstrap.vendors.find((candidate) => candidate.id === selectedQuote?.vendorId)?.name ?? ""].join(" ").toLowerCase();
       return (!query || searchable.includes(query)) &&
-        filterSelectionIncludes(project, task?.projectId ?? null) &&
+        filterSelectionIncludes(project, task?.projectId ?? item.projectId ?? null) &&
         filterSelectionIncludes(orderStatus, item.orderStatus) &&
         filterSelectionIncludes(vendor, selectedQuote ? context.vendorsById[selectedQuote.vendorId]?.name ?? "Unknown vendor" : "No selected quote") &&
         filterSelectionIncludes(approval, item.approvalStatus) &&
@@ -195,7 +195,7 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
     const location = receiptLocation.trim();
     const received = sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity));
     const discretePart = isDiscretePurchaseReceipt(receivingItem);
-    const remaining = receivingItem.quantity - received;
+    const remaining = receivingItem.quantity === null ? 0 : receivingItem.quantity - received;
     if (receiptStorageBlocked || !isValidReceiptQuantity(quantity, remaining, discretePart) || !location || location.length > 200) return;
     const mapKey = operationMapKey(receiptOperationScope, receivingItem.id);
     if (receiptWriteLocks.current.has(mapKey)) return;
@@ -281,7 +281,7 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
       <PurchaseTable bootstrap={bootstrap} filteredPurchases={pagination.pageItems} filterMotionClass={filterMotionClass} hasPurchaseFilters={hasFilters} context={context} openEditPurchaseModal={openEditPurchaseModal} canReceivePurchases={canReceivePurchases} onReceive={openReceipt} acknowledgedReceiptIds={acknowledgedReceiptIds} pagination={pagination} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} />
       {receivingItem ? <ModalDialog label={`Receive ${receivingItem.title}`} onClose={closeReceiptDialog} dismissOnBackdrop><form className="modal-card" onSubmit={submitReceipt}>
         <div className="panel-header compact-header"><h2>Receive {receivingItem.title}</h2><button className="secondary-action" type="button" onClick={closeReceiptDialog}>Close</button></div>
-        <label className="field"><span>Quantity received ({receiptUnit})</span><input autoFocus disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked || receiptAlreadyRecorded} min={isDiscreteReceipt ? 1 : undefined} max={Math.min(1000, sumReceiptQuantities([receivingItem.quantity - sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity))]))} step={isDiscreteReceipt ? "1" : "any"} required type="number" value={receiptQuantity} onChange={(event) => { setReceiptQuantity(event.target.value); beginNewReceiptOperation(); }} /></label>
+        <label className="field"><span>Quantity received ({receiptUnit})</span><input autoFocus disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked || receiptAlreadyRecorded || receivingItem.quantity === null} min={isDiscreteReceipt ? 1 : undefined} max={receivingItem.quantity === null ? undefined : Math.min(1000, sumReceiptQuantities([receivingItem.quantity - sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity))]))} step={isDiscreteReceipt ? "1" : "any"} required type="number" value={receiptQuantity} onChange={(event) => { setReceiptQuantity(event.target.value); beginNewReceiptOperation(); }} /></label>
         <label className="field"><span>Location</span><input disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked || receiptAlreadyRecorded} maxLength={200} required value={receiptLocation} onChange={(event) => { setReceiptLocation(event.target.value); beginNewReceiptOperation(); }} /></label>
         {receiptError ? <p role="alert">{receiptError}</p> : null}
         {receiptOutcomeUnknown ? <p>These details are held so Check again can confirm the delivery safely.</p> : null}

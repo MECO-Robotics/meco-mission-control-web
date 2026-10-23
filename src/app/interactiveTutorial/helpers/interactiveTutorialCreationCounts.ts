@@ -36,7 +36,7 @@ export function getInteractiveTutorialCreationCounts(
     ).length,
     students: scopedStudents.length,
     materials: payload.materials.length,
-    purchaseItems: payload.purchaseItems.filter((item) => scopedTaskIds.has(item.taskId)).length,
+    purchaseItems: payload.purchaseItems.filter((item) => item.taskId !== null && scopedTaskIds.has(item.taskId)).length,
     milestones: payload.milestones.filter((milestone) =>
       tutorialProjectId ? milestone.projectIds.includes(tutorialProjectId) : true,
     ).length,

@@ -55,27 +55,27 @@ export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass,
       </div>
       {pagination.pageItems.map((item) => {
         const part = bootstrap.partDefinitions.find((definition) => definition.id === item.partDefinitionId);
-        const task = context.tasksById[item.taskId];
-        const projectName = bootstrap.projects.find((project) => project.id === task?.projectId)?.name ?? "Unknown project";
+        const task = item.taskId ? context.tasksById[item.taskId] : undefined;
+        const projectName = bootstrap.projects.find((project) => project.id === (task?.projectId ?? item.projectId))?.name ?? "Unknown project";
         const quote = getSelectedPurchaseQuote(item);
         const finalCost = item.finalCost ? `${formatCurrency(item.finalCost.amount)} ${item.finalCost.currency ?? ""}`.trim() : "Pending";
         const receipts = item.receipts ?? [];
         const received = sumReceiptQuantities(receipts.map((receipt) => receipt.quantity));
-        const remaining = Math.max(0, sumReceiptQuantities([item.quantity - received]));
-        const canReceive = canReceivePurchases && !acknowledgedReceiptIds.has(item.id) && remaining > 0 && ["ordered", "shipped", "delivered"].includes(item.orderStatus);
+        const remaining = item.quantity === null ? null : Math.max(0, sumReceiptQuantities([item.quantity - received]));
+        const canReceive = canReceivePurchases && item.quantity !== null && !acknowledgedReceiptIds.has(item.id) && remaining! > 0 && ["ordered", "shipped", "delivered"].includes(item.orderStatus);
         return (
           <Fragment key={item.id}>
           <button className="ops-table ops-row materials-table editable-hover-target editable-hover-target-row" data-tutorial-target="edit-purchase-row" onClick={() => openEditPurchaseModal(item)} style={{ "--workspace-grid-template": PURCHASE_GRID_TEMPLATE } as CSSProperties} title={`Edit ${item.title}`} type="button">
-            <ResourceRecordCell label="Item" name={item.title} photoUrl={part?.photoUrl} subtitle={`${item.quantity} · ${item.kind === "cots-goods" ? "COTS goods" : "Manufacturing service"}`} />
-            <ResourceRecordCell label="Procurement task" name={task?.title ?? "Missing procurement task"} subtitle={projectName} />
+            <ResourceRecordCell label="Item" name={item.title} photoUrl={part?.photoUrl} subtitle={`${item.quantity ?? "Quantity not listed"} · ${item.kind === "cots-goods" ? "COTS goods" : "Manufacturing service"}${item.sourceStatus ? ` · Source: ${item.sourceStatus}` : ""}`} />
+            <ResourceRecordCell label="Procurement task" name={task?.title ?? (item.sourceReference ? "Historical source record" : "Missing procurement task")} subtitle={projectName} />
             <TableCell label="Vendor">{getPurchaseVendorName(item, context)}{quote?.amount ? <small>{formatCurrency(quote.amount.amount)} {quote.amount.currency ?? ""}</small> : null}</TableCell>
-            <TableCell label="Qty">{item.quantity}</TableCell>
+            <TableCell label="Qty">{item.quantity ?? "—"}</TableCell>
             <TableCell label="Approval" valueClassName="table-cell-pill"><span className={getStatusPillClassName(item.approvalStatus)}>{item.approvalStatus}</span></TableCell>
             <TableCell label="Order" valueClassName="table-cell-pill"><span className={getStatusPillClassName(item.orderStatus)}>{item.orderStatus}</span></TableCell>
             <TableCell label="Final">{finalCost}</TableCell>
             <EditableHoverIndicator />
           </button>
-          <div className="purchase-receipt-summary"><span>Received {received} of {item.quantity}</span><span>{remaining} remaining</span>{receipts.length ? <span>Receipts: {receipts.map((receipt) => `${receipt.location} · ${receipt.quantity} · ${new Date(receipt.receivedAt).toLocaleDateString()}`).join("; ")}</span> : <span>No receipts recorded</span>}{canReceive ? <button className="secondary-action" type="button" onClick={() => onReceive(item)}>Receive</button> : null}</div>
+          <div className="purchase-receipt-summary"><span>Received {received} of {item.quantity ?? "unknown quantity"}</span><span>{remaining ?? "Remaining unknown"}</span>{receipts.length ? <span>Receipts: {receipts.map((receipt) => `${receipt.location} · ${receipt.quantity} · ${receipt.receivedAt ? new Date(receipt.receivedAt).toLocaleDateString() : "date not recorded"}`).join("; ")}</span> : <span>No receipts recorded</span>}{canReceive ? <button className="secondary-action" type="button" onClick={() => onReceive(item)}>Receive</button> : null}</div>
           </Fragment>
         );
       })}

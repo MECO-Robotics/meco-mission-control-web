@@ -98,18 +98,22 @@ export interface PurchaseReceiptRecord {
   operationId?: string;
   quantity: number;
   location: string;
-  receivedAt: string;
+  receivedAt: string | null;
   partInstanceIds: string[];
 }
 
 export interface PurchaseItemRecord {
   id: string;
-  taskId: string;
+  taskId: string | null;
+  seasonId?: string;
+  projectId?: string | null;
+  sourceStatus?: string | null;
+  sourceReference?: string;
   kind: PurchaseKind;
   partDefinitionId: string | null;
   materialId: string | null;
   title: string;
-  quantity: number;
+  quantity: number | null;
   quotes: PurchaseQuoteRecord[];
   selectedQuoteId: string | null;
   approvalStatus: PurchaseApprovalStatus;

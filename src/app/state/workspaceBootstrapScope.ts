@@ -56,7 +56,10 @@ export function scopeBootstrapBySelection(
   const testFindings = payload.testFindings.filter(({ projectId }) => projectIds.has(projectId));
   const risks = scopeBootstrapRisks(payload, projectIds);
   const artifacts = payload.artifacts.filter(({ projectId }) => projectIds.has(projectId));
-  const purchaseItems = payload.purchaseItems.filter(({ taskId }) => taskIds.has(taskId));
+  const purchaseItems = payload.purchaseItems.filter(({ taskId, projectId, seasonId }) =>
+    (taskId ? taskIds.has(taskId) : Boolean(projectId && projectIds.has(projectId))) &&
+    (!selectedSeasonId || seasonId === selectedSeasonId || Boolean(taskId && taskIds.has(taskId))),
+  );
   const neededVendorIds = new Set([
     ...purchaseItems.flatMap(({ quotes }) => quotes.map(({ vendorId }) => vendorId)),
     ...payload.materials.flatMap(({ preferredVendorId }) => preferredVendorId ? [preferredVendorId] : []),
