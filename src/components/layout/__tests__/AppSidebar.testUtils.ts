@@ -29,7 +29,7 @@ export function renderSidebar(
     seasons?: SeasonRecord[];
     sessionUser?: SessionUser | null;
     taskView?: "timeline" | "robot-map" | "kanban";
-    worklogsView?: "logs" | "activity" | "qa" | "results";
+    worklogsView?: "logs" | "activity" | "reports";
   },
 ) {
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {

@@ -145,60 +145,57 @@ describe("WorkLogsView", () => {
     expect(html).not.toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 
-  it("provides the shared Add QA report plus action on QA reports", () => {
-    const html = renderWorkLogsView("qa");
+  it("offers both report creation actions in the shared Results menu", () => {
+    const html = renderWorkLogsView("reports");
 
-    expect(html).toContain('aria-label="Add QA report"');
+    expect(html).toContain('aria-label="Add report"');
+    expect(html).toContain("Add QA report");
+    expect(html).toContain("Add milestone report");
     expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 
-  it("hides QA creation for student roles while retaining work logging", () => {
-    expect(renderWorkLogsView("qa", {}, false, false)).not.toContain('aria-label="Add QA report"');
+  it("hides QA creation for student roles while retaining milestone report creation", () => {
+    const reports = renderWorkLogsView("reports", {}, false, false);
+    expect(reports).not.toContain("Add QA report");
+    expect(reports).toContain('aria-label="Add milestone report"');
     expect(renderWorkLogsView("logs", {}, false, false)).toContain('aria-label="Log work"');
   });
 
-  it("provides the shared Add milestone report plus action on Results", () => {
-    const html = renderWorkLogsView("results");
-
-    expect(html).toContain('aria-label="Add milestone report"');
-    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
-  });
-
-  it("keeps QA and milestone history as filters rather than duplicate task lists", () => {
+  it("renders QA and milestone reports in the same results list", () => {
     const base = { projectId: "p", targetRefs: [], createdByMemberId: null, participantIds: [], mentorId: null, requestedById: null, result: "pass", status: "submitted" as const, notes: "", createdAt: "2026-09-10" };
     const reports: BootstrapPayload["reports"] = [
       { ...base, id: "qa", reportType: "qa", summary: "Sensor QA" },
-      { ...base, id: "result", reportType: "review", summary: "Scrimmage result" },
+      { ...base, id: "result", reportType: "practice", summary: "Scrimmage result", result: "Strong finish" },
     ];
-    const qa = renderWorkLogsView("qa", { reports });
-    expect(qa).toContain("Sensor QA");
-    expect(qa).toContain("qa-report-list");
-    expect(qa).toContain("Outcome");
-    expect(qa).toContain("Submitted · waiting for review");
-    expect(qa).toContain("Not reviewed");
-    expect(qa).not.toContain(">pass</span>");
-    expect(qa).not.toContain("Scrimmage result");
-    const milestones = renderWorkLogsView("results", { reports });
-    expect(milestones).toContain("Scrimmage result");
-    expect(milestones).not.toContain("Sensor QA");
-    expect(renderWorkLogsView("qa")).toContain("No QA reports yet");
+    const html = renderWorkLogsView("reports", { reports });
+    expect(html).toContain("Sensor QA");
+    expect(html).toContain("Scrimmage result");
+    expect(html).toContain("results-report-list");
+    expect(html).toContain("Outcome");
+    expect(html).toContain("Submitted · waiting for review");
+    expect(html).toContain("Strong finish");
+    expect(html).not.toContain("qa-report-list");
+    expect(renderWorkLogsView("reports")).toContain("No results yet");
   });
 
-  it("orders QA recent history by server review order, labels date fallback, and separates observed date", () => {
+  it("interleaves recent reports by effective date and keeps QA review order visible", () => {
     const base = { projectId: "project-1", targetRefs: [], createdByMemberId: null, participantIds: [], mentorId: null, requestedById: null, summary: "", notes: "", createdAt: "2026-10-15T00:00:00.000Z" };
     const reports: BootstrapPayload["reports"] = [
       { ...base, id: "old-pass", reportType: "qa", summary: "Earlier pass", result: "pass", status: "reviewed", createdAt: "2099-12-31T00:00:00.000Z", reviewedAt: "2026-10-10T00:00:00.000Z", reviewOrder: 1 },
       { ...base, id: "new-fail", reportType: "qa", summary: "Later failure", result: "fail", status: "reviewed", createdAt: "2026-10-10T00:00:00.000Z", reviewedAt: "2026-10-15T00:00:00.000Z", reviewOrder: 2 },
       { ...base, id: "legacy", reportType: "qa", summary: "Legacy review", result: "pass", status: "reviewed", reviewedAt: "2026-10-12T00:00:00.000Z" },
-      { ...base, id: "submitted", reportType: "qa", summary: "Still waiting", result: "pass", status: "submitted", createdAt: "2100-01-01T00:00:00.000Z" },
+      { ...base, id: "milestone", reportType: "practice", summary: "Scrimmage result", result: "Strong finish", status: "submitted", createdAt: "2026-10-13T00:00:00.000Z" },
+      { ...base, id: "submitted", reportType: "qa", summary: "Still waiting", result: "pass", status: "submitted", createdAt: "2026-10-09T00:00:00.000Z" },
     ];
-    const html = renderWorkLogsView("qa", { reports });
+    const html = renderWorkLogsView("reports", { reports });
     expect(html.indexOf("Later failure")).toBeLessThan(html.indexOf("Earlier pass"));
-    expect(html.indexOf("Earlier pass")).toBeLessThan(html.indexOf("Legacy review"));
-    expect(html.indexOf("Legacy review")).toBeLessThan(html.indexOf("Still waiting"));
-    expect(html).toContain("Order unavailable · sorted by review date");
+    expect(html.indexOf("Later failure")).toBeLessThan(html.indexOf("Scrimmage result"));
+    expect(html.indexOf("Scrimmage result")).toBeLessThan(html.indexOf("Legacy review"));
+    expect(html.indexOf("Legacy review")).toBeLessThan(html.indexOf("Earlier pass"));
+    expect(html.indexOf("Earlier pass")).toBeLessThan(html.indexOf("Still waiting"));
+    expect(html).toContain("Review order unavailable");
+    expect(html).toContain("Review 1");
     expect(html).toContain("Observed: 2099-12-31T00:00:00.000Z");
-    expect(html).toContain("Not reviewed");
   });
 
   it("shows unknown verification and exposes retest only to reviewers", () => {
@@ -212,20 +209,17 @@ describe("WorkLogsView", () => {
       severity: "medium", status: "open", createdAt: "2026-10-10T00:00:00.000Z", updatedAt: "2026-10-10T00:00:00.000Z",
     };
     const data = { reports: [report], qaFindings: [finding], testResults: [{ id: "test-result-1", projectId: report.projectId, targetRefs: [], title: "Wheel test", status: "fail" as const }], testFindings: [{ ...finding, id: "test-finding-1", testResultId: "test-result-1" }] };
-    const student = renderWorkLogsView("qa", data);
+    const student = renderWorkLogsView("reports", data);
     expect(student).toContain("This review needs another check");
     expect(student).not.toContain(">Record retest</button>");
-    const mentor = renderWorkLogsView("qa", data, true);
+    expect(student).toContain("Test findings");
+    const mentor = renderWorkLogsView("reports", data, true);
     expect(mentor).toMatch(/>\s*Record retest<\/button>/);
     expect(mentor).not.toContain("Retests are temporarily unavailable");
     expect(mentor).toContain("Wheel check");
-    const results = renderWorkLogsView("results", data, true);
-    expect(results).toContain("Test findings");
-    expect(results).toMatch(/>\s*Record retest<\/button>/);
-    expect(student).not.toContain("Test findings");
 
     const platformBootstrap = createBootstrap();
-    const stale = renderWorkLogsView("qa", {
+    const stale = renderWorkLogsView("reports", {
       ...data,
       partInstances: platformBootstrap.partInstances,
       reports: [{ ...report, targetRefs: [{ kind: "task", id: platformBootstrap.tasks[0].id }], inspectedPartInstanceIds: [], reviewOrder: 1, needsReverification: false }],
@@ -252,7 +246,7 @@ describe("WorkLogsView", () => {
     const matching = filterTestResultsForHistory(bootstrap.testResults, ["student-1"], "drive", Object.fromEntries(bootstrap.tasks.map((entry) => [entry.id, entry])));
     expect(matching.map((result) => result.id)).toEqual(["drive-result"]);
 
-    const html = renderWorkLogsView("results", bootstrap, true, true, ["student-1"]);
+    const html = renderWorkLogsView("reports", bootstrap, true, true, ["student-1"]);
     expect(html).toContain("Drive mount");
     expect(html).not.toContain("Pump seal");
     expect(html).toContain("Test findings");

@@ -41,7 +41,12 @@ describe("canonical workspace navigation", () => {
     expect(readNavigationLocation("?view=resources-parts", "non-robot-project")).toEqual({ tab: "home" });
     expect(readNavigationLocation("?view=unknown", "robot-project")).toEqual({ tab: "home" });
     expect(readNavigationLocation("?view=work-schedule&presentation=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
-    expect(getActiveNavigationSubItemId({ ...state, activeTab: "worklogs", worklogsView: "qa" })).toBe("resources-qa-reports");
+    expect(getActiveNavigationSubItemId({ ...state, activeTab: "worklogs", worklogsView: "reports" })).toBe("resources-qa-reports");
+  });
+  it("routes old milestone-results URLs to the combined Results destination", () => {
+    expect(readNavigationLocation("?view=resources-qa-reports&presentation=results", "robot-project")).toEqual({ tab: "worklogs", worklogsView: "reports" });
+    const search = writeNavigationLocation({ ...state, activeTab: "worklogs", worklogsView: "reports" }, "robot-project", "?presentation=results");
+    expect(search).toBe("?view=resources-qa-reports");
   });
   it("keeps CAD nested under Structure", () => {
     expect(writeNavigationLocation({ ...state, activeTab: "cad" }, "robot-project", "")).toBe("?view=resources-structure&mode=cad");

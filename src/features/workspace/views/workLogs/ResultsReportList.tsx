@@ -6,11 +6,11 @@ import { TableCell } from "@/features/workspace/shared/table/workspaceTableChrom
 import { ResourceRecordCell } from "@/features/workspace/shared/resourceList/ResourceRecordCell";
 import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
 import { FindingRetestAction } from "./FindingRetestAction";
-import "./QaReportList.css";
+import "./ResultsReportList.css";
 
 const QA_REPORT_GRID = "minmax(220px, 2fr) minmax(120px, 1fr) minmax(90px, 0.7fr) minmax(120px, 0.9fr)";
 
-interface QaReportListProps {
+interface ResultsReportListProps {
   bootstrap: BootstrapPayload;
   reports: ReportRecord[];
   canReviewFindings?: boolean;
@@ -25,14 +25,14 @@ interface QaReportListProps {
   onOpenMilestone?: (milestoneId: string) => void;
 }
 
-export function QaReportList({ bootstrap, reports, canReviewFindings = false, localActorMemberId, operationScope = "local-anonymous", viewScope = "", handleUnauthorized, loadWorkspace, setDataMessage, readFinding, onOpenTask, onOpenMilestone }: QaReportListProps) {
+export function ResultsReportList({ bootstrap, reports, canReviewFindings = false, localActorMemberId, operationScope = "local-anonymous", viewScope = "", handleUnauthorized, loadWorkspace, setDataMessage, readFinding, onOpenTask, onOpenMilestone }: ResultsReportListProps) {
   const gridStyle = { "--workspace-grid-template": QA_REPORT_GRID } as CSSProperties;
-  if (reports.length === 0) return <WorkspaceEmptyState title="No QA reports yet" reason="QA reviews recorded for this workspace will appear here." />;
+  if (reports.length === 0) return <WorkspaceEmptyState title="No results yet" reason="QA and milestone reports recorded for this workspace will appear here." />;
 
   return (
-    <div className="table-shell qa-report-list">
-      <div className="ops-table ops-table-header materials-table qa-report-row" style={gridStyle}>
-        {(["Report", "Target", "Outcome", "Review"] as const).map((label) => <span className="table-column-title" key={label}>{label}</span>)}
+    <div className="table-shell results-report-list">
+      <div className="ops-table ops-table-header materials-table results-report-row" style={gridStyle}>
+        {(["Report", "Target", "Outcome", "Date"] as const).map((label) => <span className="table-column-title" key={label}>{label}</span>)}
       </div>
       {reports.map((report) => {
         const taskTargets = report.targetRefs.filter((target) => target.kind === "task");
@@ -42,23 +42,34 @@ export function QaReportList({ bootstrap, reports, canReviewFindings = false, lo
           : target.kind === "milestone"
             ? bootstrap.milestones.find((milestone) => milestone.id === target.id)?.title ?? "Milestone"
             : target.id);
+        const isQaReport = report.reportType === "qa";
+        const reportTypeLabel = isQaReport
+          ? "QA report"
+          : milestoneTargets.length > 0 ? "Milestone report" : `${report.reportType} report`;
+        const effectiveDate = isQaReport && report.status === "reviewed"
+          ? report.reviewedAt ?? report.createdAt
+          : report.createdAt;
+        const outcome = isQaReport
+          ? report.status === "reviewed" ? report.result || "Reviewed" : report.status === "submitted" ? "Submitted · waiting for review" : "Draft · not approved"
+          : report.result || report.status;
 
         return (
-          <details className="qa-report-disclosure" key={report.id}>
-            <summary className="ops-table ops-row materials-table qa-report-row" style={gridStyle}>
-              <ResourceRecordCell label="Report" name={report.summary || "QA review"} subtitle={report.notes || "No notes"} />
+          <details className="results-report-disclosure" key={report.id}>
+            <summary className="ops-table ops-row materials-table results-report-row" style={gridStyle}>
+              <ResourceRecordCell label="Report" name={report.summary || reportTypeLabel} subtitle={`${reportTypeLabel}${report.notes ? ` · ${report.notes}` : ""}`} />
               <TableCell label="Target">{targetNames.join(", ") || "Workspace"}</TableCell>
-              <TableCell label="Outcome" valueClassName="table-cell-pill">{report.status === "reviewed" ? report.result || "Reviewed" : report.status === "submitted" ? "Submitted · waiting for review" : "Draft · not approved"}</TableCell>
-              <TableCell label="Review date">{report.status === "reviewed" ? <>{report.reviewedAt || "Date unavailable"}{typeof report.reviewOrder !== "number" ? <small className="qa-review-order-note">Order unavailable · sorted by review date</small> : null}</> : "Not reviewed"}</TableCell>
+              <TableCell label="Outcome" valueClassName="table-cell-pill">{outcome}</TableCell>
+              <TableCell label="Date">{effectiveDate || "Date unavailable"}{isQaReport && report.status === "reviewed" ? <small className="qa-review-order-note">{typeof report.reviewOrder === "number" ? `Review ${report.reviewOrder}` : "Review order unavailable"}</small> : null}</TableCell>
             </summary>
             <div className="qa-report-details">
               {taskTargets.map((target) => onOpenTask ? <button className="secondary-action" key={target.id} onClick={() => onOpenTask(target.id)} type="button">Open task</button> : null)}
               {milestoneTargets.map((target) => onOpenMilestone ? <button className="secondary-action" key={target.id} onClick={() => onOpenMilestone(target.id)} type="button">Open milestone</button> : null)}
               <p>Observed: {report.createdAt}</p>
               {report.evidenceNotes ? <p>Evidence: {report.evidenceNotes}</p> : null}
-              {report.status === "reviewed" ? <p>Reviewed by: {bootstrap.members.find((member) => member.id === report.reviewedById)?.name ?? "Reviewer unavailable"}</p> : null}
+              {isQaReport && report.status === "reviewed" ? <p>Reviewed by: {bootstrap.members.find((member) => member.id === report.reviewedById)?.name ?? "Reviewer unavailable"}</p> : null}
+              {isQaReport && report.status === "reviewed" && typeof report.reviewOrder === "number" ? <p>Review {report.reviewOrder}</p> : null}
               {report.participantIds.length ? <p>Participants: {report.participantIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name ?? "Unknown member").join(", ")}</p> : null}
-              {bootstrap.qaFindings.filter((finding) => finding.reportId === report.id).map((finding) => {
+              {isQaReport ? bootstrap.qaFindings.filter((finding) => finding.reportId === report.id).map((finding) => {
                 const inspectedIds = report.inspectedPartInstanceIds;
                 const currentPartIds = bootstrap.tasks.filter((task) => taskTargets.some((target) => target.id === task.id)).flatMap((task) => task.partInstanceIds);
                 const missingParts = inspectedIds ? currentPartIds.filter((id) => !inspectedIds.includes(id)) : [];
@@ -79,7 +90,7 @@ export function QaReportList({ bootstrap, reports, canReviewFindings = false, lo
                   {linkedRisk ? <p>Linked risk: {linkedRisk.title}</p> : null}
                   {needsVerification || finding.retests?.length ? <FindingRetestAction key={`${viewScope}:qa:${finding.id}`} finding={finding} sourceType="qa" scope={operationScope} viewScope={viewScope} canReview={canReviewFindings} handleUnauthorized={handleUnauthorized} localActorMemberId={localActorMemberId} members={bootstrap.members} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} /> : null}
                 </div>;
-              })}
+              }) : null}
               {report.photoUrl ? <a href={report.photoUrl} rel="noreferrer" target="_blank">View attached evidence</a> : null}
             </div>
           </details>

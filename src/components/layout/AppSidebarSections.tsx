@@ -1,4 +1,4 @@
-import { ClipboardCheck, FileText, History, List, type LucideIcon } from "lucide-react";
+import { History, List, type LucideIcon } from "lucide-react";
 
 import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget, type TaskViewTab, type WorklogsViewTab } from "@/lib/workspaceNavigation";
 import { SidebarItem, type SidebarItemConfig } from "./sidebar/SidebarItem";
@@ -7,13 +7,8 @@ const ACTIVITY_VIEWS = [
   { icon: List, label: "Work logs", key: "logs", target: { tab: "worklogs", worklogsView: "logs" } },
   { icon: History, label: "Changes", key: "activity", target: { tab: "worklogs", worklogsView: "activity" } },
 ] as const;
-const QA_REPORT_VIEWS = [
-  { icon: ClipboardCheck, label: "QA results", key: "qa", target: { tab: "worklogs", worklogsView: "qa" } },
-  { icon: FileText, label: "Milestone results", key: "results", target: { tab: "worklogs", worklogsView: "results" } },
-] as const;
 const SUBVIEW_PARENT_IDS = new Set<NavigationSubItemId>([
   "work-activity",
-  "resources-qa-reports",
 ]);
 
 interface SidebarSubview {
@@ -104,9 +99,6 @@ export function AppSidebarSections({
         />
         {item.id === "work-activity" && (isCollapsed || activeSubItemId === "work-activity") ? (
           <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="Activity views" compact={isCollapsed} items={ACTIVITY_VIEWS} onSelect={onSubItemSelect} title="Activity" />
-        ) : null}
-        {item.id === "resources-qa-reports" && (isCollapsed || activeSubItemId === "resources-qa-reports") ? (
-          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="QA and report views" compact={isCollapsed} items={QA_REPORT_VIEWS} onSelect={onSubItemSelect} title="QA / Reports" />
         ) : null}
         </div>
       ))}

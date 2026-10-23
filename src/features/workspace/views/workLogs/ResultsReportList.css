@@ -1,13 +1,13 @@
-.qa-report-row {
+.results-report-row {
   grid-template-columns: var(--workspace-grid-template);
 }
 
-.qa-report-disclosure > summary {
+.results-report-disclosure > summary {
   display: grid;
   list-style: none;
 }
 
-.qa-report-disclosure > summary::-webkit-details-marker {
+.results-report-disclosure > summary::-webkit-details-marker {
   display: none;
 }
 
