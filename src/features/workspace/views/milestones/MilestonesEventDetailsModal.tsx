@@ -18,7 +18,7 @@ import {
   MilestoneEditScheduleField,
   MilestoneEditTitleField,
 } from "./MilestonesEventDetailsModalParts";
-import { formatMilestoneDateTime, formatMilestoneEndDateTime } from "./milestonesViewUtils";
+import { formatMilestoneRecordDate, formatMilestoneEndDateTime } from "./milestonesViewUtils";
 
 interface MilestonesEventDetailsModalProps {
   activeMilestone: MilestoneRecord;
@@ -141,12 +141,12 @@ export function MilestonesEventDetailsModal({
       description: activeMilestone.description,
       projectIds: activeMilestone.projectIds,
     };
-  const editableStartDate = milestoneStartDate ?? activeMilestone.startAt.slice(0, 10);
-  const editableStartTime = milestoneStartTime ?? activeMilestone.startAt.slice(11, 16);
+  const editableStartDate = milestoneStartDate ?? (activeMilestone.startAt ?? activeMilestone.date ?? "").slice(0, 10);
+  const editableStartTime = milestoneStartTime ?? (activeMilestone.startAt?.slice(11, 16) || "18:00");
   const editableEndDate = milestoneEndDate ?? activeMilestone.endAt?.slice(0, 10) ?? "";
   const editableEndTime = milestoneEndTime ?? activeMilestone.endAt?.slice(11, 16) ?? "";
-  const milestoneStartLabel = formatMilestoneDateTime(activeMilestone.startAt);
-  const milestoneEndLabel = formatMilestoneEndDateTime(activeMilestone.startAt, activeMilestone.endAt);
+  const milestoneStartLabel = formatMilestoneRecordDate(activeMilestone);
+  const milestoneEndLabel = activeMilestone.startAt ? formatMilestoneEndDateTime(activeMilestone.startAt, activeMilestone.endAt) : null;
 
   return createPortal(
     <ModalDialog label={activeMilestone.title} onClose={handleClose}>

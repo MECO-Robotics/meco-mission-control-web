@@ -161,6 +161,37 @@ export function PartDefinitionEditorModal({
           ))}
         </select>
       </label>
+      <div className="field modal-wide">
+        <span style={{ color: "var(--text-title)" }}>Vendor part numbers</span>
+        {Object.entries(partDefinitionDraft.vendorPartNumbers ?? {}).map(([vendorId, value]) => (
+          <label className="field" key={vendorId}>
+            <span>{bootstrap.vendors.find((vendor) => vendor.id === vendorId)?.name ?? vendorId}</span>
+            <input
+              onChange={(event) => setPartDefinitionDraft((current) => ({
+                ...current,
+                vendorPartNumbers: { ...current.vendorPartNumbers, [vendorId]: event.target.value },
+              }))}
+              value={value}
+            />
+          </label>
+        ))}
+        <select
+          aria-label="Add vendor part number"
+          onChange={(event) => {
+            const vendorId = event.target.value;
+            if (vendorId) setPartDefinitionDraft((current) => ({
+              ...current,
+              vendorPartNumbers: { ...current.vendorPartNumbers, [vendorId]: "" },
+            }));
+          }}
+          value=""
+        >
+          <option value="">Add vendor part number…</option>
+          {bootstrap.vendors.filter((vendor) => !(vendor.id in (partDefinitionDraft.vendorPartNumbers ?? {}))).map((vendor) => (
+            <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
+          ))}
+        </select>
+      </div>
       <label className="field modal-wide">
         <span style={{ color: "var(--text-title)" }}>Description</span>
         <textarea

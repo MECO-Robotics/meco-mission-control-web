@@ -46,7 +46,7 @@ it("restores a current-schema saved demo without the optional actions collection
     ...seed,
     materials: seed.materials.map((material) => ({ ...material, name: "Kept from older saved demo" })),
   });
-  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 3, baseline, snapshot: savedSnapshot }));
+  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 4, baseline, snapshot: savedSnapshot }));
 
   const restored = await read();
   const scoped = scopeBootstrapBySelection(restored, null, null);
@@ -289,7 +289,7 @@ it("archives an incompatible snapshot intact and starts from the current canonic
   const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
   await read();
   expect(data.get("meco.local-demo.v1.incompatible.0")).toBe(incompatible);
-  expect(JSON.parse(data.get("meco.local-demo.v1")!)).toMatchObject({ schemaVersion: 3 });
+  expect(JSON.parse(data.get("meco.local-demo.v1")!)).toMatchObject({ schemaVersion: 4 });
   expect((await read()).projects).toEqual(seed.projects);
   expect(warning).toHaveBeenCalledWith(expect.stringContaining("archived as meco.local-demo.v1.incompatible.0"));
   warning.mockRestore();
@@ -313,7 +313,7 @@ it.each([1, 2])("archives schema-%s demo snapshots before reading groups without
   await read();
 
   expect(data.get(`meco.local-demo.v1.incompatible.${schemaVersion}`)).toBe(legacy);
-  expect(JSON.parse(data.get("meco.local-demo.v1")!).schemaVersion).toBe(3);
+  expect(JSON.parse(data.get("meco.local-demo.v1")!).schemaVersion).toBe(4);
   expect(fetch).toHaveBeenCalledTimes(1);
   expect(warning).toHaveBeenCalledWith(expect.stringContaining(`incompatible.${schemaVersion}`));
   warning.mockRestore();
@@ -324,7 +324,7 @@ it("derives cached task hours from logs across reload and tutorial entry", async
   snapshot.tasks[0].actualHours = 999;
   const taskId = snapshot.tasks[0].id;
   const expected = snapshot.workLogs.filter((log) => log.taskId === taskId).reduce((sum, log) => sum + log.hours, 0);
-  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 3, baseline: snapshot, snapshot }));
+  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 4, baseline: snapshot, snapshot }));
   expect((await read()).tasks[0].actualHours).toBe(expected);
   leaveLocalWorkspace(); enterLocalDemo();
   expect((await read()).tasks[0].actualHours).toBe(expected);

@@ -63,7 +63,7 @@ const isAdminMentor = (member: MemberRecord) =>
 const isElevatedRole = (role: MemberPayload["role"]) => role === "lead" || role === "admin";
 
 const getEmailPlaceholder = (role: MemberPayload["role"]) =>
-  role === "external" ? "name@example.org" : "name@mecorobotics.org";
+  role === "unknown" ? "" : role === "external" ? "name@example.org" : "name@mecorobotics.org";
 
 export const RosterView: React.FC<RosterViewProps> = ({
   availabilityBootstrap,
@@ -116,6 +116,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
     return priority !== 0 ? priority : a.name.localeCompare(b.name);
   });
   const sortedExternalMembers = [...externalMembers].sort((a, b) => a.name.localeCompare(b.name));
+  const sortedUnknownMembers = bootstrap.members.filter((member) => member.role === "unknown").sort((a, b) => a.name.localeCompare(b.name));
 
   const responsibleGroups = React.useMemo(
     () => bootstrap.responsibleGroups.filter((group) => !group.isArchived && (!selectedProject || group.projectIds.includes(selectedProject.id))),
@@ -154,6 +155,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
   const filteredSortedStudents = filterMembers(sortedStudents);
   const filteredSortedMentors = filterMembers(sortedMentors);
   const filteredSortedExternalMembers = filterMembers(sortedExternalMembers);
+  const filteredSortedUnknownMembers = filterMembers(sortedUnknownMembers);
 
   const inactiveMembers = React.useMemo(() => {
     if (!selectedSeasonId) {
@@ -235,7 +237,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
         <div className="people-member-activity">
           {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary>
           {load.topTasks.map(task => <button className="ghost-button" key={task.id} type="button" onClick={() => { const record = bootstrap.tasks.find(item => item.id === task.id); if (record) onOpenTask?.(record); }}>{task.title}</button>)}</details> : null}
-          {onCreateTaskForMember && member.role !== "external" ? (
+          {onCreateTaskForMember && member.role !== "external" && member.role !== "unknown" ? (
             <button
               aria-label={`Assign work to ${member.name.split(" ")[0]}`}
               className="icon-button people-assign-work-button"
@@ -269,9 +271,13 @@ export const RosterView: React.FC<RosterViewProps> = ({
       members: filteredSortedExternalMembers,
       title: "External access",
     },
+    {
+      members: filteredSortedUnknownMembers,
+      title: "Role unknown",
+    },
   ];
   const visibleRosterSections = rosterSections.filter((section) => section.members.length > 0);
-  const hasRosterMembers = sortedStudents.length + sortedMentors.length + sortedExternalMembers.length > 0;
+  const hasRosterMembers = sortedStudents.length + sortedMentors.length + sortedExternalMembers.length + sortedUnknownMembers.length > 0;
   return (
     <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">

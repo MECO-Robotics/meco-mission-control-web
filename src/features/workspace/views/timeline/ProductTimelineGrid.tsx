@@ -77,7 +77,8 @@ export function ProductTimelineGrid({ bootstrap, tasks, days, groupBy, zoom = 1,
           if (!spans.length) return null;
           const start = Math.min(...spans.map((span) => span.start));
           const end = Math.max(...spans.map((span) => span.start + span.span));
-          const dates = `${records.reduce((first, task) => task.startDate < first ? task.startDate : first, records[0].startDate)} – ${records.reduce((last, task) => task.dueDate > last ? task.dueDate : last, records[0].dueDate)}`;
+          const dated = records.filter((task) => task.startDate && task.dueDate);
+          const dates = dated.length ? `${dated.reduce((first, task) => task.startDate! < first ? task.startDate! : first, dated[0].startDate!)} – ${dated.reduce((last, task) => task.dueDate! > last ? task.dueDate! : last, dated[0].dueDate!)}` : "Dates unknown";
           return <button type="button" aria-label={`Expand ${name}`} aria-description={`${details} · ${dates}`} title={`${name} · ${details} · ${dates}`} onClick={() => toggle(id)} className="product-timeline-summary-span" style={{ "--schedule-completion": `${progress}%`, left: `${start / days.length * 100}%`, width: `${(end - start) / days.length * 100}%` } as CSSProperties}><span className="product-timeline-summary-label">{records.length} {records.length === 1 ? "task" : "tasks"} · {progress}% complete</span></button>;
         })()}
       </div>

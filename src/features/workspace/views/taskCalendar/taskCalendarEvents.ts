@@ -104,7 +104,7 @@ export function buildTaskCalendarEvents({
   const taskEvents: TaskCalendarEvent[] = bootstrap.tasks
     .filter(
       (task) =>
-        Boolean(task.dueDate) &&
+        task.dueDate !== null && task.dueDate !== undefined &&
         filterSelectionMatchesTaskPeople(activePersonFilter, task) &&
         task.status !== "complete",
     )
@@ -125,12 +125,13 @@ export function buildTaskCalendarEvents({
           type,
         },
         id: `task:${task.id}`,
-        start: hasTime(task.dueDate) ? task.dueDate : asDateOnly(task.dueDate),
+        start: hasTime(task.dueDate!) ? task.dueDate! : asDateOnly(task.dueDate!),
         title: prependContextLabel(task.title, contextLabel),
       };
     });
 
   const milestoneEvents: TaskCalendarEvent[] = bootstrap.milestones
+    .filter((milestone) => milestone.date !== null || milestone.startAt !== null)
     .filter((milestone) => {
       if (activePersonFilter.length === 0) {
         return true;
@@ -155,15 +156,16 @@ export function buildTaskCalendarEvents({
           type: "milestone",
         },
         id: `milestone:${milestone.id}`,
-        start: milestone.startAt,
+        start: milestone.startAt ?? milestone.date!,
         title: prependContextLabel(milestone.title, contextLabel),
       };
     });
 
   const meetingEvents: TaskCalendarEvent[] = (bootstrap.meetings ?? [])
+    .filter((meeting) => meeting.date !== null || meeting.startAt !== null)
     .filter((meeting) => isMeetingVisibleInProjectScope(meeting, activeProjectIds))
     .map((meeting) => {
-      const meetingStart = meeting.startAt;
+      const meetingStart = meeting.startAt ?? meeting.date!;
       const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
         projectIds: meeting.projectIds ?? [],
@@ -184,6 +186,7 @@ export function buildTaskCalendarEvents({
     });
 
   const eventEvents: TaskCalendarEvent[] = bootstrap.events
+    .filter((event) => event.date !== null || event.startAt !== null)
     .filter((event) => isMeetingVisibleInProjectScope(event, activeProjectIds))
     .map((event) => {
       const contextLabel = buildProjectContextLabel({
@@ -194,7 +197,7 @@ export function buildTaskCalendarEvents({
       return {
         extendedProps: { contextLabel, recordId: event.id, status: event.eventType, type: "event" },
         id: `event:${event.id}`,
-        start: hasTime(event.startAt) ? event.startAt : asDateOnly(event.startAt),
+        start: event.startAt ? (hasTime(event.startAt) ? event.startAt : asDateOnly(event.startAt)) : event.date!,
         title: prependContextLabel(event.title, contextLabel),
       };
     });
@@ -202,7 +205,8 @@ export function buildTaskCalendarEvents({
   return [...milestoneEvents, ...taskEvents, ...meetingEvents, ...eventEvents];
 }
 
-export function isTaskDueSoon(dueDate: string, today = new Date()) {
+export function isTaskDueSoon(dueDate: string | null, today = new Date()) {
+  if (!dueDate) return false;
   const parsedDue = parseLocalDate(asDateOnly(dueDate));
   if (!parsedDue) {
     return false;

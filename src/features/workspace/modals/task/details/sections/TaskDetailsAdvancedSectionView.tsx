@@ -179,7 +179,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 onBlur={() => setEditingField(null)}
                 onChange={model.handleStartDateChange}
                 type="date"
-                value={editableTask.startDate}
+                value={editableTask.startDate ?? ""}
               />
             ) : (
               <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline task-detail-inline-edit-shell-inline-left">
@@ -190,7 +190,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                   type="button"
                 >
                   <span className="pill status-pill status-pill-neutral">
-                    {new Date(`${editableTask.startDate}T00:00:00`).toLocaleDateString()}
+                    {editableTask.startDate ? new Date(`${editableTask.startDate}T00:00:00`).toLocaleDateString() : "Start date unknown"}
                   </span>
                 </button>
                 <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
@@ -199,7 +199,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
           ) : (
             <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
               <span className="pill status-pill status-pill-neutral">
-                {new Date(`${editableTask.startDate}T00:00:00`).toLocaleDateString()}
+                {editableTask.startDate ? new Date(`${editableTask.startDate}T00:00:00`).toLocaleDateString() : "Start date unknown"}
               </span>
             </p>
           )}

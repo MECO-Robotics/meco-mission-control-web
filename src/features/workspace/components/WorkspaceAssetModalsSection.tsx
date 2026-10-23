@@ -21,7 +21,7 @@ export function WorkspaceAssetModalsSection(props: WorkspaceModalHostViewProps) 
         />
       ) : null}
 
-      <MaterialEditorModal {...props.materialEditor} bootstrap={props.bootstrap} requestPhotoUpload={props.requestPhotoUpload} />
+      <MaterialEditorModal {...props.materialEditor} bootstrap={props.bootstrap} materialTransactions={props.bootstrap.materialTransactions} requestPhotoUpload={props.requestPhotoUpload} />
 
       {props.mechanismEditor.mechanismModalMode ? (
         <MechanismEditorModal
