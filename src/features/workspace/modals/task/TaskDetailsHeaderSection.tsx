@@ -91,7 +91,7 @@ export function TaskDetailsHeaderSection({
   const detailStatusLabel = isBlockedByDependency ? "Blocked" : formatTaskStatusLabel(statusText);
   const estimatedHours = Number(activeTask.estimatedHours);
   const actualHours = Number(activeTask.actualHours);
-  const dueDate = getTaskDetailDatePresentation(editableTask.dueDate);
+  const dueDate = editableTask.dueDate ? getTaskDetailDatePresentation(editableTask.dueDate) : { text: "Due date unknown", isOverdue: false, isToday: false };
   const dueDateText = dueDate.text;
   const dueDatePillClassName = editableTask.dueDate
     ? statusText === "complete"
@@ -180,7 +180,7 @@ export function TaskDetailsHeaderSection({
                       setEditingField(null);
                     }}
                     type="date"
-                    value={editableTask.dueDate}
+                    value={editableTask.dueDate ?? ""}
                   />
                 ) : (
                   <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">

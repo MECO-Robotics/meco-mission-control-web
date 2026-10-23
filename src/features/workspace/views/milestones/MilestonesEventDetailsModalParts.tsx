@@ -4,7 +4,7 @@ import type { MilestoneRecord } from "@/types/recordsExecution";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { MilestoneTaskStateIcon } from "@/features/workspace/shared/milestones/milestoneTaskState";
 import type { TaskQueueBoardState } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
-import { formatMilestoneDateTime, formatMilestoneEndDateTime } from "./milestonesViewUtils";
+import { formatMilestoneDateTime, formatMilestoneRecordDate, formatMilestoneEndDateTime } from "./milestonesViewUtils";
 import type { MilestoneDetailEditableField } from "./sections/MilestonesEventDetailEditor";
 
 export function MilestoneDetailValue({
@@ -135,11 +135,11 @@ export function MilestoneEditScheduleField({
   const startValue =
     milestoneStartDate && milestoneStartTime
       ? formatMilestoneDateTime(`${milestoneStartDate}T${milestoneStartTime}:00`)
-      : formatMilestoneDateTime(activeMilestone.startAt);
+      : formatMilestoneRecordDate(activeMilestone);
   const endValue =
     milestoneEndDate && milestoneEndTime
       ? formatMilestoneDateTime(`${milestoneEndDate}T${milestoneEndTime}:00`)
-      : formatMilestoneEndDateTime(activeMilestone.startAt, activeMilestone.endAt);
+      : activeMilestone.startAt ? formatMilestoneEndDateTime(activeMilestone.startAt, activeMilestone.endAt) : null;
 
   if (editingField === "schedule") {
     return (

@@ -16,8 +16,8 @@ function TaskList({ tasks, label, onOpenTask }: {
           <strong>{task.title}</strong>
           <span className="home-your-task-meta">{TASK_PRIORITY_OPTIONS.find(option => option.id === task.priority)?.name}
             {" · "}{HOME_TASK_STATUSES.find(status => status.id === task.status)?.label}</span>
-          <span className="home-your-task-date">{parseHomeTaskDueDate(task.dueDate)
-            ? <>Due <time dateTime={task.dueDate}>{formatDate(task.dueDate)}</time></> : "No due date"}</span>
+          <span className="home-your-task-date">{task.dueDate && parseHomeTaskDueDate(task.dueDate)
+            ? <>Due <time dateTime={task.dueDate}>{formatDate(task.dueDate)}</time></> : "Due date unknown"}</span>
         </button>
       </li>)}</ul>
     </div>;

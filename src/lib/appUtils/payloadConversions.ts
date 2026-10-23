@@ -15,7 +15,6 @@ export const materialToPayload = (item: MaterialRecord): MaterialPayload => ({
   name: item.name,
   category: item.category,
   unit: item.unit,
-  onHandQuantity: item.onHandQuantity,
   reorderPoint: item.reorderPoint,
   location: item.location,
   preferredVendorId: item.preferredVendorId,

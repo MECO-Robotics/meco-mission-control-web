@@ -38,6 +38,7 @@ export const bootstrap: BootstrapPayload = {
   subsystems: [],
   mechanisms: [],
   materials: [],
+  materialTransactions: [],
   artifacts: [],
   partDefinitions: [],
   partInstances: [{

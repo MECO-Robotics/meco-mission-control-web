@@ -123,6 +123,7 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
                   <option value="mentor">Mentor</option>
                   <option value="admin">Admin</option>
                   <option value="external">External access</option>
+                  <option value="unknown">Unknown role</option>
                 </select>
               </label>
               <details className="modal-wide">

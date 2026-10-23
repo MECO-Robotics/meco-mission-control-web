@@ -56,8 +56,8 @@ function availabilityStatusFromMetrics(metrics: {
 }
 
 function sortTaskPreviews(left: RosterInsightsTaskPreview, right: RosterInsightsTaskPreview) {
-  const leftDue = parseDateValue(left.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
-  const rightDue = parseDateValue(right.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
+  const leftDue = left.dueDate ? parseDateValue(left.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+  const rightDue = right.dueDate ? parseDateValue(right.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
   if (leftDue !== rightDue) {
     return leftDue - rightDue;
   }
@@ -134,11 +134,11 @@ export function buildRosterInsightsFromBootstrap(
         .slice(0, 3);
 
       const overdueTaskCount = assignedTasks.filter((task) => {
-        const dueDate = parseDateValue(task.dueDate);
+        const dueDate = task.dueDate ? parseDateValue(task.dueDate) : null;
         return dueDate !== null && dueDate.getTime() < today.getTime();
       }).length;
       const dueSoonTaskCount = assignedTasks.filter((task) => {
-        const dueDate = parseDateValue(task.dueDate);
+        const dueDate = task.dueDate ? parseDateValue(task.dueDate) : null;
         if (!dueDate) {
           return false;
         }

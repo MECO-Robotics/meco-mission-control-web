@@ -33,8 +33,8 @@ export interface TaskPayload {
   ownerId: string | null;
   assigneeIds: string[];
   mentorId: string | null;
-  startDate: string;
-  dueDate: string;
+  startDate: string | null;
+  dueDate: string | null;
   priority: TaskPriority;
   status: TaskStatus;
   checklistItems: string[];

@@ -61,7 +61,7 @@ export function MaterialsView({
 
     return {
       name: uniqueOptions((material) => material.name),
-      quantity: uniqueOptions((material) => `${material.onHandQuantity} / ${material.reorderPoint}`),
+      quantity: uniqueOptions((material) => `${material.onHandQuantity ?? "Unknown"} / ${material.reorderPoint ?? "Not set"}`),
       location: uniqueOptions((material) => material.location || "Unassigned"),
       vendor: uniqueOptions(vendorName),
     };
@@ -220,7 +220,8 @@ export function MaterialsView({
 
         {materialPagination.pageItems.map((material) => {
           const isBelowReorder = isMaterialBelowReorder(material);
-          const isLow = material.onHandQuantity <= material.reorderPoint;
+          const isUnknown = material.onHandQuantity === null;
+          const isLow = material.onHandQuantity !== null && material.reorderPoint !== null && material.onHandQuantity <= material.reorderPoint;
           const materialSubtitle =
             material.notes.trim().length > 0
               ? material.notes
@@ -239,14 +240,14 @@ export function MaterialsView({
               <ResourceRecordCell label="Material" photoUrl={material.photoUrl} name={material.name} subtitle={materialSubtitle} />
               <TableCell label="Category">{material.category}</TableCell>
               <TableCell label="On hand / reorder" valueClassName={isBelowReorder ? "materials-stock-below-reorder" : undefined}>
-                {material.onHandQuantity} / {material.reorderPoint}
+                {material.onHandQuantity ?? "Unknown"} / {material.reorderPoint ?? "Not set"}
               </TableCell>
               <TableCell label="Location">{material.location || "Unassigned"}</TableCell>
               <TableCell label="Preferred vendor">{material.preferredVendorId ? bootstrap.vendors.find((item) => item.id === material.preferredVendorId)?.name ?? "Unknown vendor" : "None"}</TableCell>
               <TableCell label="Status" valueClassName="table-cell-pill">
-                <span className={getStatusPillClassName(isLow ? "critical" : "complete")}>
+                {isUnknown ? <span className="muted-copy">Quantity unknown</span> : material.reorderPoint === null ? <span className="muted-copy">Reorder point not set</span> : <span className={getStatusPillClassName(isLow ? "critical" : "complete")}>
                   {isLow ? "Low stock" : "Stock OK"}
-                </span>
+                </span>}
               </TableCell>
               <EditableHoverIndicator />
             </button>

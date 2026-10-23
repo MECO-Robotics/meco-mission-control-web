@@ -12,9 +12,11 @@ export function TimelineMilestoneLane({ days, milestones, onOpenMilestone }: Tim
   if (days.length === 0) return null;
   const firstDay = days[0];
   const lastDay = days[days.length - 1];
-  const visibleMilestones = milestones.filter((milestone) =>
-    milestone.startAt.slice(0, 10) <= lastDay && (milestone.endAt ?? milestone.startAt).slice(0, 10) >= firstDay,
-  ).sort((left, right) => left.startAt.localeCompare(right.startAt) || left.id.localeCompare(right.id));
+  const visibleMilestones = milestones.filter((milestone) => {
+    const startAt = milestone.startAt ?? milestone.date;
+    if (!startAt) return false;
+    return startAt.slice(0, 10) <= lastDay && (milestone.endAt ?? startAt).slice(0, 10) >= firstDay;
+  }).sort((left, right) => (left.startAt ?? left.date ?? "").localeCompare(right.startAt ?? right.date ?? "") || left.id.localeCompare(right.id));
   if (visibleMilestones.length === 0) return null;
 
   return (
@@ -22,8 +24,8 @@ export function TimelineMilestoneLane({ days, milestones, onOpenMilestone }: Tim
       <div className="schedule-milestone-label">Milestones</div>
       <div className="schedule-milestone-track" style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }}>
         {visibleMilestones.map((milestone) => {
-          const startDay = milestone.startAt.slice(0, 10);
-          const endDay = (milestone.endAt ?? milestone.startAt).slice(0, 10);
+          const startDay = (milestone.startAt ?? milestone.date)! .slice(0, 10);
+          const endDay = (milestone.endAt ?? milestone.startAt ?? milestone.date)!.slice(0, 10);
           const startIndex = days.findIndex((day) => day >= startDay);
           const endIndex = days.findLastIndex((day) => day <= endDay);
           const typeStyle = getMilestoneTypeStyle(milestone.type);

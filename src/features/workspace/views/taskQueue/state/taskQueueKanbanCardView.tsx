@@ -11,6 +11,7 @@ import { getTaskQueueCardContextLabel, TaskPriorityBadge } from "../taskQueueKan
 import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 
 function getTaskCardDeadline(task: TaskRecord) {
+  if (!task.dueDate) return { text: "Due date unknown", tone: "neutral" };
   const date = new Date(`${task.dueDate}T00:00:00`);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(task.dueDate) || Number.isNaN(date.getTime()) || date.getDate() !== Number(task.dueDate.slice(-2))) {
     return { text: "No due date", tone: "neutral" };

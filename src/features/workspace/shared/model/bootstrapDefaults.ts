@@ -11,6 +11,7 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   subsystems: [],
   mechanisms: [],
   materials: [],
+  materialTransactions: [],
   artifacts: [],
   partDefinitions: [],
   partInstances: [],

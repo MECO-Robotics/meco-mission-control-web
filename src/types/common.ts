@@ -1,4 +1,13 @@
-export type MemberRole = "student" | "lead" | "mentor" | "admin" | "external";
+export type MemberRole = "student" | "lead" | "mentor" | "admin" | "external" | "unknown";
+
+export const MEMBER_ROLE_LABELS: Record<MemberRole, string> = {
+  student: "Student",
+  lead: "Lead",
+  mentor: "Mentor",
+  admin: "Admin",
+  external: "External access",
+  unknown: "Unknown role",
+};
 
 export type PlannedAttendanceDay =
   | "monday"

@@ -9,7 +9,8 @@ import { useCatalogRecordActions } from "./useCatalogRecordActions";
 import { buildEmptyMaterialPayload } from "@/lib/appUtils/payloadBuilders";
 import { materialToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
-import { createMaterialRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
+import { createMaterialRecord, createMaterialTransactionRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
+import type { MaterialTransactionPayload } from "@/types/payloads";
 
 export function useMaterialEditor({
   bootstrap, selectedProjectId, selectedSeasonId,
@@ -79,11 +80,31 @@ export function useMaterialEditor({
     }
   }, [activeMaterialId, closeMaterialModal, handleUnauthorized, beginOperation, materialDraft, materialModalMode, setDataMessage]);
 
+  const handleMaterialTransaction = useCallback(async (payload: MaterialTransactionPayload) => {
+    if (!activeMaterialId || materialModalMode !== "edit") return false;
+    const operation = beginOperation();
+    if (!operation) return false;
+    setDataMessage(null);
+
+    try {
+      await createMaterialTransactionRecord(activeMaterialId, payload, handleUnauthorized);
+      await operation.refresh();
+      if (operation.isCurrent()) setDataMessage("Stock transaction recorded.");
+      return operation.isCurrent();
+    } catch (error) {
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
+      return false;
+    } finally {
+      operation.finish();
+    }
+  }, [activeMaterialId, beginOperation, handleUnauthorized, materialModalMode, setDataMessage]);
+
   return {
     materialModalMode, activeMaterialId, materialDraft, setMaterialDraft, isSavingMaterial, isDeletingMaterial,
     closeMaterialModal,
     handleDeleteMaterial,
     handleMaterialSubmit,
+    handleMaterialTransaction,
     openCreateMaterialModal,
     openEditMaterialModal,
   };
