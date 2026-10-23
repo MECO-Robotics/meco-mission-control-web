@@ -9,30 +9,33 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
-import { filterTestResultsForHistory } from "./workLogs/workLogsViewStateData";
+import { filterTestFindingsForHistory } from "./workLogs/workLogsViewStateData";
 import { WorkLogsActivitySection } from "./workLogs/WorkLogsActivitySection";
 import { WorkLogsActivityToolbar } from "./workLogs/WorkLogsActivityToolbar";
 import { WorkLogsTableSection } from "./workLogs/WorkLogsTableSection";
 import { WorkLogsToolbar } from "./workLogs/WorkLogsToolbar";
-import { ResultsReportList } from "./workLogs/ResultsReportList";
-import { TestFindingRetestList } from "./workLogs/TestFindingRetestList";
+import { ResultsReportList, type ResultsListEntry } from "./workLogs/ResultsReportList";
 import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
 import { WorkspaceTopbarControls, buildSingleAddMenuAction, buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 
-type HistoryReport = BootstrapPayload["reports"][number];
-
-function effectiveReportDate(report: HistoryReport) {
+function resultsEntryDate(entry: ResultsListEntry) {
+  if (entry.kind === "test-finding") return entry.finding.createdAt;
+  const report = entry.report;
   return report.reportType === "qa" && report.status === "reviewed"
     ? report.reviewedAt ?? report.createdAt
     : report.createdAt;
 }
 
-export function compareRecentReports(left: HistoryReport, right: HistoryReport, direction: "asc" | "desc") {
+function resultsEntryTitle(entry: ResultsListEntry) {
+  return entry.kind === "test-finding" ? entry.finding.title : entry.report.summary;
+}
+
+function compareRecentResults(left: ResultsListEntry, right: ResultsListEntry, direction: "asc" | "desc") {
   const factor = direction === "desc" ? -1 : 1;
-  const dateOrder = effectiveReportDate(left).localeCompare(effectiveReportDate(right));
-  return dateOrder * factor || left.summary.localeCompare(right.summary);
+  const dateOrder = resultsEntryDate(left).localeCompare(resultsEntryDate(right));
+  return dateOrder * factor || resultsEntryTitle(left).localeCompare(resultsEntryTitle(right));
 }
 
 interface WorkLogsViewProps {
@@ -72,10 +75,14 @@ export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings,
         : ref.id);
     return matchesPerson && [report.summary, report.notes, report.result, report.status, ...targets]
       .join(" ").toLowerCase().includes(state.search.toLowerCase());
-  }).sort((a, b) => reportSort === "title"
-    ? a.summary.localeCompare(b.summary) * (reportSortDirection === "asc" ? 1 : -1)
-    : compareRecentReports(a, b, reportSortDirection));
-  const testResults = filterTestResultsForHistory(bootstrap.testResults, activePersonFilter, state.search, state.taskById);
+  });
+  const testFindings = filterTestFindingsForHistory(bootstrap.testFindings, bootstrap.testResults, activePersonFilter, state.search, state.taskById);
+  const results: ResultsListEntry[] = [
+    ...reports.map((report) => ({ kind: "report" as const, report })),
+    ...testFindings.map(({ finding, testResult }) => ({ kind: "test-finding" as const, finding, testResult })),
+  ].sort((left, right) => reportSort === "title"
+    ? resultsEntryTitle(left).localeCompare(resultsEntryTitle(right)) * (reportSortDirection === "asc" ? 1 : -1)
+    : compareRecentResults(left, right, reportSortDirection));
   const addReportLabel = canCreateQaReport ? "Add report" : "Add milestone report";
   return <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
     <AppTopbarSlotPortal slot="controls"><WorkspaceTopbarControls>
@@ -89,6 +96,6 @@ export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings,
     </WorkspaceTopbarControls></AppTopbarSlotPortal>
     {view === "logs" ? <>
       <WorkLogsTableSection membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} workLogFilterMotionClass={state.workLogFilterMotionClass} workLogPagination={state.workLogPagination} workLogs={state.workLogs} />
-    </> : view === "activity" ? <WorkLogsActivitySection actions={state.activityActions} activityPagination={state.activityPagination} membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} /> : <><ResultsReportList reports={reports} bootstrap={bootstrap} canReviewFindings={canReviewFindings} localActorMemberId={localActorMemberId} operationScope={operationScope} viewScope={viewScope} handleUnauthorized={handleUnauthorized} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} /><TestFindingRetestList bootstrap={bootstrap} testResults={testResults} canReview={Boolean(canReviewFindings)} handleUnauthorized={handleUnauthorized} localActorMemberId={localActorMemberId} operationScope={operationScope} viewScope={viewScope} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} /></>}
+    </> : view === "activity" ? <WorkLogsActivitySection actions={state.activityActions} activityPagination={state.activityPagination} membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} /> : <ResultsReportList entries={results} bootstrap={bootstrap} canReviewFindings={canReviewFindings} localActorMemberId={localActorMemberId} operationScope={operationScope} viewScope={viewScope} handleUnauthorized={handleUnauthorized} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} />}
   </section>;
 }

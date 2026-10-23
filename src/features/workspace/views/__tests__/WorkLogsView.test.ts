@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
-import { filterTestResultsForHistory } from "@/features/workspace/views/workLogs/workLogsViewStateData";
+import { filterTestFindingsForHistory } from "@/features/workspace/views/workLogs/workLogsViewStateData";
 import type { WorklogsViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -161,24 +161,37 @@ describe("WorkLogsView", () => {
     expect(renderWorkLogsView("logs", {}, false, false)).toContain('aria-label="Log work"');
   });
 
-  it("renders QA and milestone reports in the same results list", () => {
+  it("renders QA, milestone, and test finding records in the same results list", () => {
     const base = { projectId: "p", targetRefs: [], createdByMemberId: null, participantIds: [], mentorId: null, requestedById: null, result: "pass", status: "submitted" as const, notes: "", createdAt: "2026-09-10" };
     const reports: BootstrapPayload["reports"] = [
       { ...base, id: "qa", reportType: "qa", summary: "Sensor QA" },
       { ...base, id: "result", reportType: "practice", summary: "Scrimmage result", result: "Strong finish" },
     ];
-    const html = renderWorkLogsView("reports", { reports });
+    const html = renderWorkLogsView("reports", {
+      reports,
+      testResults: [{ id: "test-result", projectId: "p", targetRefs: [], title: "Drive vibration", status: "fail" }],
+      testFindings: [
+        { id: "test-finding", reportId: null, testResultId: "test-result", projectId: "p", targetRefs: [], title: "Drive mount", detail: "Retorque bolts", severity: "medium", status: "open", createdAt: "2026-09-11", updatedAt: "2026-09-11" },
+        { id: "orphan-finding", reportId: null, testResultId: "missing-result", projectId: "p", targetRefs: [], title: "Orphan finding", detail: "Check record linkage", severity: "low", status: "open", createdAt: "2026-09-09", updatedAt: "2026-09-09" },
+      ],
+    });
     expect(html).toContain("Sensor QA");
     expect(html).toContain("Scrimmage result");
     expect(html).toContain("results-report-list");
     expect(html).toContain("Outcome");
     expect(html).toContain("Submitted · waiting for review");
     expect(html).toContain("Strong finish");
+    expect(html).toContain("Drive mount");
+    expect(html).toContain("Orphan finding");
+    expect(html).toContain("open · test fail");
+    expect(html).toContain("Test result unavailable");
+    expect(html).not.toContain('aria-label="Test findings"');
+    expect((html.match(/results-report-list/g) ?? [])).toHaveLength(1);
     expect(html).not.toContain("qa-report-list");
     expect(renderWorkLogsView("reports")).toContain("No results yet");
   });
 
-  it("interleaves recent reports by effective date and keeps QA review order visible", () => {
+  it("interleaves reports and test findings by effective date and keeps QA review order visible", () => {
     const base = { projectId: "project-1", targetRefs: [], createdByMemberId: null, participantIds: [], mentorId: null, requestedById: null, summary: "", notes: "", createdAt: "2026-10-15T00:00:00.000Z" };
     const reports: BootstrapPayload["reports"] = [
       { ...base, id: "old-pass", reportType: "qa", summary: "Earlier pass", result: "pass", status: "reviewed", createdAt: "2099-12-31T00:00:00.000Z", reviewedAt: "2026-10-10T00:00:00.000Z", reviewOrder: 1 },
@@ -187,9 +200,14 @@ describe("WorkLogsView", () => {
       { ...base, id: "milestone", reportType: "practice", summary: "Scrimmage result", result: "Strong finish", status: "submitted", createdAt: "2026-10-13T00:00:00.000Z" },
       { ...base, id: "submitted", reportType: "qa", summary: "Still waiting", result: "pass", status: "submitted", createdAt: "2026-10-09T00:00:00.000Z" },
     ];
-    const html = renderWorkLogsView("reports", { reports });
+    const html = renderWorkLogsView("reports", {
+      reports,
+      testResults: [{ id: "test-result", projectId: "project-1", targetRefs: [], title: "Drive vibration", status: "fail" }],
+      testFindings: [{ id: "test-finding", reportId: null, testResultId: "test-result", projectId: "project-1", targetRefs: [], title: "Drive mount", detail: "Retorque bolts", severity: "medium", status: "open", createdAt: "2026-10-14T00:00:00.000Z", updatedAt: "2026-10-14T00:00:00.000Z" }],
+    });
     expect(html.indexOf("Later failure")).toBeLessThan(html.indexOf("Earlier pass"));
-    expect(html.indexOf("Later failure")).toBeLessThan(html.indexOf("Scrimmage result"));
+    expect(html.indexOf("Later failure")).toBeLessThan(html.indexOf("Drive mount"));
+    expect(html.indexOf("Drive mount")).toBeLessThan(html.indexOf("Scrimmage result"));
     expect(html.indexOf("Scrimmage result")).toBeLessThan(html.indexOf("Legacy review"));
     expect(html.indexOf("Legacy review")).toBeLessThan(html.indexOf("Earlier pass"));
     expect(html.indexOf("Earlier pass")).toBeLessThan(html.indexOf("Still waiting"));
@@ -212,7 +230,8 @@ describe("WorkLogsView", () => {
     const student = renderWorkLogsView("reports", data);
     expect(student).toContain("This review needs another check");
     expect(student).not.toContain(">Record retest</button>");
-    expect(student).toContain("Test findings");
+    expect(student).toContain("Loose wheel nut");
+    expect(student).toContain("Test finding · Wheel test");
     const mentor = renderWorkLogsView("reports", data, true);
     expect(mentor).toMatch(/>\s*Record retest<\/button>/);
     expect(mentor).not.toContain("Retests are temporarily unavailable");
@@ -243,13 +262,13 @@ describe("WorkLogsView", () => {
       { id: "drive-finding", reportId: null, testResultId: "drive-result", projectId: task.projectId, targetRefs: [], title: "Drive mount", detail: "Retorque", severity: "medium", status: "open", createdAt: "2026-10-16", updatedAt: "2026-10-16" },
       { id: "pump-finding", reportId: null, testResultId: "pump-result", projectId: task.projectId, targetRefs: [], title: "Pump seal", detail: "Inspect", severity: "medium", status: "open", createdAt: "2026-10-16", updatedAt: "2026-10-16" },
     ];
-    const matching = filterTestResultsForHistory(bootstrap.testResults, ["student-1"], "drive", Object.fromEntries(bootstrap.tasks.map((entry) => [entry.id, entry])));
-    expect(matching.map((result) => result.id)).toEqual(["drive-result"]);
+    const matching = filterTestFindingsForHistory(bootstrap.testFindings, bootstrap.testResults, ["student-1"], "drive", Object.fromEntries(bootstrap.tasks.map((entry) => [entry.id, entry])));
+    expect(matching.map(({ finding }) => finding.id)).toEqual(["drive-finding"]);
 
     const html = renderWorkLogsView("reports", bootstrap, true, true, ["student-1"]);
     expect(html).toContain("Drive mount");
     expect(html).not.toContain("Pump seal");
-    expect(html).toContain("Test findings");
+    expect(html).not.toContain('aria-label="Test findings"');
   });
 
   it("does not synthesize activity entries when audit actions are unavailable", () => {

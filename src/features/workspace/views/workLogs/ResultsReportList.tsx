@@ -12,7 +12,7 @@ const QA_REPORT_GRID = "minmax(220px, 2fr) minmax(120px, 1fr) minmax(90px, 0.7fr
 
 interface ResultsReportListProps {
   bootstrap: BootstrapPayload;
-  reports: ReportRecord[];
+  entries: ResultsListEntry[];
   canReviewFindings?: boolean;
   localActorMemberId?: string | null;
   operationScope?: string;
@@ -25,51 +25,63 @@ interface ResultsReportListProps {
   onOpenMilestone?: (milestoneId: string) => void;
 }
 
-export function ResultsReportList({ bootstrap, reports, canReviewFindings = false, localActorMemberId, operationScope = "local-anonymous", viewScope = "", handleUnauthorized, loadWorkspace, setDataMessage, readFinding, onOpenTask, onOpenMilestone }: ResultsReportListProps) {
+export type ResultsListEntry =
+  | { kind: "report"; report: ReportRecord }
+  | { kind: "test-finding"; finding: BootstrapPayload["testFindings"][number]; testResult: BootstrapPayload["testResults"][number] | null };
+
+export function ResultsReportList({ bootstrap, entries, canReviewFindings = false, localActorMemberId, operationScope = "local-anonymous", viewScope = "", handleUnauthorized, loadWorkspace, setDataMessage, readFinding, onOpenTask, onOpenMilestone }: ResultsReportListProps) {
   const gridStyle = { "--workspace-grid-template": QA_REPORT_GRID } as CSSProperties;
-  if (reports.length === 0) return <WorkspaceEmptyState title="No results yet" reason="QA and milestone reports recorded for this workspace will appear here." />;
+  if (entries.length === 0) return <WorkspaceEmptyState title="No results yet" reason="QA reports, milestone reports, and test findings recorded for this workspace will appear here." />;
 
   return (
     <div className="table-shell results-report-list">
       <div className="ops-table ops-table-header materials-table results-report-row" style={gridStyle}>
         {(["Report", "Target", "Outcome", "Date"] as const).map((label) => <span className="table-column-title" key={label}>{label}</span>)}
       </div>
-      {reports.map((report) => {
-        const taskTargets = report.targetRefs.filter((target) => target.kind === "task");
-        const milestoneTargets = report.targetRefs.filter((target) => target.kind === "milestone");
-        const targetNames = report.targetRefs.map((target) => target.kind === "task"
+      {entries.map((entry) => {
+        const report = entry.kind === "report" ? entry.report : null;
+        const finding = entry.kind === "test-finding" ? entry.finding : null;
+        const testResult = entry.kind === "test-finding" ? entry.testResult : null;
+        const targetRefs = report?.targetRefs ?? (finding?.targetRefs.length ? finding.targetRefs : testResult?.targetRefs ?? []);
+        const taskTargets = targetRefs.filter((target) => target.kind === "task");
+        const milestoneTargets = targetRefs.filter((target) => target.kind === "milestone");
+        const targetNames = targetRefs.map((target) => target.kind === "task"
           ? bootstrap.tasks.find((task) => task.id === target.id)?.title ?? "Task"
           : target.kind === "milestone"
             ? bootstrap.milestones.find((milestone) => milestone.id === target.id)?.title ?? "Milestone"
             : target.id);
-        const isQaReport = report.reportType === "qa";
+        const isQaReport = report?.reportType === "qa";
         const reportTypeLabel = isQaReport
           ? "QA report"
-          : milestoneTargets.length > 0 ? "Milestone report" : `${report.reportType} report`;
-        const effectiveDate = isQaReport && report.status === "reviewed"
+          : report ? milestoneTargets.length > 0 ? "Milestone report" : `${report.reportType} report` : "Test finding";
+        const effectiveDate = isQaReport && report?.status === "reviewed"
           ? report.reviewedAt ?? report.createdAt
-          : report.createdAt;
-        const outcome = isQaReport
-          ? report.status === "reviewed" ? report.result || "Reviewed" : report.status === "submitted" ? "Submitted · waiting for review" : "Draft · not approved"
-          : report.result || report.status;
+          : report?.createdAt ?? finding?.createdAt ?? "";
+        const outcome = finding
+          ? testResult ? `${finding.status} · test ${testResult.status}` : finding.status
+          : isQaReport && report
+            ? report.status === "reviewed" ? report.result || "Reviewed" : report.status === "submitted" ? "Submitted · waiting for review" : "Draft · not approved"
+            : report?.result || report?.status || "Unknown";
 
         return (
-          <details className="results-report-disclosure" key={report.id}>
+          <details className="results-report-disclosure" key={report ? `report:${report.id}` : finding?.id}>
             <summary className="ops-table ops-row materials-table results-report-row" style={gridStyle}>
-              <ResourceRecordCell label="Report" name={report.summary || reportTypeLabel} subtitle={`${reportTypeLabel}${report.notes ? ` · ${report.notes}` : ""}`} />
-              <TableCell label="Target">{targetNames.join(", ") || "Workspace"}</TableCell>
+              <ResourceRecordCell label="Report" name={report?.summary || finding?.title || reportTypeLabel} subtitle={report ? `${reportTypeLabel}${report.notes ? ` · ${report.notes}` : ""}` : `${reportTypeLabel} · ${testResult?.title ?? "Test result unavailable"}`} />
+              <TableCell label="Target">{targetNames.join(", ") || (finding && !testResult ? "Target unavailable" : "Workspace")}</TableCell>
               <TableCell label="Outcome" valueClassName="table-cell-pill">{outcome}</TableCell>
-              <TableCell label="Date">{effectiveDate || "Date unavailable"}{isQaReport && report.status === "reviewed" ? <small className="qa-review-order-note">{typeof report.reviewOrder === "number" ? `Review ${report.reviewOrder}` : "Review order unavailable"}</small> : null}</TableCell>
+              <TableCell label="Date">{effectiveDate || "Date unavailable"}{isQaReport && report?.status === "reviewed" ? <small className="qa-review-order-note">{typeof report.reviewOrder === "number" ? `Review ${report.reviewOrder}` : "Review order unavailable"}</small> : null}</TableCell>
             </summary>
-            <div className="qa-report-details">
+            <div className="results-report-details">
               {taskTargets.map((target) => onOpenTask ? <button className="secondary-action" key={target.id} onClick={() => onOpenTask(target.id)} type="button">Open task</button> : null)}
               {milestoneTargets.map((target) => onOpenMilestone ? <button className="secondary-action" key={target.id} onClick={() => onOpenMilestone(target.id)} type="button">Open milestone</button> : null)}
-              <p>Observed: {report.createdAt}</p>
-              {report.evidenceNotes ? <p>Evidence: {report.evidenceNotes}</p> : null}
-              {isQaReport && report.status === "reviewed" ? <p>Reviewed by: {bootstrap.members.find((member) => member.id === report.reviewedById)?.name ?? "Reviewer unavailable"}</p> : null}
-              {isQaReport && report.status === "reviewed" && typeof report.reviewOrder === "number" ? <p>Review {report.reviewOrder}</p> : null}
-              {report.participantIds.length ? <p>Participants: {report.participantIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name ?? "Unknown member").join(", ")}</p> : null}
-              {isQaReport ? bootstrap.qaFindings.filter((finding) => finding.reportId === report.id).map((finding) => {
+              {report ? <>
+                <p>Observed: {report.createdAt}</p>
+                {report.evidenceNotes ? <p>Evidence: {report.evidenceNotes}</p> : null}
+                {isQaReport && report.status === "reviewed" ? <p>Reviewed by: {bootstrap.members.find((member) => member.id === report.reviewedById)?.name ?? "Reviewer unavailable"}</p> : null}
+                {isQaReport && report.status === "reviewed" && typeof report.reviewOrder === "number" ? <p>Review {report.reviewOrder}</p> : null}
+                {report.participantIds.length ? <p>Participants: {report.participantIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name ?? "Unknown member").join(", ")}</p> : null}
+              </> : null}
+              {report && isQaReport ? bootstrap.qaFindings.filter((finding) => finding.reportId === report.id).map((finding) => {
                 const inspectedIds = report.inspectedPartInstanceIds;
                 const currentPartIds = bootstrap.tasks.filter((task) => taskTargets.some((target) => target.id === task.id)).flatMap((task) => task.partInstanceIds);
                 const missingParts = inspectedIds ? currentPartIds.filter((id) => !inspectedIds.includes(id)) : [];
@@ -82,7 +94,7 @@ export function ResultsReportList({ bootstrap, reports, canReviewFindings = fals
                 const needsVerification = finding.status !== "resolved" || verificationUnknown || missingParts.length > 0;
                 const correctiveTask = finding.correctiveTaskId ? bootstrap.tasks.find((task) => task.id === finding.correctiveTaskId) : null;
                 const linkedRisk = finding.riskId ? bootstrap.risks.find((risk) => risk.id === finding.riskId) : null;
-                return <div className="qa-finding-details" key={finding.id}>
+                return <div className="results-finding-details" key={finding.id}>
                   <p><strong>{finding.title}</strong>: {finding.detail} <span className="table-cell-pill">{finding.status}</span></p>
                   <p>{coverageMessage}</p>
                   {typeof report.reviewOrder === "number" ? <p>Review {report.reviewOrder}</p> : null}
@@ -91,7 +103,12 @@ export function ResultsReportList({ bootstrap, reports, canReviewFindings = fals
                   {needsVerification || finding.retests?.length ? <FindingRetestAction key={`${viewScope}:qa:${finding.id}`} finding={finding} sourceType="qa" scope={operationScope} viewScope={viewScope} canReview={canReviewFindings} handleUnauthorized={handleUnauthorized} localActorMemberId={localActorMemberId} members={bootstrap.members} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} /> : null}
                 </div>;
               }) : null}
-              {report.photoUrl ? <a href={report.photoUrl} rel="noreferrer" target="_blank">View attached evidence</a> : null}
+              {report?.photoUrl ? <a href={report.photoUrl} rel="noreferrer" target="_blank">View attached evidence</a> : null}
+              {finding ? <div className="results-finding-details">
+                <p>{finding.detail} <span className="table-cell-pill">{finding.status}</span></p>
+                <p>{testResult ? `Test result: ${testResult.title} · ${testResult.status}` : "Test result unavailable"}</p>
+                <FindingRetestAction key={`${viewScope}:test:${finding.id}`} finding={finding} sourceType="test" scope={operationScope} viewScope={viewScope} canReview={canReviewFindings} handleUnauthorized={handleUnauthorized} localActorMemberId={localActorMemberId} members={bootstrap.members} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} />
+              </div> : null}
             </div>
           </details>
         );
