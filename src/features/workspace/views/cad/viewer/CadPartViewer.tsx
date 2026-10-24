@@ -5,7 +5,7 @@ import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspa
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
 import type { CadMesh } from "./cadGeometry";
-import { loadBundledMainAssembly } from "./loadBundledCadFile";
+import { loadBundledMainAssembly, loadOptimizedRobotPreview } from "./loadBundledCadFile";
 import "./cadPartViewer.css";
 
 const CadPartScene = lazy(() => import("./CadPartScene"));
@@ -24,7 +24,11 @@ function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { 
   const [reset, setReset] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
-    void import("./loadCadGeometry").then(({ loadCadGeometry }) => loadCadGeometry(file, controller.signal)).then((result) => {
+    const optimized = file.name.toLowerCase().endsWith(".glb");
+    const loadGeometry = optimized
+      ? import("./loadCadGltfGeometry").then(({ loadCadGltfGeometry }) => loadCadGltfGeometry(file, controller.signal))
+      : import("./loadCadGeometry").then(({ loadCadGeometry }) => loadCadGeometry(file, controller.signal));
+    void loadGeometry.then((result) => {
       if (!controller.signal.aborted) setMeshes(result);
     }).catch((cause: Error) => {
       if (!controller.signal.aborted) setError(cause.message);
@@ -36,8 +40,8 @@ function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { 
     (mesh.name || `Part ${index + 1}`).toLowerCase().includes(search.trim().toLowerCase()),
   );
   return <>
-    <p className="cad-viewer-filename">{file.name} · File preview · Dimensions in millimeters</p>
-    {error ? <p role="alert">{error}</p> : !meshes ? <p role="status">Preparing part geometry…</p> : <>
+    <p className="cad-viewer-filename">{file.name} · {file.name.toLowerCase().endsWith(".glb") ? "Optimized glTF preview" : "STEP file preview · Dimensions in millimeters"}</p>
+    {error ? <p role="alert">{error}</p> : !meshes ? <p role="status">{file.name.toLowerCase().endsWith(".glb") ? "Loading optimized model…" : "Preparing part geometry…"}</p> : <>
       <div className="cad-viewer-toolbar">
         <button type="button" className="secondary-action" onClick={() => setReset((value) => value + 1)}>Fit view</button>
         <button type="button" className="secondary-action" aria-pressed={wireframe} onClick={() => setWireframe(!wireframe)}>Wireframe</button>
@@ -83,6 +87,8 @@ export function CadFileViewer({
   importPlacement = "inline",
   embeddedInMap = false,
   loadSeedMainAssembly = false,
+  projectId,
+  seasonId,
   onOpenCadWorkspace,
   additionalTopbarActions = [],
   onOrbitingChange,
@@ -90,11 +96,16 @@ export function CadFileViewer({
 }: {
   embeddedInMap?: boolean;
   loadSeedMainAssembly?: boolean;
+  projectId?: string | null;
+  seasonId?: string | null;
   importPlacement?: "inline" | "topbar";
   onOpenCadWorkspace?: () => void;
   additionalTopbarActions?: TopbarAddMenuAction[];
   onOrbitingChange?: (isOrbiting: boolean) => void;
 } & CadPartImageTargets) {
+  const navigationParams = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
+  const previewProjectId = projectId ?? navigationParams?.get("project");
+  const previewSeasonId = seasonId ?? navigationParams?.get("season");
   const [file, setFile] = useState<File | null>(null);
   const [seedLoadMessage, setSeedLoadMessage] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -107,8 +118,11 @@ export function CadFileViewer({
       return;
     }
     let isActive = true;
-    setSeedLoadMessage("Loading the 2026 robot assembly…");
-    void loadBundledMainAssembly().then((seededFile) => {
+    setSeedLoadMessage(embeddedInMap ? "Loading optimized robot CAD…" : "Loading the 2026 robot assembly…");
+    const loadPreview = embeddedInMap
+      ? loadOptimizedRobotPreview({ projectId: previewProjectId, seasonId: previewSeasonId })
+      : loadBundledMainAssembly();
+    void loadPreview.then((seededFile) => {
       if (!isActive) return;
       setFile((current) => current ?? seededFile);
       setSeedLoadMessage(null);
@@ -116,7 +130,7 @@ export function CadFileViewer({
       if (isActive) setSeedLoadMessage(error instanceof Error ? error.message : String(error));
     });
     return () => { isActive = false; };
-  }, [shouldLoadSeedMainAssembly]);
+  }, [embeddedInMap, previewProjectId, previewSeasonId, shouldLoadSeedMainAssembly]);
   return <div className={`cad-local-viewer${embeddedInMap ? " cad-local-viewer-embedded" : ""}`}>
     {!embeddedInMap ? <TopbarResponsiveSearch ariaLabel="Search CAD parts" onChange={setSearch} placeholder="Search CAD parts…" value={search} /> : null}
     {importPlacement === "topbar" ? (

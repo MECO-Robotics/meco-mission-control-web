@@ -17,3 +17,25 @@ export function loadBundledMainAssembly(): Promise<File> {
   }
   return mainAssemblyPromise;
 }
+
+export async function loadOptimizedRobotPreview(scope: { projectId?: string | null; seasonId?: string | null } = {}): Promise<File> {
+  const params = new URLSearchParams();
+  if (scope.projectId) params.set("projectId", scope.projectId);
+  if (scope.seasonId) params.set("seasonId", scope.seasonId);
+  const query = params.size ? `?${params.toString()}` : "";
+  const response = await fetch(`/api/cad/optimized-preview${query}`, { credentials: "include" });
+  if (response.ok) {
+    const sourceName = decodeURIComponent(response.headers.get("X-CAD-Source-Name") ?? "Robot assembly.step");
+    return new File([await response.blob()], sourceName.replace(/\.(step|stp)$/i, ".glb"), { type: "model/gltf-binary" });
+  }
+  if (response.status !== 404) {
+    const message = await response.text().catch(() => "");
+    throw new Error(message || "The stored CAD preview could not be loaded.");
+  }
+  const bundled = await fetch("/cad/main-assembly.glb.gzdata");
+  if (!bundled.ok || !bundled.body) throw new Error("No optimized robot CAD preview is available.");
+  if (typeof DecompressionStream === "undefined") throw new Error("This browser cannot decompress the optimized robot CAD preview.");
+  const decompressed = bundled.body.pipeThrough(new DecompressionStream("gzip"));
+  const blob = await new Response(decompressed).blob();
+  return new File([blob], "MAIN ASSEMBLY.glb", { type: "model/gltf-binary" });
+}
