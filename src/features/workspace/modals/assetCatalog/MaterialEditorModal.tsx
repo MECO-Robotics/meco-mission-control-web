@@ -36,6 +36,8 @@ export function MaterialEditorModal({
   handleMaterialTransaction,
   materialTransactions,
 }: MaterialEditorModalProps) {
+  const activeInventoryItem = bootstrap.materials.find((material) => material.id === activeMaterialId);
+  const isTool = activeInventoryItem?.category === "tool" || (materialModalMode === "create" && materialDraft.category === "tool");
   const [movementType, setMovementType] = useState<"consumption" | "adjustment">("consumption");
   const [adjustmentDirection, setAdjustmentDirection] = useState<"increase" | "decrease">("increase");
   const [transactionQuantity, setTransactionQuantity] = useState("");
@@ -44,23 +46,23 @@ export function MaterialEditorModal({
   const [projectId, setProjectId] = useState("");
   const [isRecordingTransaction, setIsRecordingTransaction] = useState(false);
   useEffect(() => {
-    setMovementType("consumption");
+    setMovementType(isTool ? "adjustment" : "consumption");
     setAdjustmentDirection("increase");
     setTransactionQuantity("");
     setTransactionReason("");
     setTaskId("");
     setProjectId("");
     setIsRecordingTransaction(false);
-  }, [activeMaterialId, materialModalMode]);
+  }, [activeMaterialId, isTool, materialModalMode]);
   if (!materialModalMode) return null;
   const updateDraft = <K extends keyof MaterialPayload>(field: K, value: MaterialPayload[K]) =>
     setMaterialDraft((current) => ({ ...current, [field]: value }));
 
   return (
     <EditorModalShell
-      dialogLabel="Material editor"
-      eyebrowLabel="Material editor"
-      title={materialModalMode === "create" ? "Add material" : "Edit material"}
+      dialogLabel={isTool ? "Tool editor" : "Material editor"}
+      eyebrowLabel={isTool ? "Tool editor" : "Material editor"}
+      title={materialModalMode === "create" ? isTool ? "Add tool" : "Add material" : isTool ? "Edit tool" : "Edit material"}
       onClose={closeMaterialModal}
       onSubmit={handleMaterialSubmit}
     >
@@ -84,6 +86,7 @@ export function MaterialEditorModal({
           <option value="electronics">Electronics</option>
           <option value="hardware">Hardware</option>
           <option value="consumable">Consumable</option>
+          <option value="tool">Tool</option>
           <option value="other">Other</option>
         </select>
       </label>
@@ -130,13 +133,13 @@ export function MaterialEditorModal({
       />
       {materialModalMode === "edit" && activeMaterialId ? (
         <section className="field modal-wide" aria-label="Stock transactions">
-          <h3 className="task-details-section-title">Stock transactions</h3>
+          <h3 className="task-details-section-title">{isTool ? "Tool inventory transactions" : "Stock transactions"}</h3>
           <p className="muted-copy">Current balance: {bootstrap.materials.find((material) => material.id === activeMaterialId)?.onHandQuantity ?? "Unknown"} {materialDraft.unit}</p>
           <div className="field">
             <label className="field">
               <span style={{ color: "var(--text-title)" }}>Movement</span>
               <select value={movementType} onChange={(event) => setMovementType(event.target.value as typeof movementType)}>
-                <option value="consumption">Consume stock</option>
+                {!isTool ? <option value="consumption">Consume stock</option> : null}
                 <option value="adjustment">Adjust stock</option>
               </select>
             </label>

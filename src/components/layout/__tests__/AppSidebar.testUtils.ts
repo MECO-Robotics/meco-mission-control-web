@@ -19,7 +19,7 @@ export function renderSidebar(
   activeTab: ViewTab = "worklogs",
   options?: {
     canSignIn?: boolean;
-    inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
+    inventoryView?: "materials" | "tools" | "parts" | "part-mappings" | "purchases";
     isCollapsed?: boolean;
     isNotificationQueueOpen?: boolean;
     notificationCount?: number;

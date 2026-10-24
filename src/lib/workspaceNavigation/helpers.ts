@@ -43,7 +43,7 @@ export function getActiveNavigationSubItemId(state: NavigationState, context?: V
     case "cad": case "subsystems": return "resources-structure";
     case "roster": return "team-people";
     case "teams": return "team-teams";
-    case "inventory": return state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? "resources-materials" : "resources-parts";
+    case "inventory": return state.inventoryView === "tools" ? "resources-tools" : state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? "resources-materials" : "resources-parts";
     default: return null;
   }
 }

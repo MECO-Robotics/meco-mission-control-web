@@ -154,7 +154,7 @@ export function PartDefinitionEditorModal({
           value={partDefinitionDraft.materialId ?? ""}
         >
           <option value="">No material</option>
-          {bootstrap.materials.map((material) => (
+          {bootstrap.materials.filter((material) => material.category !== "tool").map((material) => (
             <option key={material.id} value={material.id}>
               {material.name}
             </option>
