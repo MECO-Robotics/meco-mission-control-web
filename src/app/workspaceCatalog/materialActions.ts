@@ -11,6 +11,7 @@ import { materialToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createMaterialRecord, createMaterialTransactionRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
 import type { MaterialTransactionPayload } from "@/types/payloads";
+import type { MaterialCategory } from "@/types/common";
 
 export function useMaterialEditor({
   bootstrap, selectedProjectId, selectedSeasonId,
@@ -54,6 +55,10 @@ export function useMaterialEditor({
     records: bootstrap.materials,
     setDataMessage,
   });
+  const openCreateInventoryItem = useCallback((category?: MaterialCategory) => {
+    openCreateMaterialModal();
+    if (category) setMaterialDraft((current) => ({ ...current, category }));
+  }, [openCreateMaterialModal, setMaterialDraft]);
 
   const handleMaterialSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
@@ -105,7 +110,7 @@ export function useMaterialEditor({
     handleDeleteMaterial,
     handleMaterialSubmit,
     handleMaterialTransaction,
-    openCreateMaterialModal,
+    openCreateMaterialModal: openCreateInventoryItem,
     openEditMaterialModal,
   };
 }

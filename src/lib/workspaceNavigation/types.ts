@@ -24,10 +24,10 @@ export type ViewAvailabilityContext =
 
 export type TaskViewTab = "timeline" | "robot-map" | "kanban";
 export type WorklogsViewTab = "logs" | "activity" | "reports";
-export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
+export type InventoryViewTab = "materials" | "tools" | "documents" | "parts" | "part-mappings" | "purchases";
 export type NavigationSubItemId =
   | "home" | "work-tasks" | "work-schedule" | "work-activity" | "work-risks"
-  | "resources-materials" | "resources-documents" | "resources-qa-reports" | "resources-parts"
+  | "resources-materials" | "resources-tools" | "resources-documents" | "resources-qa-reports" | "resources-parts"
   | "resources-purchases" | "resources-structure"
   | "team-people" | "team-teams";
 

@@ -33,7 +33,8 @@ import {
 
 interface MaterialsViewProps {
   bootstrap: BootstrapPayload;
-  openCreateMaterialModal: () => void;
+  inventoryKind?: "materials" | "tools";
+  openCreateMaterialModal: (category?: "tool") => void;
   openEditMaterialModal: (item: MaterialRecord) => void;
 }
 
@@ -41,9 +42,17 @@ const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) minmax(0, 0.75fr) minmax(0
 
 export function MaterialsView({
   bootstrap,
+  inventoryKind = "materials",
   openCreateMaterialModal,
   openEditMaterialModal,
 }: MaterialsViewProps) {
+  const isToolsView = inventoryKind === "tools";
+  const itemLabel = isToolsView ? "Tool" : "Material";
+  const itemLabelPlural = isToolsView ? "tools" : "materials";
+  const inventoryItems = useMemo(
+    () => bootstrap.materials.filter((item) => (item.category === "tool") === isToolsView),
+    [bootstrap.materials, isToolsView],
+  );
   const [search, setSearch] = useState("");
   const [name, setName] = useState<FilterSelection>([]);
   const [category, setCategory] = useState<FilterSelection>([]);
@@ -56,7 +65,7 @@ export function MaterialsView({
 
   const columnOptions = useMemo(() => {
     const uniqueOptions = (getValue: (material: MaterialRecord) => string) =>
-      getResourceFilterOptions(bootstrap.materials.map(getValue));
+      getResourceFilterOptions(inventoryItems.map(getValue));
     const vendorName = (material: MaterialRecord) => material.preferredVendorId ? bootstrap.vendors.find((vendor) => vendor.id === material.preferredVendorId)?.name ?? "Unknown vendor" : "No preferred vendor";
 
     return {
@@ -65,10 +74,10 @@ export function MaterialsView({
       location: uniqueOptions((material) => material.location || "Unassigned"),
       vendor: uniqueOptions(vendorName),
     };
-  }, [bootstrap.materials, bootstrap.vendors]);
+  }, [inventoryItems, bootstrap.vendors]);
 
   const filteredMaterials = useMemo(() => {
-    return filterMaterialInventory(bootstrap.materials, {
+    return filterMaterialInventory(inventoryItems, {
       search,
       name,
       category,
@@ -77,7 +86,7 @@ export function MaterialsView({
       vendor,
       stock,
     }, Object.fromEntries(bootstrap.vendors.map((item) => [item.id, item.name])));
-  }, [bootstrap.materials, bootstrap.vendors, category, location, name, quantity, search, stock, vendor]);
+  }, [inventoryItems, bootstrap.vendors, category, location, name, quantity, search, stock, vendor]);
   const sortedMaterials = useMemo(
     () => sortMaterialInventory(filteredMaterials, sortField, sortDirection, Object.fromEntries(bootstrap.vendors.map((item) => [item.id, item.name]))),
     [bootstrap.vendors, filteredMaterials, sortDirection, sortField],
@@ -119,13 +128,13 @@ export function MaterialsView({
                 <>
                   <CompactFilterMenu
                     activeCount={[name, category, quantity, location, vendor, stock].filter((value) => value.length > 0).length}
-                    ariaLabel="Material filters"
+                    ariaLabel={`${itemLabel} filters`}
                     buttonLabel="Filters"
                     className="materials-filter-menu"
                     items={[
-                      createResourceFilterMenuItem({ allLabel: "All materials", ariaLabel: "Filter materials by name", label: "Material", onChange: setName, options: columnOptions.name, value: name }),
-                      createResourceFilterMenuItem({ allLabel: "All categories", ariaLabel: "Filter materials by category", label: "Category", onChange: setCategory, options: MATERIAL_CATEGORY_OPTIONS, value: category }),
-                      createResourceFilterMenuItem({ allLabel: "All quantities", ariaLabel: "Filter materials by on-hand and reorder quantities", label: "On hand / reorder", onChange: setQuantity, options: columnOptions.quantity, value: quantity }),
+                      createResourceFilterMenuItem({ allLabel: `All ${itemLabelPlural}`, ariaLabel: `Filter ${itemLabelPlural} by name`, label: itemLabel, onChange: setName, options: columnOptions.name, value: name }),
+                      createResourceFilterMenuItem({ allLabel: "All categories", ariaLabel: `Filter ${itemLabelPlural} by category`, label: "Category", onChange: setCategory, options: MATERIAL_CATEGORY_OPTIONS.filter((option) => (option.id === "tool") === isToolsView), value: category }),
+                      createResourceFilterMenuItem({ allLabel: "All quantities", ariaLabel: `Filter ${itemLabelPlural} by quantity`, label: isToolsView ? "On hand" : "On hand / reorder", onChange: setQuantity, options: columnOptions.quantity, value: quantity }),
                       createResourceFilterMenuItem({ allLabel: "All locations", ariaLabel: "Filter materials by location", label: "Location", onChange: setLocation, options: columnOptions.location, value: location }),
                       createResourceFilterMenuItem({ allLabel: "All vendors", ariaLabel: "Filter materials by vendor", label: "Vendor", onChange: setVendor, options: columnOptions.vendor, value: vendor }),
                       createResourceFilterMenuItem({ allLabel: "All stock", ariaLabel: "Filter materials by stock level", label: "Status", onChange: setStock, options: MATERIAL_STOCK_OPTIONS, value: stock }),
@@ -134,25 +143,25 @@ export function MaterialsView({
                   <ResourceSortMenu
                     direction={sortDirection}
                     field={sortField}
-                    label="materials"
+                    label={itemLabelPlural}
                     onDirectionChange={setSortDirection}
                     onFieldChange={(field) => setSortField(field as MaterialSortField)}
-                    options={[{ label: "Material", value: "name" }, { label: "Category", value: "category" }, { label: "On hand / reorder", value: "quantity" }, { label: "Location", value: "location" }, { label: "Vendor", value: "vendor" }, { label: "Status", value: "status" }]}
+                    options={[{ label: itemLabel, value: "name" }, { label: "Category", value: "category" }, { label: isToolsView ? "On hand" : "On hand / reorder", value: "quantity" }, { label: "Location", value: "location" }, { label: "Vendor", value: "vendor" }, { label: "Status", value: "status" }]}
                   />
                 </>
                 ),
-               ariaLabel: "Search materials",
+               ariaLabel: `Search ${itemLabelPlural}`,
               onChange: setSearch,
-              placeholder: "Search materials...",
-              tutorialTarget: "materials-search-input",
+              placeholder: `Search ${itemLabelPlural}...`,
+              tutorialTarget: isToolsView ? "tools-search-input" : "materials-search-input",
               value: search,
             })}
           />
           <WorkspaceTopbarAddMenu
-            actions={buildSingleAddMenuAction({ label: "Add material", onSelect: openCreateMaterialModal })}
-            ariaLabel="Add material"
-            title="Add material"
-            tutorialTarget="create-material-button"
+            actions={buildSingleAddMenuAction({ label: `Add ${itemLabel.toLowerCase()}`, onSelect: () => openCreateMaterialModal(isToolsView ? "tool" : undefined) })}
+            ariaLabel={`Add ${itemLabel.toLowerCase()}`}
+            title={`Add ${itemLabel.toLowerCase()}`}
+            tutorialTarget={isToolsView ? "create-tool-button" : "create-material-button"}
           />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
@@ -162,10 +171,10 @@ export function MaterialsView({
           className="ops-table ops-table-header materials-table"
           style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
         >
-          <ResourceColumnHeader field="name" label="Material" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
+          <ResourceColumnHeader field="name" label={itemLabel} onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
-              allLabel="All materials"
-              ariaLabel="Filter materials by name"
+              allLabel={`All ${itemLabelPlural}`}
+              ariaLabel={`Filter ${itemLabelPlural} by name`}
               onChange={setName}
               options={columnOptions.name}
               value={name}
@@ -176,14 +185,14 @@ export function MaterialsView({
               allLabel="All categories"
               ariaLabel="Filter materials by category"
               onChange={setCategory}
-              options={MATERIAL_CATEGORY_OPTIONS}
+              options={MATERIAL_CATEGORY_OPTIONS.filter((option) => (option.id === "tool") === isToolsView)}
               value={category}
             />
           </ResourceColumnHeader>
-          <ResourceColumnHeader field="quantity" label="On hand / reorder" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
+          <ResourceColumnHeader field="quantity" label={isToolsView ? "On hand" : "On hand / reorder"} onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All quantities"
-              ariaLabel="Filter materials by on-hand and reorder quantities"
+              ariaLabel={`Filter ${itemLabelPlural} by quantity`}
               onChange={setQuantity}
               options={columnOptions.quantity}
               value={quantity}
@@ -237,15 +246,15 @@ export function MaterialsView({
               title={`Edit ${material.name}`}
               type="button"
             >
-              <ResourceRecordCell label="Material" photoUrl={material.photoUrl} name={material.name} subtitle={materialSubtitle} />
+              <ResourceRecordCell label={itemLabel} photoUrl={material.photoUrl} name={material.name} subtitle={materialSubtitle} />
               <TableCell label="Category">{material.category}</TableCell>
-              <TableCell label="On hand / reorder" valueClassName={isBelowReorder ? "materials-stock-below-reorder" : undefined}>
-                {material.onHandQuantity ?? "Unknown"} / {material.reorderPoint ?? "Not set"}
+              <TableCell label={isToolsView ? "On hand" : "On hand / reorder"} valueClassName={isBelowReorder ? "materials-stock-below-reorder" : undefined}>
+                {isToolsView ? material.onHandQuantity ?? "Unknown" : `${material.onHandQuantity ?? "Unknown"} / ${material.reorderPoint ?? "Not set"}`}
               </TableCell>
               <TableCell label="Location">{material.location || "Unassigned"}</TableCell>
               <TableCell label="Preferred vendor">{material.preferredVendorId ? bootstrap.vendors.find((item) => item.id === material.preferredVendorId)?.name ?? "Unknown vendor" : "None"}</TableCell>
               <TableCell label="Status" valueClassName="table-cell-pill">
-                {isUnknown ? <span className="muted-copy">Quantity unknown</span> : material.reorderPoint === null ? <span className="muted-copy">Reorder point not set</span> : <span className={getStatusPillClassName(isLow ? "critical" : "complete")}>
+                {isUnknown ? <span className="muted-copy">Quantity unknown</span> : isToolsView ? <span className={getStatusPillClassName("complete")}>In inventory</span> : material.reorderPoint === null ? <span className="muted-copy">Reorder point not set</span> : <span className={getStatusPillClassName(isLow ? "critical" : "complete")}>
                   {isLow ? "Low stock" : "Stock OK"}
                 </span>}
               </TableCell>
@@ -259,17 +268,17 @@ export function MaterialsView({
             reason={
               hasMaterialFilters
                 ? "The current search or filters hide every material record in this scope."
-                : "No stock, vendor, location, or reorder threshold records have been added for this workspace yet."
+                : isToolsView ? "No shop tools have been added for this workspace yet." : "No stock, vendor, location, or reorder threshold records have been added for this workspace yet."
             }
             title={
               hasMaterialFilters
-                ? "No materials match these filters"
-                : "Manage consumable and raw material inventory here"
+                ? `No ${itemLabelPlural} match these filters`
+                : isToolsView ? "Track reusable shop tools here" : "Manage fabrication stock here"
             }
           />
         ) : null}
         <PaginationControls
-          label="materials"
+          label={itemLabelPlural}
           onPageChange={materialPagination.setPage}
           onPageSizeChange={materialPagination.setPageSize}
           page={materialPagination.page}

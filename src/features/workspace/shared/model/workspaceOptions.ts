@@ -55,6 +55,7 @@ export const MATERIAL_CATEGORY_OPTIONS: DropdownOption[] = [
   { id: "electronics", name: "Electronics" },
   { id: "hardware", name: "Hardware" },
   { id: "consumable", name: "Consumable" },
+  { id: "tool", name: "Tool" },
   { id: "other", name: "Other" },
 ];
 

@@ -264,7 +264,7 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
   const receiptUnit = isDiscreteReceipt
     ? "parts"
     : receivingItem?.materialId
-    ? bootstrap.materials.find((material) => material.id === receivingItem.materialId)?.unit ?? "material units"
+    ? bootstrap.materials.find((material) => material.id === receivingItem.materialId)?.unit ?? "inventory units"
     : "service units";
   const beginNewReceiptOperation = () => {
     if (receivingItem) {

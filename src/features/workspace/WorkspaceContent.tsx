@@ -87,7 +87,7 @@ export interface WorkspaceContentProps {
   membersById: Record<string, BootstrapPayload["members"][number]>;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   openCreateArtifactModal: (kind: ArtifactKind) => void;
-  openCreateMaterialModal: () => void;
+  openCreateMaterialModal: (category?: "tool") => void;
   openCreateMechanismModal: (subsystemId?: string) => void;
   openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number], partDefinitionId?: string) => void;
   openCreateSubsystemModal: () => void;
@@ -199,7 +199,7 @@ export function WorkspaceContent({
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "documents", "parts", "part-mappings", "purchases"],
+    ["materials", "tools", "documents", "parts", "part-mappings", "purchases"],
   );
 
   useEffect(() => {
