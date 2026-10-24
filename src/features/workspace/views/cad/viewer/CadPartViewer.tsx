@@ -99,8 +99,9 @@ export function CadFileViewer({
   const [seedLoadMessage, setSeedLoadMessage] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const shouldLoadSeedMainAssembly = embeddedInMap || loadSeedMainAssembly;
   useEffect(() => {
-    if (!loadSeedMainAssembly) {
+    if (!shouldLoadSeedMainAssembly) {
       setFile(null);
       setSeedLoadMessage(null);
       return;
@@ -115,7 +116,7 @@ export function CadFileViewer({
       if (isActive) setSeedLoadMessage(error instanceof Error ? error.message : String(error));
     });
     return () => { isActive = false; };
-  }, [loadSeedMainAssembly]);
+  }, [shouldLoadSeedMainAssembly]);
   return <div className={`cad-local-viewer${embeddedInMap ? " cad-local-viewer-embedded" : ""}`}>
     {!embeddedInMap ? <TopbarResponsiveSearch ariaLabel="Search CAD parts" onChange={setSearch} placeholder="Search CAD parts…" value={search} /> : null}
     {importPlacement === "topbar" ? (
