@@ -16,6 +16,7 @@ import type {
 export function uploadCadStepFile(
   payload: {
     file: File;
+    optimizedModel: File;
     label: string;
     projectId?: string | null;
     seasonId?: string | null;
@@ -31,6 +32,7 @@ export function uploadCadStepFile(
     formData.set("seasonId", payload.seasonId);
   }
   formData.set("file", payload.file);
+  formData.set("optimizedModel", payload.optimizedModel);
   return requestApi<{
     importRun: CadStepImportRunRecord;
     snapshot: CadStepSnapshotRecord;

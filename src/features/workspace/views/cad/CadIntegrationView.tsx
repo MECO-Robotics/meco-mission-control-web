@@ -71,7 +71,7 @@ export function CadIntegrationView({
         onSubmit={cadWorkflow.handleStepUpload}
       />
 
-      <CadPartViewer file={cadWorkflow.stepFile} partDefinitions={matchingPartDefinitions} onSavePartImage={onSavePartImage} search={search} />
+      <CadPartViewer file={cadWorkflow.previewFile ?? cadWorkflow.stepFile} partDefinitions={matchingPartDefinitions} onSavePartImage={onSavePartImage} search={search} />
 
       <CadStepReviewPanels
         diff={cadWorkflow.stepDiff}

@@ -15,6 +15,7 @@ import {
 } from "./cadStepWorkflowDerivations";
 import { useCadSnapshotDetails } from "./useCadSnapshotDetails";
 import { loadBundledMainAssembly } from "../viewer/loadBundledCadFile";
+import { createOptimizedCadFile } from "../viewer/createOptimizedCadFile";
 import type {
   CadHierarchyReviewDecision,
   CadStepImportRunRecord,
@@ -39,6 +40,7 @@ export function useCadStepWorkflow({
   seasonId?: string | null;
 }) {
   const [stepFile, setStepFile] = useState<File | null>(null);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [stepLabel, setStepLabel] = useState("MECO 2026 Main Assembly");
   const [cadSnapshots, setCadSnapshots] = useState<CadStepSnapshotRecord[]>([]);
   const [cadImportRuns, setCadImportRuns] = useState<CadStepImportRunRecord[]>([]);
@@ -178,10 +180,14 @@ export function useCadStepWorkflow({
     const requestedProjectId = projectId;
     const requestedSeasonId = seasonId;
     setIsUploadingStep(true);
-    setMessage(null);
+    setMessage("Preparing optimized glTF preview…");
     try {
+      const optimizedModel = await createOptimizedCadFile(stepFile);
+      if (!isCurrentUpload(requestId, requestedProjectId, requestedSeasonId)) return;
+      setMessage("Uploading source STEP and optimized preview…");
       const response = await uploadCadStepFile({
         file: stepFile,
+        optimizedModel,
         label: stepLabel,
         projectId,
         seasonId,
@@ -190,6 +196,7 @@ export function useCadStepWorkflow({
       if (!didLoadSnapshots || !isCurrentUpload(requestId, requestedProjectId, requestedSeasonId)) {
         return;
       }
+      setPreviewFile(optimizedModel);
       setCadImportRuns((current) => [response.importRun, ...current.filter((run) => run.id !== response.importRun.id)]);
       setCadSnapshots((current) => [response.snapshot, ...current.filter((snapshot) => snapshot.id !== response.snapshot.id)]);
       selectCadSnapshot(response.snapshot.id);
@@ -310,7 +317,9 @@ export function useCadStepWorkflow({
     selectedCadImportRun, selectedCadSnapshot, selectedCadSnapshotId, stepDiff, stepFile, stepLabel,
     stepMappings, stepSummary, stepTree, stepWarnings,
     isFinalizing, isSavingMapping, isUploadingStep,
-    setStepFile, setStepLabel,
+    previewFile,
+    setStepFile: (file: File | null) => { setStepFile(file); setPreviewFile(null); },
+    setStepLabel,
     handleConfirmHierarchyDecision, handleConfirmMapping, handleFinalize, handleGroupRepeatedInstancesChange,
     handleSnapshotChange, handleStepUpload,
   };
