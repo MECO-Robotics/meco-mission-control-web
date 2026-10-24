@@ -28,10 +28,6 @@ export async function loadOptimizedRobotPreview(scope: { projectId?: string | nu
     const sourceName = decodeURIComponent(response.headers.get("X-CAD-Source-Name") ?? "Robot assembly.step");
     return new File([await response.blob()], sourceName.replace(/\.(step|stp)$/i, ".glb"), { type: "model/gltf-binary" });
   }
-  if (response.status !== 404) {
-    const message = await response.text().catch(() => "");
-    throw new Error(message || "The stored CAD preview could not be loaded.");
-  }
   const bundled = await fetch("/cad/main-assembly.glb.gzdata");
   if (!bundled.ok || !bundled.body) throw new Error("No optimized robot CAD preview is available.");
   if (typeof DecompressionStream === "undefined") throw new Error("This browser cannot decompress the optimized robot CAD preview.");
