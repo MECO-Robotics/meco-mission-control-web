@@ -34,6 +34,10 @@
   text-transform: uppercase;
 }
 
+.cad-table :is(th, td) + :is(th, td) {
+  border-inline-start: 1px solid var(--border-base);
+}
+
 .cad-tree-list,
 .cad-snapshot-list,
 .cad-warning-list {

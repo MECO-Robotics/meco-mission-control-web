@@ -46,10 +46,13 @@ before using it. A CSS fallback must not silently establish a competing theme.
 | `--official-white` | `#ffffff` | `#ffffff` | White brand artwork |
 | `--meco-soft-blue` | `rgba(22, 71, 142, 0.08)` | `rgba(22, 71, 142, 0.2)` | Active navigation and brand selection washes |
 | `--meco-soft-red` | `rgba(234, 28, 45, 0.08)` | `rgba(234, 28, 45, 0.2)` | Brand emphasis washes |
+| `--search-highlight-bg` / `--search-highlight-text` | `#fde68a` / `#713f12` | `#92400e` / `#fef3c7` | Literal workspace search matches and milestone suggestion marks |
 | `--row-tint` | `rgba(22, 71, 142, 0.14)` | `rgba(59, 130, 246, 0.18)` | Selected or highlighted rows |
 | `--bg-panel` | `#ffffff` | `#1e293b` | Cards, panels, and controls |
-| `--bg-row-alt` | `#f8fafc` | `#0f172a` | Alternate rows and secondary shell surfaces |
+| `--bg-row-alt` | `#f8fafc` | `#0f172a` | Secondary shell surfaces and neutral controls |
+| `--bg-row-stripe` | `#e2e8f0` | `#0b1220` | Neutral alternating record rows and board lanes |
 | `--border-base` | `#e5e7eb` | `#334155` | Standard separators and outlines |
+| `--border-grid` | `#64748b` | `#94a3b8` | Kanban structural separators and Gantt date-grid lines across panel and zebra surfaces |
 | `--border-strong` | `#cbd5e1` | `#475569` | Emphasized separators |
 | `--text-title` | `#000000` | `#f8fafc` | Headings and primary labels |
 | `--text-copy` | `#475569` | `#e2e8f0` | Body copy and inactive navigation |
@@ -74,6 +77,14 @@ before using it. A CSS fallback must not silently establish a competing theme.
 | `--team-task-open-chart` / `--team-task-open-text` | `#eab308` / `#a16207` | `#facc15` / `#facc15` | Team open-task metrics |
 | `--team-task-blocked-chart` / `--team-task-blocked-text` | `#ea1c2d` / `#b91c1c` | `#ea1c2d` / `#f87171` | Team blocked-task metrics |
 | `--team-task-overdue-chart` / `--team-task-overdue-text` | `#f97316` / `#c2410c` | `#fb923c` / `#fb923c` | Team overdue-task metrics |
+
+Shared zebra treatment uses `--bg-panel` for the first record and
+`--bg-row-stripe` for the second, counting only matching record siblings.
+Tables, board lanes, Timeline project/subsystem bands, roster members,
+subsystem/workflow rows, Teams and Home's Your tasks quicklist use this neutral
+pair. Headers, inline forms and detail siblings do not advance the stripe. Selected and attention states retain their
+own semantic styling; `--row-tint` is not a zebra color. Other record lists and
+modal content do not receive new striping from this rule.
 
 Use `--status-danger-text` for shared error copy, `--text-title` for pagination
 controls, and `--bg-row-alt` for neutral pagination buttons. These roles replace
@@ -160,7 +171,7 @@ Dark mode keeps brand blue and red intact. Use paired status tokens for color wa
 
 Use the canonical status token pairs above for task states, priorities,
 deadlines, warnings, and errors. The task priority ladder is consistent across
-cards, pills, and detail views: critical/high use danger, medium uses warning,
+priority icons, pills, and detail views: critical/high use danger, medium uses warning,
 and low uses neutral. Task statuses map as follows:
 
 | Status | Token pair |
@@ -185,9 +196,27 @@ Workspace-generated colors are normalized to six-character hex values and fall b
 
 These colors are used for workstreams, subsystems, timeline grouping, and user-selected workspace accents. The fallback subsystem highlight is `#4F86C6`.
 
-## Timeline Discipline Colors
+Responsible teams store their own icon and six-character hex color. The shared team icon catalog renders this identity in Teams, its editor preview and Gantt task rows. Glyphs mix the stored color at 45% with the theme's title foreground for contrast; names retain semantic text colors. Identity comes from the assigned team, including archived teams, rather than its name or task discipline. Unavailable teams use a neutral people glyph.
 
-Timeline task bars use discipline-based accents:
+Kanban project rails reuse sidebar project identity colors through `--kanban-project-accent` as opaque surface tints. Kanban lane icons use `--kanban-lane-accent`: teams reuse the shared task discipline palette, while subsystem/workstream groups reuse their configured workspace colors. Names retain semantic text colors; icons mix their accent with the theme's title color for contrast. Cards remain neutral.
+
+Team cards use a 3px top border in their saved team color to identify each team.
+The name and icon remain visible alongside this accent in both themes.
+
+## Timeline Status Colors
+
+Timeline bars use canonical status pairs: neutral for not started, warning for
+in progress and waiting, info for QA, success for complete, and danger for
+blocked. Complete takes precedence over stale blockers; blockers precede unmet
+prerequisites. Overdue is separate danger-colored text counting local calendar
+days past due for unfinished work. The shared topbar provides a status legend.
+Collapsed groups use neutral summary spans. Sticky work names, the agenda and
+handoff modal remain the current schedule owners.
+
+## Task Discipline Colors
+
+Kanban and task-detail accents retain this shared task palette; Gantt bars use
+status colors instead:
 
 | Discipline | Hex |
 | --- | --- |
@@ -221,7 +250,7 @@ Timeline task bars use discipline-based accents:
 | Social media | `#dd6f5a` |
 | Fallback | `#7a8799` |
 
-Timeline selection and hover states are derived by mixing the active discipline or subsystem color into transparent highlight fills and strokes.
+Task discipline accents are owned by the shared task presentation.
 
 ## Milestone Event Colors
 
@@ -258,6 +287,11 @@ Use `--text-copy` and `--text-muted` for neutral text, `--border-base` and
 surfaces. Keep neutral UI cool slate; do not introduce local grey values where
 one of these shared roles applies.
 
+Use 1px `--border-base` rules between adjacent columns in workspace lists and
+tables. Align headers with row fields, including reserved edit-action space.
+When table rows stack on narrow screens, separate field labels from values;
+single-column lists keep their existing stacking.
+
 ## Shell And Navigation
 
 The shell has a fixed top bar and a fixed left sidebar. The top bar height is 58px. The expanded sidebar and brand area are 156px wide; the collapsed sidebar is 64px wide.
@@ -292,7 +326,7 @@ Cards and board columns use panel surfaces, thin borders, and soft shadows. Task
 
 Tables are grid-based rather than native table layouts. Headers use small uppercase labels, muted copy color, and brand-blue sort arrows. Purchase, manufacturing, and print tables each define their own proportional column templates.
 
-Task queue advanced cards use zoom-scaled spacing and type. Board labels use the canonical text tokens. Task status and priority states use the semantic token pairs defined above in both themes.
+Task queue cards use neutral 1px borders without priority-colored outlines or tinted shadows. Priority uses the shared glyphs, with accessible labels and semantic text colors. Future and completed-task deadlines stay neutral; due-today and overdue deadlines use warning and danger text. Cards use zoom-scaled spacing and type. Board labels use the canonical text tokens. Task status and priority states use the semantic token pairs defined above in both themes.
 
 ## Timeline
 

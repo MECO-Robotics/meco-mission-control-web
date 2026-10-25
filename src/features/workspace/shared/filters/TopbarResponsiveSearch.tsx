@@ -1,5 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { useWorkspaceSearchHighlight } from "../search/useWorkspaceSearchHighlight";
 import { useTopbarSearchOverride } from "./TopbarSearchOverride";
 
 import {
@@ -67,6 +68,7 @@ export function TopbarResponsiveSearch({
   const handleChange = searchOverride?.onChange ?? onChange;
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  useWorkspaceSearchHighlight(value, searchRef);
   const hasSearchOverride = Boolean(searchOverride);
   useEffect(() => {
     if (!hasSearchOverride) return;
@@ -82,7 +84,6 @@ export function TopbarResponsiveSearch({
   const legacyIconWidth = iconSwitchWidth ?? 86 + actionOverlayWidthPx;
   const legacyIconReleaseWidth = iconReleaseWidth ?? legacyIconWidth + 12;
   const shouldUseCollisionDetection = resolvedMode === "dynamic-label" && (collisionDetectionMode ?? "auto") === "auto";
-  const { compactRef, isCompactOpen, setIsCompactOpen } = useCompactSearchPopover();
   const { searchMode, searchWidth } = useTopbarResponsiveSearchMode({
     actionOverlayWidthPx,
     compactLabel,
@@ -101,6 +102,7 @@ export function TopbarResponsiveSearch({
     searchRef,
     shouldUseCollisionDetection,
   });
+  const { compactRef, isCompactOpen, setIsCompactOpen } = useCompactSearchPopover(resolvedMode !== "dynamic-label" || searchMode === "icon");
   const resolvedPlaceholder =
     resolvedMode === "dynamic-label" &&
     (searchMode === "compact" || (searchWidth !== null && searchWidth <= legacySwitchWidth))

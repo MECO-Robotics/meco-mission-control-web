@@ -105,12 +105,12 @@ export function SubsystemsTableSection({
                 aria-controls={`subsystem-${subsystem.id}-details`}
                 style={{
                   gridTemplateColumns: "minmax(220px, 2.2fr) 1fr 1.1fr 0.8fr 0.8fr 0.8fr",
-                  padding: "12px 16px",
+                  paddingBlock: "12px",
                   borderBottom: "1px solid var(--border-base)",
                   color: "var(--text-copy)",
                   background: isSelected
-                    ? "rgba(22, 71, 142, 0.08)"
-                    : "var(--row-bg, var(--bg-row-alt))",
+                    ? "var(--row-tint)"
+                    : "var(--row-bg, var(--bg-panel))",
                   textAlign: "left",
                   boxShadow: isSelected
                     ? `inset 4px 0 0 ${accentColor}, inset 0 0 0 1px rgba(22, 71, 142, 0.16)`

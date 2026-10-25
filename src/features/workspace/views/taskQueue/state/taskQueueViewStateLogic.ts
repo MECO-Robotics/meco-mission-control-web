@@ -6,7 +6,7 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import { readTaskSubsystemIds } from "../taskQueueKanbanCard";
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE, getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
+import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import type { TaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import type { TaskSortField } from "../taskQueueViewState";
 import { useTaskQueueProcessedTasks } from "./useTaskQueueProcessedTasks";
@@ -33,7 +33,6 @@ export interface TaskQueueViewStateLogicArgs {
   setFocusedBoardState: Dispatch<SetStateAction<TaskQueueBoardState | null>>;
   setProjectFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSubsystemIterationFilter: Dispatch<SetStateAction<FilterSelection>>;
-  setVisibleTaskCount: Dispatch<SetStateAction<number>>;
   sortField: TaskSortField;
   sortOrder: "asc" | "desc";
   statusFilter: FilterSelection;
@@ -57,7 +56,6 @@ export function useTaskQueueViewStateLogic({
   setFocusedBoardState,
   setProjectFilter,
   setSubsystemIterationFilter,
-  setVisibleTaskCount,
   sortField,
   sortOrder,
   statusFilter,
@@ -170,10 +168,6 @@ export function useTaskQueueViewStateLogic({
     };
   }, [focusedBoardState, setFocusedBoardState]);
 
-  useEffect(() => {
-    setVisibleTaskCount(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
-  }, [processedTasks.length, setVisibleTaskCount]);
-
   const taskFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
     disciplineFilter,
@@ -206,8 +200,6 @@ export function useTaskQueueViewStateLogic({
     projectsById,
     subsystemFilterOptions,
     subsystemIterationOptions,
-    showProjectContextOnCards: !isAllProjectsView,
-    showProjectOnCards: isAllProjectsView && projectFilter.length === 0,
     showSubsystemIterationFilter,
     taskFilterMotionClass,
     taskSortIsDefault: sortField === "dueDate" && sortOrder === "asc",

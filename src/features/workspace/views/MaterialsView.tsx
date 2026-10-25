@@ -37,7 +37,7 @@ interface MaterialsViewProps {
   openEditMaterialModal: (item: MaterialRecord) => void;
 }
 
-const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) 0.75fr 1.05fr 1fr 1fr 0.8fr";
+const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) minmax(0, 0.75fr) minmax(0, 1.05fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr)";
 
 export function MaterialsView({
   bootstrap,

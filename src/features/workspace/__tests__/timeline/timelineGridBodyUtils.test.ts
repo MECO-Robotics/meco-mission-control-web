@@ -1,8 +1,6 @@
 /// <reference types="jest" />
 
 import {
-  buildTaskDependencyCountsByTaskId,
-  buildTimelineTaskStatusSignalByTaskId,
   getTimelineTaskStatusSignal,
 } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -37,126 +35,6 @@ const baseTask: BootstrapPayload["tasks"][number] = {
 };
 
 describe("timeline task dependency counts and status", () => {
-  it("counts incoming and outgoing task dependencies for a task", () => {
-    const dependencies: Parameters<typeof buildTaskDependencyCountsByTaskId>[0] = [
-      {
-        id: "dependency-1",
-        taskId: "task-target",
-        kind: "task",
-        refId: "task-upstream-1",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-        requiredState: "complete",
-      },
-      {
-        id: "dependency-2",
-        taskId: "task-target",
-        kind: "task",
-        refId: "task-upstream-2",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-        requiredState: "complete",
-      },
-      {
-        id: "dependency-3",
-        taskId: "task-downstream",
-        kind: "task",
-        refId: "task-target",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-        requiredState: "complete",
-      },
-      {
-        id: "dependency-4",
-        taskId: "task-unrelated",
-        kind: "task",
-        refId: "task-other",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-        requiredState: "complete",
-      },
-    ];
-    const counts = buildTaskDependencyCountsByTaskId(dependencies)["task-target"];
-
-    expect(counts).toEqual({
-      incoming: 2,
-      outgoing: 1,
-    });
-  });
-
-  it("builds a reusable dependency count lookup for timeline task bars", () => {
-    const lookup = buildTaskDependencyCountsByTaskId([
-      {
-        id: "dependency-1",
-        taskId: "task-b",
-        kind: "task",
-        refId: "task-a",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-        requiredState: "complete",
-      },
-      {
-        id: "dependency-2",
-        taskId: "task-c",
-        kind: "task",
-        refId: "task-b",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-        requiredState: "complete",
-      },
-      {
-        id: "dependency-3",
-        taskId: "task-c",
-        kind: "task",
-        refId: "task-a",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-        requiredState: "complete",
-      },
-    ]);
-
-    expect(lookup["task-a"]).toEqual({
-      incoming: 0,
-      outgoing: 2,
-    });
-    expect(lookup["task-b"]).toEqual({
-      incoming: 1,
-      outgoing: 1,
-    });
-    expect(lookup["task-c"]).toEqual({
-      incoming: 2,
-      outgoing: 0,
-    });
-    expect(lookup["task-unrelated"]).toBeUndefined();
-  });
-
-  it("does not treat a non-task reference with a matching ID as an outgoing task edge", () => {
-    const lookup = buildTaskDependencyCountsByTaskId([
-      {
-        id: "milestone-edge",
-        taskId: "task-dependent",
-        kind: "milestone",
-        refId: "shared-id",
-        requiredState: "complete",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-      },
-      {
-        id: "task-edge",
-        taskId: "shared-id",
-        kind: "task",
-        refId: "task-upstream",
-        requiredState: "complete",
-        dependencyType: "hard",
-        createdAt: "2026-02-01T00:00:00.000Z",
-      },
-    ]);
-
-    expect(lookup["shared-id"]).toEqual({ incoming: 1, outgoing: 0 });
-    expect(lookup["task-dependent"]).toEqual({ incoming: 1, outgoing: 0 });
-    expect(lookup["task-upstream"]).toEqual({ incoming: 0, outgoing: 1 });
-  });
-
   it("prioritizes active blockers over dependency and status icons", () => {
     const bootstrap: BootstrapPayload = {
       ...EMPTY_BOOTSTRAP,
@@ -200,7 +78,7 @@ describe("timeline task dependency counts and status", () => {
       ],
     };
 
-    const signals = buildTimelineTaskStatusSignalByTaskId(bootstrap);
+    const signals = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, getTimelineTaskStatusSignal(task, bootstrap)]));
 
     expect(signals["task-upstream"]).toBe("in-progress");
     expect(signals["task-blocked"]).toBe("blocked");

@@ -10,8 +10,39 @@
   justify-content: flex-start;
 }
 
+@media (min-width: 901px) {
+  .ops-table:is(.ops-row, .ops-table-header) {
+    padding-inline-start: 0.375rem;
+  }
+
+  .ops-table > .table-cell,
+  .ops-table-header > span {
+    display: grid;
+    align-content: center;
+    align-self: stretch;
+    min-width: 0;
+  }
+
+  .ops-table > .table-cell + .table-cell,
+  .ops-table-header > :not(:first-child):not(.editable-hover-indicator) {
+    border-inline-start: 1px solid var(--border-base);
+    padding-inline-start: 0.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .ops-table .table-cell-value {
+    border-inline-start: 1px solid var(--border-base);
+    padding-inline-start: 0.55rem;
+  }
+}
+
+.table-shell > .ops-row {
+  background-color: var(--row-bg, var(--bg-panel));
+}
+
 .table-shell > :nth-child(2n of .ops-row) {
-  background-color: var(--bg-row-alt);
+  --row-bg: var(--bg-row-stripe);
 }
 
 .ops-row:is(:hover, :focus-visible) {

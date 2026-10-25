@@ -68,21 +68,34 @@ export function TopbarResponsiveSearchLayout({
       </div>
     </div>
   );
-  const renderIconOnlySearch = () => (
-    <div className="topbar-responsive-search-full topbar-responsive-search-full-primary topbar-responsive-search-full-icon-only">
-      <div className="topbar-responsive-search-field">
-        <SearchToolbarInput
-          ariaLabel={ariaLabel}
-          inputRef={searchInputRef}
-          onChange={onChange}
-          onSearchIconActivate={() => {
-            searchInputRef.current?.focus();
-          }}
-          placeholder=""
-          value={value}
-        />
-        {renderActions(" topbar-responsive-search-actions-compact")}
-      </div>
+  const renderCompactSearch = () => (
+    <div className={`topbar-responsive-search-compact${isCompactOpen ? " is-open" : ""}`} ref={compactRef}>
+      <button
+        aria-expanded={isCompactOpen}
+        aria-haspopup="dialog"
+        aria-label={ariaLabel}
+        className={`icon-button app-topbar-icon-button topbar-responsive-search-toggle${isActive ? " is-active" : ""}`}
+        onClick={() => setIsCompactOpen((current) => !current)}
+        title={ariaLabel}
+        type="button"
+      >
+        <Search size={14} strokeWidth={2} />
+      </button>
+      {renderActions(" topbar-responsive-search-actions-compact")}
+      {isCompactOpen ? (
+        <div className="topbar-responsive-search-popover" role="dialog" aria-label={ariaLabel}>
+          <input
+            aria-label={ariaLabel}
+            autoFocus
+            ref={searchInputRef}
+            className="toolbar-search-input"
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={placeholder}
+            type="search"
+            value={value}
+          />
+        </div>
+      ) : null}
     </div>
   );
 
@@ -94,7 +107,7 @@ export function TopbarResponsiveSearchLayout({
         ref={searchRef}
         style={rootStyle}
       >
-        {isIconMode ? renderIconOnlySearch() : renderFullSearch(resolvedPlaceholder, "topbar-responsive-search-full-primary")}
+        {isIconMode ? renderCompactSearch() : renderFullSearch(resolvedPlaceholder, "topbar-responsive-search-full-primary")}
       </div>
     );
   }
@@ -104,32 +117,7 @@ export function TopbarResponsiveSearchLayout({
       {renderFullSearch(placeholder, "topbar-responsive-search-full-primary")}
       {hasCompactLabelVariant ? renderFullSearch(compactLabel, "topbar-responsive-search-full-compact") : null}
 
-      <div className={`topbar-responsive-search-compact${isCompactOpen ? " is-open" : ""}`} ref={compactRef}>
-        <button
-          aria-expanded={isCompactOpen}
-          aria-haspopup="dialog"
-          aria-label={ariaLabel}
-          className={`icon-button app-topbar-icon-button topbar-responsive-search-toggle${isActive ? " is-active" : ""}`}
-          onClick={() => setIsCompactOpen((current) => !current)}
-          title={ariaLabel}
-          type="button"
-        >
-          <Search size={14} strokeWidth={2} />
-        </button>
-        {renderActions(" topbar-responsive-search-actions-compact")}
-        {isCompactOpen ? (
-          <div className="topbar-responsive-search-popover">
-            <input
-              aria-label={ariaLabel}
-              className="toolbar-search-input"
-              onChange={(event) => onChange(event.target.value)}
-              placeholder={placeholder}
-              type="search"
-              value={value}
-            />
-          </div>
-        ) : null}
-      </div>
+      {renderCompactSearch()}
     </div>
   );
 }

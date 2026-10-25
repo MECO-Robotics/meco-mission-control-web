@@ -192,11 +192,9 @@ export function WorkspaceContent({
   const previousInventoryViewRef = useRef(effectiveInventoryView);
 
   const taskSwipeDirection = getSwipeDirection(previousTaskViewRef.current, taskView, [
-    "calendar",
     "timeline",
     "robot-map",
     "kanban",
-    "agenda",
   ]);
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,

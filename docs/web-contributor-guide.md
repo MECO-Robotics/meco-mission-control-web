@@ -86,6 +86,14 @@ inline substitutes. Each control must act on the current view's data. If a
 control does not apply to a destination, do not show a dead or decorative
 placeholder.
 
+Home dashboard exception (explicit user direction): the top-left Work and
+pressure chart owns one Group by selector in its chart header. Team, individual,
+project, subsystem, workstream and urgency group the same unfinished tasks and
+active risks. Task pressure is highlighted inside workload stacks; risk counts
+remain alongside them with separate drilldowns. Keep dashboard search,
+project/person scope and creation actions in the shared shell. This exception
+does not authorize a dashboard-wide local toolbar or additional page header.
+
 Before changing view chrome, check `AppTopbar` and existing slot consumers. Add
 view guidance to Help/tutorial content instead of duplicating it above the data.
 
@@ -155,7 +163,7 @@ Favor minimal UI: reuse existing elements and layouts, and minimize added surfac
 
 Before implementing an additional feature, inspect and reuse the existing modules, components, and layouts that already own the relevant behavior. Extend a shared owner when the behavior is genuinely shared; keep domain-specific data and presentation at the view boundary. Do not rebuild an existing layout or interaction in parallel. For Kanban views, reuse `KanbanColumns`, `KanbanScrollFrame`, and their drag behavior, supplying view-specific columns and cards.
 
-KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom, focus selection and lazy loading stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element.
+KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom and focus selection stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element. Kanban groups the complete filtered task set by project, then the selected Team (default) or Subsystem mode. Group by lives in the shared sort menu and is remembered during navigation. Subsystem mode uses workstreams for non-robot projects, shows multi-target tasks in each linked lane, and preserves unique status-column totals. Missing targets stay visible in unassigned/unavailable lanes. The grouping model owns lane membership, order, labels and accents; the board only renders those results. Every project and status count remains visible; do not truncate tasks before grouping. Card context uses each task’s project type, showing robot subsystems or non-robot workstreams on mixed boards. Cards show a full-width title, optional neutral context, structured blocker/help exceptions and a priority/date/assignee footer. Keep descriptions, logged hours and repeated project/discipline labels in task details or board grouping. Help indicators come from unresolved linked help risks, never work-log keywords.
 
 For UI work, match existing dense Mission Control patterns. Use restrained
 controls, stable dimensions, and predictable responsive behavior. Avoid adding
@@ -219,3 +227,5 @@ clears removed placement targets. Missing hard prerequisites stay blocking.
 Manufacturing work must be retargeted or removed before its part definition is
 deleted. Help requests are canonical Risks with category `help` and server-owned
 creator attribution.
+
+Record handoffs use the current handoff modal.

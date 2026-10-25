@@ -12,20 +12,21 @@
 .workspace-disclosure { margin: 1rem; }
 .workspace-disclosure > summary { cursor: pointer; font-size: 1.1rem; font-weight: 600; padding: 1rem 0; }
 .workspace-inline-summary { padding: 0 1rem; color: var(--text-copy); }
-.people-member { padding-bottom: 1rem; border-bottom: 1px solid var(--border-base); }
+.people-member { padding-bottom: 1rem; border-bottom: 1px solid var(--border-base); background: var(--row-bg, var(--bg-panel)); }
 .people-member-context { display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; padding: .5rem; }
 .people-attendance-summary { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; width: 100%; min-width: 0; }
 .people-attendance-days { display: flex; align-items: center; gap: .28rem; }
 .people-attendance-day { display: block; width: .78rem; height: .78rem; border: 1px solid var(--border-base); border-radius: 2px; background: var(--bg-panel); }
 .people-attendance-day.is-attended { border-color: var(--official-blue); background: var(--official-blue); }
 .people-attendance-day.is-missed { border-color: var(--official-red); background: var(--official-red); }
-.people-attendance-day.is-upcoming { border-color: var(--border-base); background: var(--bg-row-alt); }
+.people-attendance-day.is-upcoming { border-color: var(--text-muted); background: var(--text-muted); }
 .people-attendance-day.is-not-scheduled { border-color: var(--border-base); background: var(--bg-panel); }
 .roster-section-title h2 { margin: 0; font-size: .95rem; }
 .people-attendance-percentage { color: var(--text-copy); font-size: .78rem; font-variant-numeric: tabular-nums; }
 .teams-list, .teams-editor { display: grid; gap: .45rem; }
 .teams-editor { padding: .85rem; border: 1px solid var(--border-base); border-radius: 10px; background: var(--bg-row-alt); }
 .teams-editor h3 { margin: 0; }
+.team-card-identity h2, .team-icon-preview { display: flex; align-items: center; gap: .45rem; }
 .teams-editor fieldset { min-width: 0; margin: 0; padding: .55rem .7rem; border: 1px solid var(--border-base); border-radius: 8px; }
 .teams-editor legend { padding-inline: .25rem; color: var(--text-title); font-weight: 600; }
 .team-primary-help { margin: 0 0 .4rem; color: var(--text-copy); font-size: .82rem; }
@@ -33,9 +34,8 @@
 .team-member-option > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .team-member-option .secondary-action { max-width: 100%; white-space: normal; text-align: left; }
 .team-member-option .secondary-action { padding: .25rem .5rem; font-size: .8rem; }
-.team-card { display: grid; gap: .35rem; padding: .35rem 0 .5rem; border: 0; border-bottom: 1px solid var(--border-base); border-radius: 0; background: transparent; }
-.teams-list > .team-card:nth-of-type(odd) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-blue) 3%, var(--bg-panel)); }
-.teams-list > .team-card:nth-of-type(even) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-red) 3%, var(--bg-panel)); }
+.team-card { display: grid; gap: .35rem; padding: .35rem .4rem .5rem; border: 0; border-top: 3px solid; border-bottom: 1px solid var(--border-base); border-radius: 0; background: var(--bg-panel); }
+.teams-list > :nth-child(2n of .team-card) { background: var(--bg-row-stripe); }
 .team-card > .panel-header { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin: 0; }
 .team-card-identity { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: .65rem; row-gap: .1rem; min-width: 0; }
 .team-card-identity :is(h2, h3) { margin: 0; font-size: 1rem; white-space: nowrap; }
@@ -120,8 +120,14 @@
 .workspace-presentation-controls button:hover, .workspace-record-list .ghost-button:hover, .people-member-context .ghost-button:hover { background: var(--bg-row-alt); }
 .workspace-presentation-controls button:disabled { opacity: .55; cursor: default; }
 .workspace-presentation-controls button:focus-visible, .workspace-record-list button:focus-visible, .workspace-disclosure summary:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
-@media (max-width: 700px) { .task-queue-view .task-queue-board-column { min-width: min(18rem, calc(100vw - 3rem)); max-width: min(18rem, calc(100vw - 3rem)); } .task-queue-view .task-queue-board-card { white-space: normal; } }
+@media (max-width: 700px) { .task-queue-view { --task-queue-board-mobile-column-width: min(18rem, calc(100vw - 3rem)); } .task-queue-view .task-queue-board-column { min-width: var(--task-queue-board-mobile-column-width); max-width: var(--task-queue-board-mobile-column-width); } .task-queue-view .task-queue-board-card { white-space: normal; } }
 
 .people-workload-details { margin-top: .5rem; color: var(--text-copy); }
 .people-workload-details summary { cursor: pointer; font-size: .875rem; }
 .people-workload-details[open] { display: flex; flex-direction: column; gap: .4rem; }
+
+@media (min-width: 701px) {
+  .workspace-record-list > li > :not(:first-child) { position: relative; }
+  .workspace-record-list > li > :not(:first-child)::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: -.5rem; border-inline-start: 1px solid var(--border-base); pointer-events: none; }
+  .team-member-load > :is(.team-member-task-metrics, .team-member-capacity) { border-inline-start: 1px solid var(--border-base); padding-inline-start: .5rem; }
+}

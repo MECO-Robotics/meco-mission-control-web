@@ -3,7 +3,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { getWorkspaceFilterToneClassName } from "@/features/workspace/shared/filters/workspaceFilterTone";
-import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
+import { getTaskDisciplineColor } from "@/features/workspace/shared/task/taskDisciplineColors";
 import {
   getTaskPartInstanceLabel,
   getTaskSelectedMechanismIds,
@@ -62,7 +62,7 @@ export function useTaskDetailsAdvancedSectionModel({
       "Not set"
     : "Not set";
   const disciplineAccentColor = editableTask.workTypeId
-    ? getTimelineTaskDisciplineColor(editableTask.workTypeId, workTypesById)
+    ? getTaskDisciplineColor(editableTask.workTypeId, workTypesById)
     : null;
   const disciplinePillStyle = {
     "--task-detail-pill-accent": disciplineAccentColor ?? undefined,

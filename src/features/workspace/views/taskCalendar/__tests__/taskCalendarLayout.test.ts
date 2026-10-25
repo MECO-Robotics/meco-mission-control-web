@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { groupTaskCalendarEventsByMonth, moveTaskCalendarDate, toEventDateKey } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
+import { groupTaskCalendarEventsByMonth, toEventDateKey } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import type { TaskCalendarEvent } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import { ScheduleAgendaMonthList } from "@/features/workspace/views/taskCalendar/ScheduleAgendaMonthList";
 import React from "react";
@@ -17,16 +17,6 @@ describe("toEventDateKey", () => {
 
   it("falls back to parsed UTC date for non-ISO strings", () => {
     expect(toEventDateKey("Mon, 20 Apr 2026 00:00:00 GMT")).toBe("2026-04-20");
-  });
-});
-
-describe("moveTaskCalendarDate", () => {
-  it("moves by local days across month, year, leap-day, and week boundaries", () => {
-    expect(moveTaskCalendarDate("2026-12-31", 1)).toBe("2027-01-01");
-    expect(moveTaskCalendarDate("2026-03-01", -1)).toBe("2026-02-28");
-    expect(moveTaskCalendarDate("2024-02-28", 1)).toBe("2024-02-29");
-    expect(moveTaskCalendarDate("2024-02-28", 7)).toBe("2024-03-06");
-    expect(moveTaskCalendarDate("2024-03-01", -7)).toBe("2024-02-23");
   });
 });
 

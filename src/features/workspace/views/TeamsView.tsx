@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Archive, ArchiveRestore, Ellipsis, Pencil, Trash2 } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ResponsibleGroupPayload } from "@/types/payloads";
+import type { ResponsibleGroupIcon } from "@/types/recordsOrganization";
 import { createResponsibleGroup, deleteResponsibleGroup, updateResponsibleGroup } from "@/lib/auth/records/responsibleGroups";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
@@ -10,9 +11,11 @@ import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/Workspace
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { TEAM_ICONS, TeamIcon } from "@/features/workspace/shared/team/TeamIcon";
+import { WorkspaceColorField } from "@/features/workspace/modals/WorkspaceColorField";
 import { formatHours } from "./roster/rosterInsightsViewModel";
 
-const emptyDraft = (seasonId: string, projectId: string | null): ResponsibleGroupPayload => ({ seasonId, name: "", projectIds: projectId ? [projectId] : [], memberIds: [], primaryMemberIds: [], isArchived: false });
+const emptyDraft = (seasonId: string, projectId: string | null): ResponsibleGroupPayload => ({ seasonId, name: "", icon: "users", color: "#4F86C6", projectIds: projectId ? [projectId] : [], memberIds: [], primaryMemberIds: [], isArchived: false });
 
 export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRefresh, handleUnauthorized, onOpenTask, onOpenMember, onError }: {
   bootstrap: BootstrapPayload;
@@ -80,7 +83,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
 
   function edit(group: BootstrapPayload["responsibleGroups"][number]) {
     setEditingId(group.id);
-    setDraft({ seasonId: group.seasonId, name: group.name, projectIds: [...group.projectIds], memberIds: [...group.memberIds], primaryMemberIds: [...group.primaryMemberIds], isArchived: group.isArchived });
+    setDraft({ seasonId: group.seasonId, name: group.name, icon: group.icon, color: group.color, projectIds: [...group.projectIds], memberIds: [...group.memberIds], primaryMemberIds: [...group.primaryMemberIds], isArchived: group.isArchived });
   }
 
   async function archive(group: BootstrapPayload["responsibleGroups"][number]) {
@@ -112,6 +115,9 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
     {draft ? <form className="compact-form teams-editor" onSubmit={save}>
       <h3>{editingId ? "Edit team" : "Create team"}</h3>
       <label className="field"><span>Name</span><input required value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })}/></label>
+      <label className="field"><span>Icon</span><select value={draft.icon} onChange={event => setDraft({ ...draft, icon: event.target.value as ResponsibleGroupIcon })}>{Object.entries(TEAM_ICONS).map(([icon, { label }]) => <option key={icon} value={icon}>{label}</option>)}</select></label>
+      <WorkspaceColorField label="Team color" seed={draft.name} value={draft.color} onChange={color => setDraft({ ...draft, color })} />
+      <div className="team-icon-preview"><TeamIcon team={{ ...draft, name: draft.name || "New team" }} size={20} /><span>{draft.name || "New team"}</span></div>
       <div className="field"><span>Projects</span><FilterDropdown allLabel="Select projects" ariaLabel="Team projects" searchInTopbar buttonContent={<span>{draft.projectIds.length ? `Projects (${draft.projectIds.length})` : "Select projects"}</span>} compactSummary onChange={selection => setDraft(current => current ? { ...current, projectIds: selection } : current)} options={[...projects.map(project => ({ id: project.id, name: project.name })), ...draft.projectIds.filter(id => !projects.some(project => project.id === id)).map(id => ({ id, name: bootstrap.projects.find(project => project.id === id)?.name ?? `Unavailable project · ${id}` }))]} showAllOption={false} value={draft.projectIds} />{draft.projectIds.length ? <small>{draft.projectIds.map(id => projects.find(project => project.id === id)?.name ?? bootstrap.projects.find(project => project.id === id)?.name ?? `Unavailable · ${id}`).join(", ")}</small> : null}</div>
       <fieldset className="field"><legend>Members</legend><p className="team-primary-help">Students can belong to several teams. Mark which selected students list this as their primary team.</p><FilterDropdown allLabel="Select members" ariaLabel="Team members" searchInTopbar buttonContent={<span>{draft.memberIds.length ? `Members (${draft.memberIds.length})` : "Select members"}</span>} compactSummary onChange={selection => setDraft(current => current ? { ...current, memberIds: selection, primaryMemberIds: current.primaryMemberIds.filter(id => selection.includes(id)) } : current)} options={[...members.map(member => ({ id: member.id, name: `${member.name} · ${member.role}` })), ...draft.memberIds.filter(id => !members.some(member => member.id === id)).map(id => ({ id, name: bootstrap.members.find(member => member.id === id)?.name ?? `Unavailable member · ${id}` }))]} showAllOption={false} value={draft.memberIds} />{draft.memberIds.map(memberId => {
         const member = bootstrap.members.find(item => item.id === memberId);
@@ -196,10 +202,10 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
           })}{!sectionMembers.length ? <p className="empty-state">No {label.toLowerCase()} members.</p> : null}</div>
         </details>;
       };
-      return <article className="panel-card team-card" key={group.id}>
+      return <article className="panel-card team-card" key={group.id} style={{ borderTopColor: group.color }}>
         <header className="panel-header team-card-header">
           <div className="team-card-identity">
-            <h2>{group.name}{group.isArchived ? " · Archived" : ""}</h2>
+            <h2><TeamIcon team={group} size={18} />{group.name}{group.isArchived ? " · Archived" : ""}</h2>
             {group.projectIds.length ? <span>{group.projectIds.map(id => projects.find(project => project.id === id)?.name ?? "Unknown project").join(", ")}</span> : null}
           </div>
           <div className="metric-grid">

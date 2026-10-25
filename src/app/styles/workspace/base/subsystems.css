@@ -13,8 +13,8 @@
   min-width: 0;
 }
 
-.subsystem-manager-list-shell>.subsystem-manager-item:nth-child(odd) {
-  --row-bg: var(--row-tint);
+.subsystem-manager-list-shell > :nth-child(2n of .subsystem-manager-item) {
+  --row-bg: var(--bg-row-stripe);
 }
 
 .subsystem-manager-item.is-active {

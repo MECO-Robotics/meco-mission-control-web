@@ -2,13 +2,15 @@
 
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { buildMilestoneSearchHighlightSegments, MilestoneSearchHighlight } from "@/features/workspace/views/milestones/MilestoneSearchHighlight";
+import { MilestoneSearchHighlight } from "@/features/workspace/views/milestones/MilestoneSearchHighlight";
+
+import { buildSearchHighlightSegments } from "@/features/workspace/shared/search/searchHighlight";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("milestone search highlighting", () => {
   it("highlights milestone search keywords without changing the visible text", () => {
-    expect(buildMilestoneSearchHighlightSegments("Robot robot readiness", "robot")).toEqual([
+    expect(buildSearchHighlightSegments("Robot robot readiness", "robot")).toEqual([
       { highlighted: true, text: "Robot" },
       { highlighted: false, text: " " },
       { highlighted: true, text: "robot" },

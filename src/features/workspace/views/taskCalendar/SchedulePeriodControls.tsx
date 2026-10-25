@@ -18,41 +18,36 @@ export function SchedulePeriodControls({
   range: TimelineViewInterval;
 }) {
   const isTimeline = presentation === "timeline";
-  const showsPeriodNavigation = !isTimeline || range !== "all";
   const periodUnit = range === "week" ? "week" : "month";
 
   return (
     <div
       aria-label={presentation === "timeline" ? "Timeline period controls" : `${presentation} period controls`}
-      className={`timeline-period-controls${range === "week" ? " is-week" : ""}${isTimeline && range === "all" ? " is-all" : ""}`}
+      className={`timeline-period-controls${range === "week" ? " is-week" : ""}`}
     >
       <ScheduleRangeSelector onChange={onRangeChange} presentation={presentation} value={range} />
-      {showsPeriodNavigation ? (
-        <>
-          <span aria-hidden="true" className="timeline-period-divider" />
-          <button
-            aria-label={`Previous ${periodUnit}`}
-            className="icon-button timeline-period-button"
-            data-tutorial-target={isTimeline ? "timeline-period-prev-button" : undefined}
-            onClick={() => onShiftPeriod(-1)}
-            title={`Previous ${periodUnit}`}
-            type="button"
-          >
-            <IconChevronLeft />
-          </button>
-          <span className="timeline-period-label">{periodLabel}</span>
-          <button
-            aria-label={`Next ${periodUnit}`}
-            className="icon-button timeline-period-button"
-            data-tutorial-target={isTimeline ? "timeline-period-next-button" : undefined}
-            onClick={() => onShiftPeriod(1)}
-            title={`Next ${periodUnit}`}
-            type="button"
-          >
-            <IconChevronRight />
-          </button>
-        </>
-      ) : null}
+      <span aria-hidden="true" className="timeline-period-divider" />
+      <button
+        aria-label={`Previous ${periodUnit}`}
+        className="icon-button timeline-period-button"
+        data-tutorial-target={isTimeline ? "timeline-period-prev-button" : undefined}
+        onClick={() => onShiftPeriod(-1)}
+        title={`Previous ${periodUnit}`}
+        type="button"
+      >
+        <IconChevronLeft />
+      </button>
+      <span className="timeline-period-label">{periodLabel}</span>
+      <button
+        aria-label={`Next ${periodUnit}`}
+        className="icon-button timeline-period-button"
+        data-tutorial-target={isTimeline ? "timeline-period-next-button" : undefined}
+        onClick={() => onShiftPeriod(1)}
+        title={`Next ${periodUnit}`}
+        type="button"
+      >
+        <IconChevronRight />
+      </button>
       <button
         aria-label="Go to today"
         className="schedule-today-button"

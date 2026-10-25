@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { HomeView } from "@/features/workspace/views/overview";
 import { buildHomeViewModel } from "@/features/workspace/views/overview/overviewViewModel";
+import { groupHomeActions } from "@/features/workspace/views/overview/homePressureModel";
 import { buildAttentionQueue } from "@/features/workspace/views/attention/attentionQueue";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -158,7 +159,7 @@ function createOverviewBootstrap() {
 }
 
 describe("Workspace overview views", () => {
-  it("orders action, upcoming milestones, and the task status summary", () => {
+  it("shows scoped chart summaries and unassigned task details", () => {
     const bootstrap = createOverviewBootstrap();
     const markup = renderToStaticMarkup(React.createElement(HomeView, {
       bootstrap,
@@ -170,21 +171,25 @@ describe("Workspace overview views", () => {
       scopeLabel: bootstrap.projects[0].name,
       today: fixedToday,
     }));
-    expect(markup.indexOf("Action Required")).toBeLessThan(markup.indexOf("Upcoming milestones"));
-    expect(markup.indexOf("Upcoming milestones")).toBeLessThan(markup.indexOf("Task status"));
-    expect(markup).toContain("Drive practice deadline");
-    expect(markup).toContain("Future gate 4");
-    expect(markup).toContain("Ready");
-    expect(markup).toContain("Not assessed");
-    expect(markup).toContain("Blocked");
+    expect(markup.indexOf("Work and pressure")).toBeLessThan(markup.indexOf("Next 14 days"));
+    expect(markup.indexOf("Task status")).toBeLessThan(markup.indexOf("Next 14 days"));
+    expect(markup).toContain('aria-label="Work grouped by"');
+    expect(markup).toContain("What unlocks work");
+    expect(markup).toContain("Needs attention");
     expect(markup).not.toContain("Other project gate");
     expect(markup).not.toContain("Completed gate");
-    expect(markup).toContain('aria-label="Filter task list by status"');
+    expect(markup).toContain('aria-label="View tasks by status"');
     expect(markup).toContain("Waiting for QA");
+    expect(markup).toContain('aria-label="Unassigned unfinished tasks"');
     expect(markup).not.toContain("Later media recap");
+    expect(markup).toContain("Finish bellypan CAD");
+    expect(markup).not.toContain("Battery cart not inspected");
+    expect(markup).toContain("3 unfinished tasks · 3 need attention");
+    expect(markup).toContain('aria-label="Complete: 1 tasks"');
+    expect(markup).toContain('aria-label="View all 4 tasks"');
   });
 
-  it("shows an empty action state and keeps task status counts explicit", () => {
+  it("shows an empty work state and keeps task status counts explicit", () => {
     const bootstrap = createOverviewBootstrap();
     bootstrap.tasks = bootstrap.tasks.map(task => ({
       ...task,
@@ -201,31 +206,33 @@ describe("Workspace overview views", () => {
       projectId: bootstrap.projects[0].id,
       today: fixedToday,
     }));
-    expect(markup).toContain("No current action items in this scope.");
+    expect(markup).toContain("No unfinished tasks or active risks in this scope.");
     expect(markup).toContain("Complete");
     expect(markup).toContain("4 tasks");
   });
 });
 
 describe("buildHomeViewModel", () => {
-  it("scopes the task distribution and next four milestones to the selected project", () => {
+  it("scopes tasks and supplies all milestone dates for the deadline chart", () => {
     const bootstrap = createOverviewBootstrap();
     const projectId = bootstrap.projects[0].id;
-    const model = buildHomeViewModel({ bootstrap, projectId, today: fixedToday });
+    const model = buildHomeViewModel({ bootstrap, projectId });
 
-    expect(model.upcomingMilestones.map((milestone) => milestone.id)).toEqual([
+    expect(model.milestones.map((milestone) => milestone.id)).toEqual([
       "milestone-soon",
       "milestone-2",
       "milestone-3",
       "milestone-4",
+      "milestone-5",
+      "milestone-complete",
     ]);
     expect(model.tasksByStatus["not-started"]).toHaveLength(1);
     expect(model.tasksByStatus["in-progress"]).toHaveLength(1);
     expect(model.tasksByStatus["waiting-for-qa"]).toHaveLength(1);
     expect(model.tasksByStatus.complete).toHaveLength(1);
 
-    const allProjectsModel = buildHomeViewModel({ bootstrap, today: fixedToday });
-    expect(allProjectsModel.upcomingMilestones.map((milestone) => milestone.id)).toContain("milestone-other-project");
+    const allProjectsModel = buildHomeViewModel({ bootstrap });
+    expect(allProjectsModel.milestones.map((milestone) => milestone.id)).toContain("milestone-other-project");
     expect(allProjectsModel.tasksByStatus["in-progress"]).toHaveLength(2);
   });
 
@@ -246,5 +253,28 @@ describe("buildHomeViewModel", () => {
     expect(queue.some((item) => item.recordId === "task-overdue")).toBe(true);
     expect(queue[0].recordId).toBe("risk-high");
     expect(queue.map((item) => item.urgency)).toEqual([...queue.map((item) => item.urgency)].sort((left, right) => right - left));
+  });
+});
+
+describe("Home chart data", () => {
+  it("counts multi-signal records once and retains queue order in each drilldown", () => {
+    const bootstrap = createOverviewBootstrap();
+    const queue = buildAttentionQueue({ bootstrap, activePersonFilter: [], today: fixedToday });
+    const groups = groupHomeActions(queue);
+    const grouped = groups.flatMap(group => group.items);
+    expect(grouped).toHaveLength(queue.length);
+    expect(new Set(grouped.map(item => item.key)).size).toBe(queue.length);
+    expect(groups.find(group => group.id === "blocked")?.items.map(item => item.recordId)).toContain("risk-high");
+    expect(groups.find(group => group.id === "high-risk")?.items).toHaveLength(0);
+    expect(groups.find(group => group.id === "waiting-qa")?.items.map(item => item.recordId)).toContain("task-soon");
+    for (const group of groups) expect(group.items).toEqual(queue.filter(item => group.items.includes(item)));
+  });
+
+  it("keeps the task chart scoped to the selected person", () => {
+    const bootstrap = createOverviewBootstrap();
+    bootstrap.tasks[0].ownerId = "selected-person";
+    bootstrap.tasks.slice(1).forEach(task => { task.ownerId = "someone-else"; task.assigneeIds = []; });
+    const model = buildHomeViewModel({ bootstrap, activePersonFilter: ["selected-person"] });
+    expect(Object.values(model.tasksByStatus).flat().map(task => task.id)).toEqual(["task-overdue"]);
   });
 });

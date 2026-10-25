@@ -3,180 +3,134 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { IconEdit, IconManufacturing, IconParts } from "@/components/shared/Icons";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskQueueCard } from "@/features/workspace/views/taskQueue/state/taskQueueKanbanCardView";
-import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
 import { readTaskSubsystemIds, readTaskWorkstreamIds } from "@/features/workspace/views/taskQueue/taskQueueKanbanCard";
-import { getTaskQueueCardContextLabel } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
 import { getTaskQueueDisciplineIcon } from "@/features/workspace/views/taskQueue/taskQueueDisciplineBadge";
 import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
-describe("Task Queue cards", () => {
-  it("normalizes subsystem and workstream IDs consistently", () => {
-    const task = createTask(1, {
-      subsystemIds: ["subsystem-1", "", "subsystem-1"],
-      workstreamIds: ["workstream-1", "", "workstream-1"],
-    });
+function renderCard(task: Partial<TaskRecord> = {}, bootstrap = createBootstrap()) {
+  return renderToStaticMarkup(React.createElement(TaskQueueCard, {
+    bootstrap, task: createTask(1, { dueDate: "2026-10-23", ...task }),
+    membersById: Object.fromEntries(bootstrap.members.map((member) => [member.id, member])),
+    projectsById: Object.fromEntries(bootstrap.projects.map((project) => [project.id, project])),
+    subsystemsById: Object.fromEntries(bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem])),
+    workstreamsById: Object.fromEntries(bootstrap.workstreams.map((workstream) => [workstream.id, workstream])),
+    openEditTaskModal: jest.fn(),
+  }));
+}
 
+function risk(overrides: Partial<BootstrapPayload["risks"][number]> = {}): BootstrapPayload["risks"][number] {
+  return {
+    id: "risk-1", projectId: "project-1", title: "Needs material", detail: "Stock is unavailable",
+    category: "supply", severity: "medium", status: "open", blocksWork: true,
+    source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-1" }],
+    mitigationTaskId: null, ownerGroupId: null, ownerMemberId: null, mitigationDueDate: null,
+    createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null, ...overrides,
+  };
+}
+
+describe("Task Queue cards", () => {
+  beforeEach(() => jest.useFakeTimers().setSystemTime(new Date(2026, 9, 21, 12)));
+  afterEach(() => jest.useRealTimers());
+
+  it("orders title, context, exceptions and footer without repeating board context or description", () => {
+    const bootstrap = createBootstrap();
+    bootstrap.risks = [risk()];
+    const markup = renderCard({ title: "Wire swerve", summary: "Execution details" }, bootstrap);
+    expect(markup.indexOf("Wire swerve")).toBeLessThan(markup.indexOf("Drive (v1)"));
+    expect(markup.indexOf("Drive (v1)")).toBeLessThan(markup.indexOf("1 blocker"));
+    expect(markup.indexOf("1 blocker")).toBeLessThan(markup.indexOf("task-queue-board-card-footer"));
+    expect(markup).not.toContain("Execution details");
+    expect(markup).not.toContain("Design discipline");
+    expect(markup).not.toContain(">Robot<");
+    expect(markup).not.toContain("task-queue-board-card-priority-accented");
+  });
+
+  it("uses each task's project type for neutral context on a mixed board", () => {
+    const bootstrap = createBootstrap();
+    bootstrap.projects.push({ ...bootstrap.projects[0], id: "outreach", projectType: "outreach", name: "Outreach" });
+    bootstrap.workstreams.push({ id: "sponsor", projectId: "outreach", name: "Sponsor engagement", description: "", color: "#335577", isArchived: false });
+    expect(renderCard({}, bootstrap)).toContain("Drive (v1)");
+    expect(renderCard({ projectId: "outreach", workstreamIds: ["sponsor"] }, bootstrap)).toContain("Sponsor engagement");
+    expect(renderCard({ subsystemIds: [] }, bootstrap)).not.toContain('class="task-queue-board-card-context"');
+    expect(renderCard({ projectId: "outreach", workstreamIds: [] }, bootstrap)).not.toContain('class="task-queue-board-card-context"');
+    expect(renderCard({}, bootstrap)).not.toContain("context-accent");
+  });
+
+  it("normalizes subsystem and workstream IDs consistently", () => {
+    const task = createTask(1, { subsystemIds: ["subsystem-1", "", "subsystem-1"], workstreamIds: ["workstream-1", "", "workstream-1"] });
     expect(readTaskSubsystemIds(task)).toEqual(["subsystem-1"]);
     expect(readTaskWorkstreamIds(task)).toEqual(["workstream-1"]);
   });
 
-  it("uses local calendar days to color task card due dates", () => {
-    const bootstrap = createBootstrap();
-    const renderDueDateClass = (offsetDays: number) => {
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + offsetDays);
-      const dateValue = [dueDate.getFullYear(), dueDate.getMonth() + 1, dueDate.getDate()]
-        .map((part, index) => index === 0 ? String(part) : String(part).padStart(2, "0"))
-        .join("-");
-      const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
-        bootstrap, task: createTask(1, { dueDate: dateValue }), workTypesById: {}, membersById: {}, projectsById: {},
-        subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
-        taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
-      }));
-      return markup.match(/task-detail-deadline-pill-(?:danger|warning|success)/)?.[0];
-    };
-
-    expect(renderDueDateClass(-1)).toBe("task-detail-deadline-pill-danger");
-    expect(renderDueDateClass(0)).toBe("task-detail-deadline-pill-warning");
-    expect(renderDueDateClass(1)).toBe("task-detail-deadline-pill-success");
+  it.each([
+    ["2026-10-20", "not-started", "Overdue · Oct 20", "danger"],
+    ["2026-10-21", "not-started", "Due today", "warning"],
+    ["2026-10-23", "not-started", "Due Oct 23", "neutral"],
+    ["2026-10-20", "complete", "Due Oct 20", "neutral"],
+    ["2026-10-21", "complete", "Due Oct 21", "neutral"],
+    ["", "not-started", "No due date", "neutral"],
+    ["bad-date", "not-started", "No due date", "neutral"],
+    ["2026-02-30", "not-started", "No due date", "neutral"],
+  ] as const)("renders %s on a %s task as %s", (dueDate, status, text, tone) => {
+    expect(renderCard({ dueDate, status })).toContain(`data-tone="${tone}">${text}</span>`);
   });
 
-  it("keeps work-log hours and help signals without showing work-log notes on task cards", () => {
+  it("uses local calendar boundaries for due-today and overdue", () => {
+    jest.setSystemTime(new Date(2026, 9, 21, 23, 59));
+    expect(renderCard({ dueDate: "2026-10-21" })).toContain("Due today");
+    jest.setSystemTime(new Date(2026, 9, 22, 0, 1));
+    expect(renderCard({ dueDate: "2026-10-21" })).toContain("Overdue · Oct 21");
+  });
+
+  it("renders distinct labeled priority glyphs for all four levels", () => {
+    const glyphs = ["low", "medium", "high", "critical"].map((priority) => {
+      const markup = renderCard({ priority: priority as TaskRecord["priority"] });
+      const label = priority[0].toUpperCase() + priority.slice(1) + " priority";
+      expect(markup).toContain(`aria-label="${label}"`);
+      expect(markup).toContain(`<title>${label}</title>`);
+      return markup.match(/<title>.*?<\/svg>/)?.[0].replace(/<title>.*?<\/title>/, "");
+    });
+    expect(new Set(glyphs).size).toBe(4);
+  });
+
+  it("shows one avatar, counts additional assignees and exposes every name", () => {
+    const markup = renderCard({ assigneeIds: ["member-2", "member-1", "member-2"] });
+    expect(markup).toContain('aria-label="Quinn Maker, Alex Builder"');
+    expect(markup).toContain(">Q<");
+    expect(markup).toContain(">+1</span>");
+    expect(markup).not.toContain("alex.png");
+    expect(markup.match(/class="profile-avatar /g)).toHaveLength(1);
+  });
+
+  it("uses owner fallback and handles unassigned or unavailable people", () => {
+    expect(renderCard()).toContain('src="https://example.com/alex.png"');
+    expect(renderCard({ ownerId: null, assigneeIds: [] })).toContain(">Unassigned</span>");
+    const unavailable = renderCard({ assigneeIds: ["missing-member", "member-1"] });
+    expect(unavailable).toContain('aria-label="Unavailable assignee, Alex Builder"');
+    expect(unavailable).toContain(">?<");
+    expect(unavailable).toContain(">+1</span>");
+    expect(unavailable).not.toContain(">Unassigned</span>");
+  });
+
+  it("shows active linked blockers and help independently of work-log notes", () => {
     const bootstrap = createBootstrap();
-    bootstrap.workLogs = [
-      { id: "old", taskId: "task-1", date: "2026-01-01", participantIds: ["member-1"], hours: 2, notes: "Need help with wiring" },
-      { id: "new", taskId: "task-1", date: "2026-01-02", participantIds: ["member-1"], hours: 1.5, notes: "Prepared connector" },
-      { id: "other", taskId: "task-2", date: "2026-01-03", participantIds: [], hours: 8, notes: "Unrelated" },
-    ];
-    const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
-      bootstrap, task: bootstrap.tasks[0], workTypesById: {}, membersById: {}, projectsById: {},
-      subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
-      taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
-    }));
-    expect(markup).toContain("3.5h logged");
-    expect(markup).toContain("task-queue-board-card-header-side");
-    expect(markup).toContain('task-queue-board-card-work-hours">3.5h logged</small>');
-    expect(markup).not.toContain("Prepared connector");
+    bootstrap.risks = [risk(), risk({ id: "help", category: "help", blocksWork: false })];
+    const markup = renderCard({}, bootstrap);
+    expect(markup).toContain("1 blocker");
     expect(markup).toContain("Help requested");
-    expect(markup).not.toContain("Unrelated");
-  });
-
-  it("shows blocker count in place of logged hours when blockers exist", () => {
-    const bootstrap = createBootstrap();
-    bootstrap.risks = [{ id: "risk-blocker", projectId: "project-1", title: "Needs material", detail: "Part stock is unavailable", category: "supply", severity: "medium", status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-1" }], mitigationTaskId: null, ownerGroupId: null,
-        ownerMemberId: null,
-        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null }];
-    bootstrap.workLogs = [
-      { id: "log-1", taskId: "task-1", date: "2026-01-02", participantIds: ["member-1"], hours: 3.5, notes: "Prepared connector" },
-    ];
-    const task = createTask(1);
-    const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
-      bootstrap, task, workTypesById: {}, membersById: {}, projectsById: {},
-      subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
-      taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
-    }));
-
-    expect(markup).toContain('task-queue-board-card-blocker-count">1 blocker</small>');
-    expect(markup).not.toContain("3.5h logged");
-    expect(markup).not.toContain("Open for help and resolution");
-  });
-
-  it("formats the kanban card context from subsystems or workflows when a project is selected", () => {
-    const robotTask = createTask(1, {
-      projectId: "project-robot",
-      subsystemIds: ["subsystem-robot"],
-      workstreamIds: [],
-    });
-    const workflowTask = createTask(2, {
-      projectId: "project-workflow",
-      subsystemIds: [],
-      workstreamIds: ["workstream-workflow"],
-    });
-
-    expect(
-      getTaskQueueCardContextLabel(
-        robotTask,
-        "robot",
-        {
-          "subsystem-robot": {
-            id: "subsystem-robot",
-            projectId: "project-robot",
-            name: "Drive",
-            color: "#224466",
-            description: "",
-            photoUrl: "",
-            iteration: 1,
-            isCore: true,
-            parentSubsystemId: null,
-            responsibleEngineerId: null,
-            mentorIds: [],
-          },
-        },
-        {},
-      ),
-    ).toBe("Drive (v1)");
-
-    expect(
-      getTaskQueueCardContextLabel(
-        workflowTask,
-        "operations",
-        {},
-        {
-          "workstream-workflow": {
-            id: "workstream-workflow",
-            projectId: "project-workflow",
-            name: "Operations",
-            description: "",
-            color: "#000000",
-            isArchived: false,
-          },
-        },
-      ),
-    ).toBe("Operations");
-  });
-
-  it("color-codes the kanban card context chip", () => {
-    const bootstrap = createBootstrap();
-    const markup = renderToStaticMarkup(
-      React.createElement(TaskQueueKanbanBoard, {
-        bootstrap,
-        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
-        focusedState: null,
-        isNonRobotProject: false,
-        membersById: {
-          "member-1": bootstrap.members[0],
-          "member-2": bootstrap.members[1],
-        },
-        onClearFocus: jest.fn(),
-        onFocusState: jest.fn(),
-        openEditTaskModal: jest.fn(),
-        projectsById: { "project-1": bootstrap.projects[0] },
-        taskQueueZoom: 1,
-        showProjectContextOnCards: true,
-        showProjectOnCards: false,
-        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
-        tasks: [createTask(1, { priority: "medium" })],
-        workstreamsById: {},
-      }),
-    );
-
-    expect(markup).toContain("task-queue-board-card-context-chip");
-    expect(markup).toContain("task-queue-board-card-context-chip-due-style");
-    expect(markup).toContain("--task-queue-board-card-context-accent:#224466");
-    expect(markup).toContain("color-mix(in srgb, #224466 24%, transparent)");
-    expect(markup).toContain("Drive (v1)");
-    expect(markup).toContain("task-queue-board-card-discipline");
-    expect(markup).toContain('aria-label="Design discipline"');
-    expect(markup).not.toContain("task-queue-board-card-priority-medium");
-    expect(markup).toContain("task-queue-board-card-priority-accented");
-    expect(markup).toContain("--task-queue-board-card-priority-accent:var(--status-warning-text)");
-    expect(markup).toContain("Medium priority</span>");
-    expect(markup.indexOf('aria-label="Design discipline"')).toBeLessThan(
-      markup.indexOf("profile-avatar"),
-    );
+    bootstrap.risks = [risk({ status: "resolved" }), risk({ id: "other", category: "help", relatedTargets: [{ kind: "task", id: "task-2" }] })];
+    bootstrap.workLogs = [{ id: "old", taskId: "task-1", date: "2026-01-01", participantIds: [], hours: 2, notes: "Need help with wiring" }];
+    const resolved = renderCard({}, bootstrap);
+    expect(resolved).not.toContain("task-queue-board-card-exceptions");
+    expect(resolved).not.toContain("Help requested");
+    expect(resolved).not.toContain("logged");
+    bootstrap.risks = [risk({ category: "help", status: "resolved", blocksWork: false })];
+    expect(renderCard({}, bootstrap)).not.toContain("Help requested");
   });
 
   it("reuses the official discipline icons for task queue discipline options", () => {

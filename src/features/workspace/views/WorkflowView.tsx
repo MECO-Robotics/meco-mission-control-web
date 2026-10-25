@@ -188,10 +188,10 @@ export function WorkflowView({
                   tabIndex={0}
                   style={{
                     gridTemplateColumns: "minmax(220px, 2.2fr) 0.8fr 0.8fr 1.2fr",
-                    padding: "12px 16px",
+                    paddingBlock: "12px",
                     borderBottom: "1px solid var(--border-base)",
                     color: "var(--text-copy)",
-                    background: "var(--row-bg, var(--bg-row-alt))",
+                    background: "var(--row-bg, var(--bg-panel))",
                     boxShadow: `inset 4px 0 0 ${accentColor}`,
                   }}
                 >

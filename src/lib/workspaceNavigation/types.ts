@@ -22,7 +22,7 @@ export type ViewAvailabilityContext =
   | "no-project"
   | "no-season";
 
-export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "kanban" | "agenda";
+export type TaskViewTab = "timeline" | "robot-map" | "kanban";
 export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
 export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
 export type NavigationSubItemId =
