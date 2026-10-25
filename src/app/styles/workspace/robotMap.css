@@ -3,17 +3,17 @@
   border: 0;
   box-shadow: none;
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: 0.75rem;
-  min-height: 0;
+  min-height: auto;
   padding: 0;
 }
 
 .robot-config-main {
   display: grid;
   gap: 0.75rem;
-  min-height: 0;
+  min-height: auto;
 }
 
 .robot-config-main-map {
@@ -25,9 +25,10 @@
 }
 
 .robot-config-canvas-shell {
+  align-self: start;
   display: grid;
   gap: 0.7rem;
-  min-height: 0;
+  min-height: auto;
 }
 
 .robot-config-map-surface {
