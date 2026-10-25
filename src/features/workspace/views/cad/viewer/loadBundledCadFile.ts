@@ -41,11 +41,10 @@ export async function loadOptimizedRobotPreview(scope: { projectId?: string | nu
 export async function loadBundledAssemblyHierarchy(meshes: CadMesh[]): Promise<CadAssemblyNode | null> {
   const response = await fetch("/cad/main-assembly-hierarchy.json");
   if (!response.ok) return null;
-  const metadata = await response.json() as { meshes: Array<{ name: string; vertexCount: number; indexCount: number }>; root: CadAssemblyNode };
+  const metadata = await response.json() as { meshes: Array<{ vertexCount: number; indexCount: number }>; root: CadAssemblyNode };
   const matches = metadata.meshes.length === meshes.length && meshes.every((mesh, index) => {
     const signature = metadata.meshes[index];
-    return signature.name === mesh.name
-      && signature.vertexCount === mesh.attributes.position.array.length / 3
+    return signature.vertexCount === mesh.attributes.position.array.length / 3
       && signature.indexCount === mesh.index.array.length;
   });
   return matches ? metadata.root : null;
