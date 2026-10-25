@@ -66,4 +66,20 @@ describe("FilterDropdown toolbar summary", () => {
     expect(markup).toContain('aria-label="Filter by discipline: All disciplines"');
     expect(markup).toContain('class="toolbar-filter-value">All</span>');
   });
+
+  it("uses a supplied default label for an empty selection", () => {
+    const markup = renderToStaticMarkup(
+      createElement(FilterDropdown, {
+        allLabel: "Active work",
+        ariaLabel: "Filter tasks by status",
+        onChange: jest.fn(),
+        options,
+        selectedAllLabel: "Active work",
+        value: [],
+      }),
+    );
+
+    expect(markup).toContain('aria-label="Filter tasks by status: Active work"');
+    expect(markup).toContain('class="toolbar-filter-value">Active work</span>');
+  });
 });

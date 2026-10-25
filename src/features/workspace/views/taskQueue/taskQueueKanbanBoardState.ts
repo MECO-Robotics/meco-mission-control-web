@@ -30,6 +30,15 @@ export const TASK_QUEUE_BOARD_COLUMNS: readonly TaskQueueBoardColumn[] = [
   { state: "complete", label: "Complete" },
 ] as const;
 
+export const TASK_QUEUE_ACTIVE_BOARD_STATES: readonly TaskQueueBoardState[] = [
+  "unrecorded",
+  "not-started",
+  "in-progress",
+  "blocked",
+  "waiting-on-dependency",
+  "waiting-for-qa",
+];
+
 export const TASK_QUEUE_STATUS_OPTIONS: DropdownOption[] = [
   { id: "unrecorded", name: "Unrecorded", icon: React.createElement(TimelineTaskStatusLogo, { compact: true, signal: "unrecorded", status: "unrecorded" }) },
   ...(["not-started", "in-progress", "waiting-for-qa", "complete"] as const).map((status) => ({

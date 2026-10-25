@@ -141,14 +141,14 @@ export function useTaskQueueViewStateLogic({
       return;
     }
 
-    const hasMatchingTasks = bootstrap.tasks.some(
+    const hasMatchingTasks = processedTasks.some(
       (task) => getTaskQueueBoardState(task, bootstrap) === focusedBoardState,
     );
 
     if (!hasMatchingTasks) {
       setFocusedBoardState(null);
     }
-  }, [bootstrap, focusedBoardState, setFocusedBoardState]);
+  }, [bootstrap, focusedBoardState, processedTasks, setFocusedBoardState]);
 
   useEffect(() => {
     if (focusedBoardState === null || typeof document === "undefined") {
