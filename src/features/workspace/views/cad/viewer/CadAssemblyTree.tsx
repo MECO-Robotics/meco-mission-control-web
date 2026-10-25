@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import type { CadMesh } from "./cadGeometry";
+import type { CadAssemblyNode, CadMesh } from "./cadGeometry";
 
 interface TreeNode {
   id: string;
@@ -9,46 +9,49 @@ interface TreeNode {
   children: TreeNode[];
 }
 
-function buildTree(meshes: CadMesh[]) {
-  const root: TreeNode = { id: "robot", label: "<robot>", children: [] };
-  meshes.forEach((mesh, meshIndex) => {
-    let parent = root;
-    const path = [...(mesh.hierarchy ?? []), mesh.name.trim() || `Part ${meshIndex + 1}`];
-    path.forEach((label, depth) => {
-      const id = `${parent.id}/${label}`;
-      let child = parent.children.find((item) => item.label === label);
-      if (!child) {
-        child = { id, label, children: [] };
-        parent.children.push(child);
-      }
-      if (depth === path.length - 1) child.meshIndex ??= meshIndex;
-      parent = child;
-    });
-  });
-  return root;
+function buildTreeNode(node: CadAssemblyNode, meshes: CadMesh[]): TreeNode {
+  const children = node.children.map((child) => buildTreeNode(child, meshes));
+  const directMeshes = node.meshIndices.map((meshIndex) => ({
+    id: `${node.id}:mesh:${meshIndex}`,
+    label: meshes[meshIndex]?.name || `Part ${meshIndex + 1}`,
+    meshIndex,
+    children: [],
+  }));
+  const label = node.name.trim() || (node.id === "root" ? "<robot>" : "Assembly");
+  if (node.id !== "root" && children.length === 0 && directMeshes.length === 1) {
+    return { id: node.id, label, meshIndex: directMeshes[0].meshIndex, children: [] };
+  }
+  return {
+    id: node.id,
+    label,
+    children: [...children, ...directMeshes],
+  };
 }
 
-export function CadAssemblyTree({ meshes, selected, onSelect }: {
+export function CadAssemblyTree({ meshes, root, selected, onSelect }: {
   meshes: CadMesh[];
+  root: CadAssemblyNode;
   selected: number | null;
   onSelect: (meshIndex: number) => void;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  const root = buildTree(meshes);
+  const tree = buildTreeNode(root, meshes);
+  tree.label = "<robot>";
 
+  const toggle = (id: string) => setExpanded((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
   const renderNode = (node: TreeNode) => {
     const isExpanded = expanded.has(node.id);
     const hasChildren = node.children.length > 0;
     return <li key={node.id}>
       <div className="cad-assembly-tree-row">
-        {hasChildren ? <button type="button" className={`cad-assembly-tree-toggle${isExpanded ? " is-expanded" : ""}`} aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.label}`} aria-expanded={isExpanded} onClick={() => setExpanded((current) => {
-          const next = new Set(current);
-          if (next.has(node.id)) next.delete(node.id); else next.add(node.id);
-          return next;
-        })}><ChevronRight aria-hidden="true" size={15} /></button> : <span className="cad-assembly-tree-spacer" />}
+        {hasChildren ? <button type="button" className={`cad-assembly-tree-toggle${isExpanded ? " is-expanded" : ""}`} aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.label}`} aria-expanded={isExpanded} onClick={() => toggle(node.id)}><ChevronRight aria-hidden="true" size={15} /></button> : <span className="cad-assembly-tree-spacer" />}
         <button type="button" className="cad-assembly-tree-label" aria-current={node.meshIndex === selected ? "true" : undefined} onClick={() => {
-          if (hasChildren) setExpanded((current) => new Set(current).add(node.id));
-          else if (node.meshIndex !== undefined) onSelect(node.meshIndex);
+          if (node.meshIndex !== undefined) onSelect(node.meshIndex);
+          else if (hasChildren) toggle(node.id);
         }}>{node.label}</button>
       </div>
       {hasChildren && isExpanded ? <ul>{node.children.map(renderNode)}</ul> : null}
@@ -56,6 +59,6 @@ export function CadAssemblyTree({ meshes, selected, onSelect }: {
   };
 
   return <nav className="cad-assembly-tree" aria-label="CAD assembly hierarchy">
-    <ul>{renderNode(root)}</ul>
+    <ul>{renderNode(tree)}</ul>
   </nav>;
 }

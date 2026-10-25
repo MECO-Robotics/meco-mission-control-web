@@ -1,7 +1,7 @@
 import workerUrl from "./cadStep.worker?worker&url";
-import type { CadGeometryResult, CadMesh } from "./cadGeometry";
+import type { CadGeometryResult } from "./cadGeometry";
 
-type CadWorkerResult = CadGeometryResult | { glb: ArrayBuffer; error?: never; meshes?: never };
+type CadWorkerResult = CadGeometryResult | { glb: ArrayBuffer; error?: never; meshes?: never; root?: never };
 type WorkerOutput = "meshes" | "glb";
 
 // Trust only the worker URL emitted by our build, never a URL from an uploaded file.
@@ -38,10 +38,10 @@ function runCadWorker(file: File, signal: AbortSignal, output: WorkerOutput): Pr
   });
 }
 
-export async function loadCadGeometry(file: File, signal: AbortSignal): Promise<CadMesh[]> {
+export async function loadCadGeometry(file: File, signal: AbortSignal): Promise<CadGeometryResult> {
   const result = await runCadWorker(file, signal, "meshes");
-  if (!result.meshes) throw new Error("The CAD geometry reader returned no preview meshes.");
-  return result.meshes;
+  if (!result.meshes || !result.root) throw new Error("The CAD geometry reader returned no preview meshes.");
+  return { meshes: result.meshes, root: result.root };
 }
 
 export async function loadCadGlb(file: File, signal: AbortSignal): Promise<ArrayBuffer> {

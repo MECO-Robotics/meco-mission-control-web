@@ -48,7 +48,6 @@
   inset: 0;
   pointer-events: none;
   position: absolute;
-  z-index: 1;
 }
 
 .robot-config-embedded-cad .cad-local-viewer-embedded {
@@ -82,14 +81,7 @@
   pointer-events: auto;
 }
 
-.robot-config-embedded-cad .cad-viewport-layout {
-  flex: 1 0 auto;
-  grid-template-columns: minmax(150px, 24%) minmax(0, 1fr);
-}
-
-.robot-config-embedded-cad .cad-assembly-tree {
-  max-height: none;
-}
+.robot-config-embedded-cad .cad-viewport-layout { flex: 1 0 auto; }
 
 @media (min-width: 1101px) {
   .robot-config-canvas-shell {
@@ -114,13 +106,7 @@
     height: max(280px, calc(100dvh - 19rem));
   }
 
-  .robot-config-embedded-cad .cad-viewport-layout {
-    flex: 1 0 auto;
-  }
-
-  .robot-config-embedded-cad .cad-assembly-tree {
-    height: max(280px, calc(100dvh - 19rem));
-  }
+  .robot-config-embedded-cad .cad-viewport-layout { flex: 1 0 auto; }
 }
 
 .robot-config-map-edit-overlay {

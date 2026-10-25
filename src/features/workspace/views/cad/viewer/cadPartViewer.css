@@ -7,8 +7,8 @@
 .cad-viewer-toolbar [aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: 2px; }
 .cad-viewer-canvas { height: clamp(280px, 52vh, 560px); overflow: hidden; border-radius: 12px; background: var(--cad-viewer-background); color: var(--cad-viewer-text); touch-action: none; }
 .cad-viewer-canvas > p { padding: 20px; }
-.cad-viewport-layout { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 10px; min-width: 0; }
-.cad-assembly-tree { min-width: 0; max-height: clamp(280px, 52vh, 560px); overflow: auto; border: 1px solid var(--border-subtle, #344155); border-radius: 10px; background: var(--surface-raised, #1d2939); color: var(--text-primary, #e5eaf2); padding: 8px; }
+.cad-viewport-layout { min-width: 0; position: relative; }
+.cad-assembly-tree { background: var(--surface-raised, #1d2939); border: 1px solid var(--border-subtle, #344155); border-radius: 10px; box-shadow: 0 8px 20px rgb(0 0 0 / 24%); box-sizing: border-box; color: var(--text-primary, #e5eaf2); left: 10px; max-height: max(180px, min(70vh, calc(100dvh - 20rem))); min-width: 0; overflow: auto; padding: 8px; position: absolute; top: 10px; width: min(320px, calc(100% - 20px)); z-index: 4; }
 .cad-assembly-tree ul { list-style: none; margin: 0; padding: 0; }
 .cad-assembly-tree ul ul { padding-left: 14px; }
 .cad-assembly-tree-row { display: flex; align-items: center; min-height: 30px; gap: 2px; }
@@ -27,7 +27,7 @@
 .cad-viewer-toolbar button:hover:not(:disabled) { border-color: var(--official-blue); }
 .cad-viewer-toolbar button:disabled { opacity: 0.5; cursor: default; }
 .cad-viewer-toolbar button:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
-.cad-viewport-layout .cad-viewer-canvas { height: clamp(280px, 52vh, 560px); min-width: 0; }
+.cad-viewport-layout .cad-viewer-canvas { height: clamp(280px, 52vh, 560px); min-width: 0; width: 100%; }
 .cad-part-viewer .cad-viewer-canvas p { color: var(--cad-viewer-text); }
 .cad-local-viewer > .cad-field { min-width: 0; }
 .cad-local-viewer input[type="file"] { min-width: 0; width: 100%; box-sizing: border-box; }

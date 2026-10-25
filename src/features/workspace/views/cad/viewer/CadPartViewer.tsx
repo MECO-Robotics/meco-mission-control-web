@@ -4,9 +4,9 @@ import type { TopbarAddMenuAction } from "@/features/workspace/shared/ui/Workspa
 import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
-import type { CadMesh } from "./cadGeometry";
+import type { CadAssemblyNode, CadMesh } from "./cadGeometry";
 import { CadAssemblyTree } from "./CadAssemblyTree";
-import { loadBundledMainAssembly, loadOptimizedRobotPreview } from "./loadBundledCadFile";
+import { loadBundledAssemblyHierarchy, loadBundledMainAssembly, loadOptimizedRobotPreview } from "./loadBundledCadFile";
 import "./cadPartViewer.css";
 
 const CadPartScene = lazy(() => import("./CadPartScene"));
@@ -16,8 +16,8 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
   render() { return this.state.failed ? <p role="alert">3D display is unavailable. Enable WebGL and reload to try again.</p> : this.props.children; }
 }
 
-function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { file: File; search?: string; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
-  const [meshes, setMeshes] = useState<CadMesh[] | null>(null);
+function FileViewer({ file, search = "", assemblyMetadata = false, onOrbitingChange, ...imageTargets }: { file: File; search?: string; assemblyMetadata?: boolean; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
+  const [geometry, setGeometry] = useState<{ meshes: CadMesh[]; root: CadAssemblyNode } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [isolated, setIsolated] = useState(false);
@@ -29,20 +29,26 @@ function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { 
     const loadGeometry = optimized
       ? import("./loadCadGltfGeometry").then(({ loadCadGltfGeometry }) => loadCadGltfGeometry(file, controller.signal))
       : import("./loadCadGeometry").then(({ loadCadGeometry }) => loadCadGeometry(file, controller.signal));
-    void loadGeometry.then((result) => {
-      if (!controller.signal.aborted) setMeshes(result);
+    void loadGeometry.then(async (result) => {
+      if (!result.meshes || !result.root) throw new Error("The CAD geometry reader returned no preview meshes.");
+      const bundledRoot = optimized && assemblyMetadata
+        ? await loadBundledAssemblyHierarchy(result.meshes).catch(() => null)
+        : null;
+      if (!controller.signal.aborted) setGeometry({ meshes: result.meshes, root: bundledRoot ?? result.root });
     }).catch((cause: Error) => {
       if (!controller.signal.aborted) setError(cause.message);
     });
     return () => controller.abort();
-  }, [file]);
+  }, [assemblyMetadata, file]);
+  const meshes = geometry?.meshes ?? null;
+  const root = geometry?.root;
   const select = (index: number | null) => { setSelected(index); if (index === null) setIsolated(false); };
   const matchingMeshes = meshes?.map((mesh, index) => ({ mesh, index })).filter(({ mesh, index }) =>
     (mesh.name || `Part ${index + 1}`).toLowerCase().includes(search.trim().toLowerCase()),
   );
   return <>
     <p className="cad-viewer-filename">{file.name} · {file.name.toLowerCase().endsWith(".glb") ? "Optimized glTF preview" : "STEP file preview · Dimensions in millimeters"}</p>
-    {error ? <p role="alert">{error}</p> : !meshes ? <p role="status">{file.name.toLowerCase().endsWith(".glb") ? "Loading optimized model…" : "Preparing part geometry…"}</p> : <>
+    {error ? <p role="alert">{error}</p> : !meshes || !root ? <p role="status">{file.name.toLowerCase().endsWith(".glb") ? "Loading optimized model…" : "Preparing part geometry…"}</p> : <>
       <div className="cad-viewer-toolbar">
         <button type="button" className="secondary-action" onClick={() => setReset((value) => value + 1)}>Fit view</button>
         <button type="button" className="secondary-action" aria-pressed={wireframe} onClick={() => setWireframe(!wireframe)}>Wireframe</button>
@@ -53,7 +59,7 @@ function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { 
         </select></label>
       </div>
       <div className="cad-viewport-layout">
-        <CadAssemblyTree meshes={meshes} selected={selected} onSelect={(index) => select(index)} />
+        <CadAssemblyTree meshes={meshes} root={root} selected={selected} onSelect={(index) => select(index)} />
         <div className="cad-viewer-canvas" role="img" aria-label={`3D preview of ${file.name}, ${meshes.length} parts`}>
           <SceneBoundary><Suspense fallback={<p role="status">Loading 3D viewer…</p>}>
             <CadPartScene meshes={meshes} selected={selected} isolated={isolated} wireframe={wireframe} reset={reset} onSelect={select} onOrbitingChange={onOrbitingChange} />
@@ -77,13 +83,14 @@ export function EmptyCadViewer({ onOrbitingChange }: { onOrbitingChange?: (isOrb
 export function CadPartViewer({
   file,
   search,
+  assemblyMetadata = false,
   onOrbitingChange,
   ...imageTargets
-}: { file: File | null; search?: string; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
+}: { file: File | null; search?: string; assemblyMetadata?: boolean; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
   const [current, setCurrent] = useState({ file, key: 0 });
   if (current.file !== file) setCurrent({ file, key: current.key + 1 });
   return <section className="cad-card cad-part-viewer" aria-label="CAD part viewer">
-    {file ? <FileViewer key={current.key} file={file} search={search} onOrbitingChange={onOrbitingChange} {...imageTargets} /> : <EmptyCadViewer onOrbitingChange={onOrbitingChange} />}
+    {file ? <FileViewer key={current.key} file={file} search={search} assemblyMetadata={assemblyMetadata} onOrbitingChange={onOrbitingChange} {...imageTargets} /> : <EmptyCadViewer onOrbitingChange={onOrbitingChange} />}
   </section>;
 }
 
@@ -165,6 +172,6 @@ export function CadFileViewer({
       </label>
     )}
     {seedLoadMessage ? <p role={file ? "alert" : "status"}>{seedLoadMessage}</p> : null}
-    <CadPartViewer file={file} search={search} onOrbitingChange={onOrbitingChange} {...imageTargets} />
+    <CadPartViewer file={file} search={search} assemblyMetadata={embeddedInMap} onOrbitingChange={onOrbitingChange} {...imageTargets} />
   </div>;
 }

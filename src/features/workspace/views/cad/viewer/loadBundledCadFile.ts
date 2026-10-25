@@ -1,3 +1,5 @@
+import type { CadAssemblyNode, CadMesh } from "./cadGeometry";
+
 let mainAssemblyPromise: Promise<File> | null = null;
 
 export function loadBundledMainAssembly(): Promise<File> {
@@ -34,4 +36,17 @@ export async function loadOptimizedRobotPreview(scope: { projectId?: string | nu
   const decompressed = bundled.body.pipeThrough(new DecompressionStream("gzip"));
   const blob = await new Response(decompressed).blob();
   return new File([blob], "MAIN ASSEMBLY.glb", { type: "model/gltf-binary" });
+}
+
+export async function loadBundledAssemblyHierarchy(meshes: CadMesh[]): Promise<CadAssemblyNode | null> {
+  const response = await fetch("/cad/main-assembly-hierarchy.json");
+  if (!response.ok) return null;
+  const metadata = await response.json() as { meshes: Array<{ name: string; vertexCount: number; indexCount: number }>; root: CadAssemblyNode };
+  const matches = metadata.meshes.length === meshes.length && meshes.every((mesh, index) => {
+    const signature = metadata.meshes[index];
+    return signature.name === mesh.name
+      && signature.vertexCount === mesh.attributes.position.array.length / 3
+      && signature.indexCount === mesh.index.array.length;
+  });
+  return matches ? metadata.root : null;
 }
