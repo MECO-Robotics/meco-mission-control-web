@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { Box, Boxes, ChevronRight } from "lucide-react";
 import type { CadAssemblyNode, CadMesh } from "./cadGeometry";
 
 interface TreeNode {
@@ -64,14 +64,17 @@ export function CadAssemblyTree({ meshes, root, search = "", selected, onSelect 
         <button type="button" className="cad-assembly-tree-label" aria-current={node.meshIndex === selected ? "true" : undefined} onClick={() => {
           if (node.meshIndex !== undefined) onSelect(node.meshIndex);
           else if (hasChildren) toggle(node.id);
-        }}>{node.label}</button>
+        }}>{hasChildren ? <Boxes aria-hidden="true" size={14} /> : <Box aria-hidden="true" size={14} />}<span>{node.label}</span></button>
       </div>
       {hasChildren && isExpanded ? <ul>{node.children.map(renderNode)}</ul> : null}
     </li>;
   };
 
-  return <nav className="cad-assembly-tree" aria-label="CAD assembly hierarchy">
-    <ul>{renderNode(tree)}</ul>
-    {noMatches ? <p className="cad-assembly-tree-empty">No components match “{search.trim()}”.</p> : null}
+  return <nav className="cad-assembly-tree" aria-label="CAD assembly browser">
+    <div className="cad-assembly-tree-header">Browser</div>
+    <div className="cad-assembly-tree-content">
+      <ul>{renderNode(tree)}</ul>
+      {noMatches ? <p className="cad-assembly-tree-empty">No components match “{search.trim()}”.</p> : null}
+    </div>
   </nav>;
 }
