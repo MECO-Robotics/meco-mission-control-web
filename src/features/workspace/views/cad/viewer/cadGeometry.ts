@@ -1,5 +1,6 @@
 export interface CadMesh {
   name: string;
+  hierarchy?: string[];
   color?: [number, number, number];
   attributes: { position: { array: number[] }; normal?: { array: number[] } };
   index: { array: number[] };

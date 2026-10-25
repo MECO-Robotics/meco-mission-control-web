@@ -21,6 +21,7 @@ export async function loadCadGltfGeometry(file: File, signal: AbortSignal): Prom
       : undefined;
     meshes.push({
       name: node.name,
+      hierarchy: nodeAncestors(node).map((ancestor) => ancestor.name.trim()).filter((name) => name && !/^(scene|root|robot)$/i.test(name)),
       color,
       attributes: {
         position: { array: Array.from(position.array as ArrayLike<number>) },
@@ -32,4 +33,10 @@ export async function loadCadGltfGeometry(file: File, signal: AbortSignal): Prom
     });
   });
   return validateCadMeshes(meshes);
+}
+
+function nodeAncestors(node: import("three").Object3D) {
+  const ancestors: import("three").Object3D[] = [];
+  for (let parent = node.parent; parent && parent.parent; parent = parent.parent) ancestors.unshift(parent);
+  return ancestors;
 }

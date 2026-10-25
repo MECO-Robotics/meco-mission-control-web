@@ -5,6 +5,7 @@ import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspa
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
 import type { CadMesh } from "./cadGeometry";
+import { CadAssemblyTree } from "./CadAssemblyTree";
 import { loadBundledMainAssembly, loadOptimizedRobotPreview } from "./loadBundledCadFile";
 import "./cadPartViewer.css";
 
@@ -51,10 +52,13 @@ function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { 
           {matchingMeshes?.map(({ mesh: part, index }) => <option key={index} value={index}>{part.name || `Part ${index + 1}`}</option>)}
         </select></label>
       </div>
-      <div className="cad-viewer-canvas" role="img" aria-label={`3D preview of ${file.name}, ${meshes.length} parts`}>
-        <SceneBoundary><Suspense fallback={<p role="status">Loading 3D viewer…</p>}>
-          <CadPartScene meshes={meshes} selected={selected} isolated={isolated} wireframe={wireframe} reset={reset} onSelect={select} onOrbitingChange={onOrbitingChange} />
-        </Suspense></SceneBoundary>
+      <div className="cad-viewport-layout">
+        <CadAssemblyTree meshes={meshes} selected={selected} onSelect={(index) => select(index)} />
+        <div className="cad-viewer-canvas" role="img" aria-label={`3D preview of ${file.name}, ${meshes.length} parts`}>
+          <SceneBoundary><Suspense fallback={<p role="status">Loading 3D viewer…</p>}>
+            <CadPartScene meshes={meshes} selected={selected} isolated={isolated} wireframe={wireframe} reset={reset} onSelect={select} onOrbitingChange={onOrbitingChange} />
+          </Suspense></SceneBoundary>
+        </div>
       </div>
       <CadPartImageAssignment key={selected ?? "none"} mesh={selected === null ? null : meshes[selected]} {...imageTargets} />
       <p>Drag to rotate · Scroll to zoom · Right-drag to pan. Select a part in the model or the list.</p>

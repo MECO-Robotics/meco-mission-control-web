@@ -82,6 +82,15 @@
   pointer-events: auto;
 }
 
+.robot-config-embedded-cad .cad-viewport-layout {
+  flex: 1 0 auto;
+  grid-template-columns: minmax(150px, 24%) minmax(0, 1fr);
+}
+
+.robot-config-embedded-cad .cad-assembly-tree {
+  max-height: none;
+}
+
 @media (min-width: 1101px) {
   .robot-config-canvas-shell {
     grid-template-rows: minmax(0, 1fr);
@@ -102,6 +111,14 @@
 
   .robot-config-embedded-cad .cad-viewer-canvas {
     flex: 0 0 auto;
+    height: max(280px, calc(100dvh - 19rem));
+  }
+
+  .robot-config-embedded-cad .cad-viewport-layout {
+    flex: 1 0 auto;
+  }
+
+  .robot-config-embedded-cad .cad-assembly-tree {
     height: max(280px, calc(100dvh - 19rem));
   }
 }
