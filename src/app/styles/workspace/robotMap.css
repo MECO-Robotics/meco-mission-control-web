@@ -82,6 +82,22 @@
   pointer-events: auto;
 }
 
+@media (min-width: 1101px) {
+  .robot-config-map-surface {
+    height: calc(100dvh - 1rem);
+  }
+
+  .robot-config-map-layer {
+    bottom: auto;
+    height: calc(100dvh - 10rem);
+  }
+
+  .robot-config-embedded-cad .cad-viewer-canvas {
+    flex: 0 0 auto;
+    height: max(280px, calc(100dvh - 19rem));
+  }
+}
+
 .robot-config-map-edit-overlay {
   align-items: center;
   bottom: 0.6rem;
