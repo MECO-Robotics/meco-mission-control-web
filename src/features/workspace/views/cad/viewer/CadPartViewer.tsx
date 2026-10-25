@@ -43,9 +43,6 @@ function FileViewer({ file, search = "", assemblyMetadata = false, onOrbitingCha
   const meshes = geometry?.meshes ?? null;
   const root = geometry?.root;
   const select = (index: number | null) => { setSelected(index); if (index === null) setIsolated(false); };
-  const matchingMeshes = meshes?.map((mesh, index) => ({ mesh, index })).filter(({ mesh, index }) =>
-    (mesh.name || `Part ${index + 1}`).toLowerCase().includes(search.trim().toLowerCase()),
-  );
   return <>
     <p className="cad-viewer-filename">{file.name} · {file.name.toLowerCase().endsWith(".glb") ? "Optimized glTF preview" : "STEP file preview · Dimensions in millimeters"}</p>
     {error ? <p role="alert">{error}</p> : !meshes || !root ? <p role="status">{file.name.toLowerCase().endsWith(".glb") ? "Loading optimized model…" : "Preparing part geometry…"}</p> : <>
@@ -53,13 +50,10 @@ function FileViewer({ file, search = "", assemblyMetadata = false, onOrbitingCha
         <button type="button" className="secondary-action" onClick={() => setReset((value) => value + 1)}>Fit view</button>
         <button type="button" className="secondary-action" aria-pressed={wireframe} onClick={() => setWireframe(!wireframe)}>Wireframe</button>
         <button type="button" className="secondary-action" disabled={selected === null} aria-pressed={isolated} onClick={() => setIsolated(!isolated)}>Isolate part</button>
-        <label className="cad-field"><span>Part</span><select value={selected ?? ""} onChange={(event) => select(event.target.value === "" ? null : Number(event.target.value))}>
-          <option value="">All parts ({meshes.length})</option>
-          {matchingMeshes?.map(({ mesh: part, index }) => <option key={index} value={index}>{part.name || `Part ${index + 1}`}</option>)}
-        </select></label>
+        <button type="button" className="secondary-action" disabled={selected === null} onClick={() => select(null)}>Show all</button>
       </div>
       <div className="cad-viewport-layout">
-        <CadAssemblyTree meshes={meshes} root={root} selected={selected} onSelect={(index) => select(index)} />
+        <CadAssemblyTree meshes={meshes} root={root} search={search} selected={selected} onSelect={(index) => select(index)} />
         <div className="cad-viewer-canvas" role="img" aria-label={`3D preview of ${file.name}, ${meshes.length} parts`}>
           <SceneBoundary><Suspense fallback={<p role="status">Loading 3D viewer…</p>}>
             <CadPartScene meshes={meshes} selected={selected} isolated={isolated} wireframe={wireframe} reset={reset} onSelect={select} onOrbitingChange={onOrbitingChange} />
@@ -67,7 +61,7 @@ function FileViewer({ file, search = "", assemblyMetadata = false, onOrbitingCha
         </div>
       </div>
       <CadPartImageAssignment key={selected ?? "none"} mesh={selected === null ? null : meshes[selected]} {...imageTargets} />
-      <p>Drag to rotate · Scroll to zoom · Right-drag to pan. Select a part in the model or the list.</p>
+      <p>Drag to rotate · Scroll to zoom · Right-drag to pan. Select components from the assembly tree or model.</p>
     </>}
   </>;
 }

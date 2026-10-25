@@ -28,15 +28,27 @@ function buildTreeNode(node: CadAssemblyNode, meshes: CadMesh[]): TreeNode {
   };
 }
 
-export function CadAssemblyTree({ meshes, root, selected, onSelect }: {
+function filterTree(node: TreeNode, query: string): TreeNode | null {
+  if (!query) return node;
+  if (node.meshIndex !== undefined) return node.label.toLowerCase().includes(query) ? node : null;
+  if (node.label.toLowerCase().includes(query)) return node;
+  const children = node.children.map((child) => filterTree(child, query)).filter((child): child is TreeNode => child !== null);
+  return children.length ? { ...node, children } : null;
+}
+
+export function CadAssemblyTree({ meshes, root, search = "", selected, onSelect }: {
   meshes: CadMesh[];
   root: CadAssemblyNode;
+  search?: string;
   selected: number | null;
   onSelect: (meshIndex: number) => void;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  const tree = buildTreeNode(root, meshes);
-  tree.label = "<robot>";
+  const query = search.trim().toLowerCase();
+  const sourceTree = buildTreeNode(root, meshes);
+  sourceTree.label = "<robot>";
+  const tree = filterTree(sourceTree, query) ?? { ...sourceTree, children: [] };
+  const noMatches = query.length > 0 && tree.children.length === 0;
 
   const toggle = (id: string) => setExpanded((current) => {
     const next = new Set(current);
@@ -44,7 +56,7 @@ export function CadAssemblyTree({ meshes, root, selected, onSelect }: {
     return next;
   });
   const renderNode = (node: TreeNode) => {
-    const isExpanded = expanded.has(node.id);
+    const isExpanded = query.length > 0 || expanded.has(node.id);
     const hasChildren = node.children.length > 0;
     return <li key={node.id}>
       <div className="cad-assembly-tree-row">
@@ -60,5 +72,6 @@ export function CadAssemblyTree({ meshes, root, selected, onSelect }: {
 
   return <nav className="cad-assembly-tree" aria-label="CAD assembly hierarchy">
     <ul>{renderNode(tree)}</ul>
+    {noMatches ? <p className="cad-assembly-tree-empty">No components match “{search.trim()}”.</p> : null}
   </nav>;
 }
