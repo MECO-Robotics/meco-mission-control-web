@@ -83,8 +83,16 @@
 }
 
 @media (min-width: 1101px) {
+  .robot-config-canvas-shell {
+    grid-template-rows: minmax(0, 1fr);
+    height: calc(100dvh - var(--shell-topbar-height, 58px) - 1rem);
+    position: sticky;
+    top: calc(var(--shell-topbar-height, 58px) + 0.75rem);
+  }
+
   .robot-config-map-surface {
-    height: calc(100dvh - 1rem);
+    height: 100%;
+    min-height: 0;
   }
 
   .robot-config-map-layer {
