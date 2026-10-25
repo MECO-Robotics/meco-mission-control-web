@@ -9,7 +9,10 @@
 .cad-viewer-canvas > p { padding: 20px; }
 .cad-viewport-layout { min-width: 0; position: relative; }
 .cad-assembly-tree { background: var(--surface-raised, #1d2939); border-right: 1px solid var(--border-subtle, #344155); border-radius: 12px 0 0 12px; box-sizing: border-box; color: var(--text-primary, #e5eaf2); display: flex; flex-direction: column; inset: 0 auto 0 0; min-width: 0; overflow: hidden; position: absolute; width: min(300px, calc(100% - 24px)); z-index: 4; }
-.cad-assembly-tree-header { align-items: center; border-bottom: 1px solid var(--border-subtle, #344155); color: var(--text-secondary, #b8c2d2); display: flex; flex: 0 0 34px; font-size: 12px; font-weight: 600; padding: 0 12px; }
+.cad-assembly-tree-header { align-items: center; border-bottom: 1px solid var(--border-subtle, #344155); color: var(--text-secondary, #b8c2d2); display: flex; flex: 0 0 34px; font-size: 12px; font-weight: 600; justify-content: space-between; padding: 0 8px 0 12px; }
+.cad-assembly-tree-actions { display: flex; gap: 2px; }
+.cad-assembly-tree-action { align-items: center; background: transparent; border: 0; border-radius: 4px; color: inherit; cursor: pointer; display: flex; height: 26px; justify-content: center; padding: 0; width: 26px; }
+.cad-assembly-tree-action:hover { background: var(--surface-hover, #2a3b52); color: var(--text-primary, #e5eaf2); }
 .cad-assembly-tree-content { min-height: 0; overflow: auto; padding: 6px 8px; }
 .cad-assembly-tree ul { list-style: none; margin: 0; padding: 0; }
 .cad-assembly-tree ul ul { border-left: 1px solid var(--border-subtle, #344155); margin-left: 10px; padding-left: 7px; }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Boxes, ChevronRight } from "lucide-react";
+import { Box, Boxes, ChevronRight, ChevronsDown, ChevronsUp } from "lucide-react";
 import type { CadAssemblyNode, CadMesh } from "./cadGeometry";
 
 interface TreeNode {
@@ -49,6 +49,12 @@ export function CadAssemblyTree({ meshes, root, search = "", selected, onSelect 
   sourceTree.label = "<robot>";
   const tree = filterTree(sourceTree, query) ?? { ...sourceTree, children: [] };
   const noMatches = query.length > 0 && tree.children.length === 0;
+  const expandableIds: string[] = [];
+  const collectExpandableIds = (node: TreeNode) => {
+    if (node.children.length) expandableIds.push(node.id);
+    node.children.forEach(collectExpandableIds);
+  };
+  collectExpandableIds(sourceTree);
 
   const toggle = (id: string) => setExpanded((current) => {
     const next = new Set(current);
@@ -71,7 +77,13 @@ export function CadAssemblyTree({ meshes, root, search = "", selected, onSelect 
   };
 
   return <nav className="cad-assembly-tree" aria-label="CAD assembly browser">
-    <div className="cad-assembly-tree-header">Browser</div>
+    <div className="cad-assembly-tree-header">
+      <span>Browser</span>
+      <div className="cad-assembly-tree-actions">
+        <button type="button" className="cad-assembly-tree-action" aria-label="Expand all" title="Expand all" onClick={() => setExpanded(new Set(expandableIds))}><ChevronsDown aria-hidden="true" size={15} /></button>
+        <button type="button" className="cad-assembly-tree-action" aria-label="Collapse all" title="Collapse all" onClick={() => setExpanded(new Set())}><ChevronsUp aria-hidden="true" size={15} /></button>
+      </div>
+    </div>
     <div className="cad-assembly-tree-content">
       <ul>{renderNode(tree)}</ul>
       {noMatches ? <p className="cad-assembly-tree-empty">No components match “{search.trim()}”.</p> : null}
