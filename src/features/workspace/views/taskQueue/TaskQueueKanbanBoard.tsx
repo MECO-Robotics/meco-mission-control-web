@@ -24,7 +24,7 @@ import { groupTaskQueueSwimlanes, type TaskQueueGroupBy } from "./taskQueueSwiml
 import { TaskQueueSwimlaneLabel } from "./taskQueueSwimlaneLabel";
 import { getProjectIconColor } from "@/components/layout/sidebarProjectIcons";
 
-const TASK_QUEUE_MIN_COMPLETED_PREVIEW_LIMIT = 5;
+const TASK_QUEUE_TASKS_PREVIEW_LIMIT = 5;
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
@@ -101,10 +101,6 @@ export function TaskQueueKanbanBoard({
     () => groupTaskQueueSwimlanes(focusedState === null ? tasks : focusedTasks, cardProps.bootstrap, groupBy),
     [cardProps.bootstrap, focusedState, focusedTasks, groupBy, tasks],
   );
-  const completedTasksPreviewLimit = Math.max(
-    TASK_QUEUE_MIN_COMPLETED_PREVIEW_LIMIT,
-    swimlanes.reduce((count, project) => count + project.lanes.length, 0),
-  );
   const boardSwimlanes = useMemo(
     () => swimlanes.map((project) => ({
       id: project.id,
@@ -117,8 +113,8 @@ export function TaskQueueKanbanBoard({
 
         for (const { state } of TASK_QUEUE_BOARD_COLUMNS) {
           const stateTasks = itemsByState[state];
-          visibleItemsByState[state] = stateTasks.slice(0, completedTasksPreviewLimit);
-          if (stateTasks.length <= completedTasksPreviewLimit) continue;
+          visibleItemsByState[state] = stateTasks.slice(0, TASK_QUEUE_TASKS_PREVIEW_LIMIT);
+          if (stateTasks.length <= TASK_QUEUE_TASKS_PREVIEW_LIMIT) continue;
 
           footerByState[state] = (
             <button
@@ -148,7 +144,7 @@ export function TaskQueueKanbanBoard({
         };
       }),
     })),
-    [cardProps.bootstrap, cardProps.projectsById, completedTasksPreviewLimit, swimlanes],
+    [cardProps.bootstrap, cardProps.projectsById, swimlanes],
   );
   const boardColumns = useMemo(
     () =>
@@ -281,11 +277,11 @@ export function TaskQueueKanbanBoard({
                     >
                       <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
                       <div className="task-queue-board-focused-lane-grid">
-                        {lane.tasks.slice(0, completedTasksPreviewLimit).map((task) => (
+                        {lane.tasks.slice(0, TASK_QUEUE_TASKS_PREVIEW_LIMIT).map((task) => (
                           <TaskQueueCard {...cardProps} key={task.id} task={task} />
                         ))}
                       </div>
-                      {lane.tasks.length > completedTasksPreviewLimit ? (
+                      {lane.tasks.length > TASK_QUEUE_TASKS_PREVIEW_LIMIT ? (
                         <button
                           aria-label={`Show all ${lane.tasks.length} ${formatTaskQueueBoardState(focusedState).toLowerCase()} tasks in ${project.projectName}, ${lane.label.name}`}
                           className="secondary-action task-queue-board-show-more"
