@@ -23,7 +23,7 @@ import { useCatalogEditorLifecycle } from "@/app/workspaceCatalog/useCatalogEdit
 import { applyTaskEditIntentToDraft } from "./taskEditIntentDraft";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
-import type { TaskStatus } from "@/types/common";
+import type { TaskWorkflowStatus } from "@/types/common";
 import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
@@ -131,7 +131,9 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
       if (taskModalMode === "create") {
         savedTask = await createTask(payload, handleUnauthorized);
       } else if (taskModalMode === "edit" && activeTaskId) {
-        savedTask = await updateTaskRecord(activeTaskId, payload, handleUnauthorized);
+        const { status, ...withoutStatus } = payload;
+        const patch = status === "unrecorded" ? withoutStatus : payload;
+        savedTask = await updateTaskRecord(activeTaskId, patch, handleUnauthorized);
       } else {
         return;
       }
@@ -171,7 +173,7 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
     }
   }
 
-  async function handleTaskStatusChange(task: TaskRecord, status: TaskStatus) {
+  async function handleTaskStatusChange(task: TaskRecord, status: TaskWorkflowStatus) {
     if (task.status === status) return;
     const workspace = captureWorkspace();
     setDataMessage(null);

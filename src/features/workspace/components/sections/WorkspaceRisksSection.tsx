@@ -52,8 +52,7 @@ export function WorkspaceRisksSection(props: WorkspaceContentPanelsViewProps) {
             const workstream = props.bootstrap.workstreams.find((item) => item.id === id);
             if (workstream) props.openEditWorkstreamModal(workstream);
           } else {
-            const report = props.bootstrap.reports.find((item) => item.id === id);
-            props.onOpenDrilldownTarget({ tab: "worklogs", worklogsView: kind === "test-result" || kind === "test-finding" || (report && report.reportType !== "qa") ? "results" : "qa" });
+            props.onOpenDrilldownTarget({ tab: "worklogs", worklogsView: "reports" });
           }
         }}
       />

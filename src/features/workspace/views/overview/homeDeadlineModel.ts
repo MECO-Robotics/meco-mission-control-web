@@ -29,10 +29,10 @@ export function buildHomeDeadlineModel({ tasks, milestones, today }: {
     return key < start ? overdue : buckets.get(key);
   };
   for (const task of tasks) {
-    if (task.status !== "complete") bucketFor(task.dueDate)?.tasks.push(task);
+    if (task.status !== "complete" && task.dueDate) bucketFor(task.dueDate)?.tasks.push(task);
   }
   for (const milestone of milestones) {
-    if (milestone.status !== "complete") bucketFor(milestone.startAt.slice(0, 10))?.milestones.push(milestone);
+    if (milestone.status !== "complete" && (milestone.date || milestone.startAt)) bucketFor((milestone.date ?? milestone.startAt)!.slice(0, 10))?.milestones.push(milestone);
   }
   return { days, overdue, maxTaskCount: Math.max(0, ...days.map(day => day.tasks.length)) };
 }

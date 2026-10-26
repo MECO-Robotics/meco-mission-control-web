@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Archive, ArchiveRestore, Ellipsis, Pencil, Trash2 } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { MEMBER_ROLE_LABELS } from "@/types/common";
+import { formatTaskStatusLabel } from "@/features/workspace/shared/model/workspaceOptions";
 import type { ResponsibleGroupPayload } from "@/types/payloads";
 import type { ResponsibleGroupIcon } from "@/types/recordsOrganization";
 import { createResponsibleGroup, deleteResponsibleGroup, updateResponsibleGroup } from "@/lib/auth/records/responsibleGroups";
@@ -119,14 +121,14 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       <WorkspaceColorField label="Team color" seed={draft.name} value={draft.color} onChange={color => setDraft({ ...draft, color })} />
       <div className="team-icon-preview"><TeamIcon team={{ ...draft, name: draft.name || "New team" }} size={20} /><span>{draft.name || "New team"}</span></div>
       <div className="field"><span>Projects</span><FilterDropdown allLabel="Select projects" ariaLabel="Team projects" searchInTopbar buttonContent={<span>{draft.projectIds.length ? `Projects (${draft.projectIds.length})` : "Select projects"}</span>} compactSummary onChange={selection => setDraft(current => current ? { ...current, projectIds: selection } : current)} options={[...projects.map(project => ({ id: project.id, name: project.name })), ...draft.projectIds.filter(id => !projects.some(project => project.id === id)).map(id => ({ id, name: bootstrap.projects.find(project => project.id === id)?.name ?? `Unavailable project · ${id}` }))]} showAllOption={false} value={draft.projectIds} />{draft.projectIds.length ? <small>{draft.projectIds.map(id => projects.find(project => project.id === id)?.name ?? bootstrap.projects.find(project => project.id === id)?.name ?? `Unavailable · ${id}`).join(", ")}</small> : null}</div>
-      <fieldset className="field"><legend>Members</legend><p className="team-primary-help">Students can belong to several teams. Mark which selected students list this as their primary team.</p><FilterDropdown allLabel="Select members" ariaLabel="Team members" searchInTopbar buttonContent={<span>{draft.memberIds.length ? `Members (${draft.memberIds.length})` : "Select members"}</span>} compactSummary onChange={selection => setDraft(current => current ? { ...current, memberIds: selection, primaryMemberIds: current.primaryMemberIds.filter(id => selection.includes(id)) } : current)} options={[...members.map(member => ({ id: member.id, name: `${member.name} · ${member.role}` })), ...draft.memberIds.filter(id => !members.some(member => member.id === id)).map(id => ({ id, name: bootstrap.members.find(member => member.id === id)?.name ?? `Unavailable member · ${id}` }))]} showAllOption={false} value={draft.memberIds} />{draft.memberIds.map(memberId => {
+      <fieldset className="field"><legend>Members</legend><p className="team-primary-help">Students can belong to several teams. Mark which selected students list this as their primary team.</p><FilterDropdown allLabel="Select members" ariaLabel="Team members" searchInTopbar buttonContent={<span>{draft.memberIds.length ? `Members (${draft.memberIds.length})` : "Select members"}</span>} compactSummary onChange={selection => setDraft(current => current ? { ...current, memberIds: selection, primaryMemberIds: current.primaryMemberIds.filter(id => selection.includes(id)) } : current)} options={[...members.map(member => ({ id: member.id, name: `${member.name} · ${MEMBER_ROLE_LABELS[member.role]}` })), ...draft.memberIds.filter(id => !members.some(member => member.id === id)).map(id => ({ id, name: bootstrap.members.find(member => member.id === id)?.name ?? `Unavailable member · ${id}` }))]} showAllOption={false} value={draft.memberIds} />{draft.memberIds.map(memberId => {
         const member = bootstrap.members.find(item => item.id === memberId);
         if (!member) return <div className="team-member-option" key={memberId}><span className="muted-copy">Unavailable member · {memberId}</span></div>;
         const canBePrimary = member.role === "student" || member.role === "lead";
         const isPrimary = draft.primaryMemberIds.includes(member.id);
         const existingPrimary = bootstrap.responsibleGroups.find(group => group.seasonId === draft.seasonId && !group.isArchived && group.primaryMemberIds.includes(member.id));
         return <div className="team-member-option" key={member.id}>
-          <span>{member.name} · {member.role}</span>
+          <span>{member.name} · {MEMBER_ROLE_LABELS[member.role]}</span>
           {canBePrimary ? isPrimary ? <span className="muted-copy">Primary team</span> : <button className="secondary-action" type="button" onClick={() => setDraft(current => current ? { ...current, primaryMemberIds: [...current.primaryMemberIds, member.id] } : current)}>{existingPrimary && existingPrimary.id !== editingId ? `Make primary · currently ${existingPrimary.name}` : "Make primary"}</button> : null}
         </div>;
       })}</fieldset>
@@ -138,7 +140,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       const openTasks = group.isArchived ? [] : tasks;
       const today = new Date().toISOString().slice(0, 10);
       const blocked = openTasks.filter(task => task.isBlocked);
-      const overdue = openTasks.filter(task => task.dueDate < today);
+      const overdue = openTasks.filter(task => task.dueDate !== null && task.dueDate < today);
       const metric = (label: string, count: number, filter: "blocked" | "overdue") => <button type="button" className={`team-task-status-filter is-${filter}`} aria-label={`${label} ${count}`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
         <span className="team-metric-label">{label}</span>{" "}<strong className={`is-${filter}`}>{count}</strong>
       </button>;
@@ -167,7 +169,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       const completedTasks = group.isArchived ? 0 : Math.max(0, totalTasks - tasks.length);
       const blockedIds = new Set(blocked.map(task => task.id));
       const overdueForPie = overdue.filter(task => !blockedIds.has(task.id));
-      const openForPie = openTasks.filter(task => !blockedIds.has(task.id) && task.dueDate >= today);
+      const openForPie = openTasks.filter(task => !blockedIds.has(task.id) && task.dueDate !== null && task.dueDate >= today);
       const taskPieTotal = openForPie.length + blocked.length + overdueForPie.length + completedTasks;
       const taskPieDegrees = (count: number) => taskPieTotal > 0 ? count / taskPieTotal * 360 : 0;
       const taskPieOpenEnd = taskPieDegrees(openForPie.length);
@@ -181,7 +183,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
           <div className="team-member-grid">{sectionMembers.map(member => {
             const assigned = openTasks.filter(task => task.ownerId === member.id || task.assigneeIds.includes(member.id) || task.mentorId === member.id);
             const blockedForMember = assigned.filter(task => task.isBlocked);
-            const overdueForMember = assigned.filter(task => task.dueDate < today);
+            const overdueForMember = assigned.filter(task => task.dueDate !== null && task.dueDate < today);
             const hours = assigned.reduce((sum, task) => sum + Math.max(0, task.estimatedHours - task.actualHours), 0);
             const primaryGroup = isStudent(member) ? bootstrap.responsibleGroups.find(other => !other.isArchived && other.seasonId === group.seasonId && other.primaryMemberIds.includes(member.id)) : undefined;
             const memberCapacity = group.isArchived || (primaryGroup && primaryGroup.id !== group.id) ? 0 : member.plannedWeeklyAttendanceHours ?? 0;
@@ -232,7 +234,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
           </details>
         </header>
         <div className="team-load">{memberSection("Primary", primaryMembers)}{memberSection("Secondary", secondaryMembers)}{contributorMembers.length ? memberSection("Assigned contributors", contributorMembers) : null}</div>
-        <details open={taskDrilldown?.groupId === group.id}><summary>{taskDrilldown?.groupId === group.id ? `${taskDrilldown.filter[0].toUpperCase()}${taskDrilldown.filter.slice(1)} tasks` : "Tasks"}</summary>{drilldownTasks.length ? drilldownTasks.map(task => <button className="ghost-button" key={task.id} onClick={() => onOpenTask(task)}>{task.title} · {task.status}</button>) : <p>No tasks match this metric.</p>}</details>
+        <details open={taskDrilldown?.groupId === group.id}><summary>{taskDrilldown?.groupId === group.id ? `${taskDrilldown.filter[0].toUpperCase()}${taskDrilldown.filter.slice(1)} tasks` : "Tasks"}</summary>{drilldownTasks.length ? drilldownTasks.map(task => <button className="ghost-button" key={task.id} onClick={() => onOpenTask(task)}>{task.title} · {formatTaskStatusLabel(task.status)}</button>) : <p>No tasks match this metric.</p>}</details>
       </article>;
     }) : <p className="empty-state">{search || archiveFilter !== "all" ? "No teams match these filters." : "No teams in this season yet."}</p>}</div>
   </section>;

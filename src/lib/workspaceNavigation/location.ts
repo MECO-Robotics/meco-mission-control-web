@@ -12,7 +12,7 @@ export function readNavigationLocation(search: string, context: ViewAvailability
   if (id === "work-risks" && params.get("risk")) return { ...target, riskId: params.get("risk")! };
   if (id === "work-schedule" && params.get("milestone")) return { ...target, taskView: "timeline", milestoneId: params.get("milestone")! };
   if (id === "work-activity" && presentation === "activity") return { ...target, worklogsView: "activity" };
-  if (id === "resources-qa-reports" && presentation === "results") return { ...target, worklogsView: "results" };
+  // Older result links land on the combined report history by default.
   if (id === "resources-structure" && mode === "cad" && context === "robot-project") return { tab: "cad" };
   return target;
 }
@@ -28,7 +28,6 @@ export function writeNavigationLocation(state: NavigationState, context: ViewAva
   params.delete("utility");
   if (state.activeTab === "help") params.set("utility", "help");
   if (id === "work-activity" && state.worklogsView !== "logs") params.set("presentation", state.worklogsView);
-  if (id === "resources-qa-reports" && state.worklogsView !== "qa") params.set("presentation", state.worklogsView);
   if (id === "resources-structure" && state.activeTab === "cad") params.set("mode", "cad");
   return `?${params.toString()}`;
 }

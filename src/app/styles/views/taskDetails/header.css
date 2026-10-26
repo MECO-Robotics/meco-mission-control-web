@@ -120,6 +120,10 @@
   color: var(--status-neutral-text);
 }
 
+.task-detail-header-status-icon-signal-unrecorded {
+  color: var(--status-neutral-text);
+}
+
 .task-detail-header-status-icon-signal-in-progress {
   color: var(--status-warning-text);
 }

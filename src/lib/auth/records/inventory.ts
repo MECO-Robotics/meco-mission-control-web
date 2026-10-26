@@ -1,7 +1,8 @@
-import type { ArtifactPayload, MaterialPayload, WorkstreamPayload } from "@/types/payloads";
-import type { ArtifactRecord, MaterialRecord } from "@/types/recordsInventory";
+import type { ArtifactPayload, MaterialPayload, MaterialTransactionPayload, WorkstreamPayload } from "@/types/payloads";
+import type { ArtifactRecord, MaterialRecord, MaterialTransactionRecord } from "@/types/recordsInventory";
 import type { WorkstreamRecord } from "@/types/recordsOrganization";
 import { requestItem, } from "./common";
+import { requestApi } from "../core/request";
 
 export function createMaterialRecord(
   payload: MaterialPayload,
@@ -26,6 +27,33 @@ export function updateMaterialRecord(
     payload,
     onUnauthorized,
   );
+}
+
+export function createMaterialTransactionRecord(
+  materialId: string,
+  payload: MaterialTransactionPayload,
+  onUnauthorized?: () => void,
+) {
+  return requestApi<{
+    item: MaterialRecord;
+    transaction: MaterialTransactionRecord;
+    replayed: boolean;
+  }>(`/materials/${materialId}/transactions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }, onUnauthorized).then((response) => response.transaction);
+}
+
+export function listMaterialTransactionRecords(
+  materialId: string,
+  onUnauthorized?: () => void,
+) {
+  return requestApi<{ items: MaterialTransactionRecord[] }>(
+    `/materials/${materialId}/transactions`,
+    {},
+    onUnauthorized,
+  ).then((response) => response.items);
 }
 
 export function deleteMaterialRecord(materialId: string, onUnauthorized?: () => void) {

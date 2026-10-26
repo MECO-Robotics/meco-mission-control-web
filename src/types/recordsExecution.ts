@@ -18,7 +18,9 @@ export interface MilestoneRecord {
   title: string;
   type: MilestoneType;
   status: MilestoneStatus;
-  startAt: string;
+  date?: string | null;
+  dateLabel?: string;
+  startAt: string | null;
   endAt: string | null;
   description: string;
   readinessStatus?: ReadinessStatus;
@@ -59,8 +61,8 @@ export interface TaskRecord {
   ownerId: string | null;
   assigneeIds: string[];
   mentorId: string | null;
-  startDate: string;
-  dueDate: string;
+  startDate: string | null;
+  dueDate: string | null;
   priority: TaskPriority;
   status: TaskStatus;
   checklistItems: string[];
@@ -126,7 +128,9 @@ export interface MeetingRecord {
   projectIds: string[];
   title: string;
   meetingType: MeetingType;
-  startAt: string;
+  date?: string | null;
+  dateLabel?: string;
+  startAt: string | null;
   endAt: string | null;
   location: string;
   description: string;
@@ -138,7 +142,9 @@ export interface EventRecord {
   projectIds: string[];
   eventType: "competition" | "practice" | "other";
   title: string;
-  startAt: string;
+  date?: string | null;
+  dateLabel?: string;
+  startAt: string | null;
   endAt: string | null;
   location: string;
   description: string;

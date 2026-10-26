@@ -4,6 +4,7 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
+import { filterTaskQueueTasks } from "@/features/workspace/views/taskQueue/taskQueueKanbanCard";
 import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -11,10 +12,14 @@ import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQ
 describe("Task Queue board", () => {
   it("renders every project beyond the former batch limit and groups blocked tasks", () => {
     const bootstrap = createBootstrap();
+    bootstrap.tasks = bootstrap.tasks.map((task) =>
+      task.status === "complete" ? { ...task, status: "not-started" } : task,
+    );
     bootstrap.projects.push({ ...bootstrap.projects[0], id: "outreach", name: "Outreach", projectType: "outreach" });
     bootstrap.workTypes.push({ id: "outreach:writing", projectType: "outreach", code: "writing", name: "Writing", isActive: true });
     bootstrap.workstreams.push({ id: "sponsor", projectId: "outreach", name: "Sponsor engagement", description: "", color: "#335577", isArchived: false });
-    bootstrap.tasks.push(createTask(17, { projectId: "outreach", workTypeId: "outreach:writing", subsystemIds: [], workstreamIds: ["sponsor"] }));
+    bootstrap.tasks.push(createTask(17, { projectId: "outreach", workTypeId: "outreach:writing", subsystemIds: [], workstreamIds: ["sponsor"], status: "not-started" }));
+    bootstrap.tasks.push(createTask(18, { status: "unrecorded" }));
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueView, {
         activePersonFilter: [],
@@ -39,12 +44,13 @@ describe("Task Queue board", () => {
     expect(markup).toContain("workspace-topbar-zoom-slot-actions");
     expect(markup).toContain("task-queue-board-column-header-icon");
     expect(markup).toContain("timeline-task-status-logo-signal-not-started");
+    expect(markup).toContain("timeline-task-status-logo-signal-unrecorded");
     expect(markup).toContain("timeline-task-status-logo-signal-in-progress");
     expect(markup).toContain("timeline-task-status-logo-signal-waiting-for-qa");
     expect(markup).toContain("timeline-task-status-logo-signal-complete");
     expect(markup).toContain("timeline-task-status-logo-signal-blocked");
     expect(markup).toContain("timeline-task-status-logo-signal-waiting-on-dependency");
-    expect(markup.match(/class="task-queue-board-state-label"/g)).toHaveLength(6);
+    expect(markup.match(/class="task-queue-board-state-label"/g)).toHaveLength(7);
     expect(markup).toContain('aria-expanded="true" class="kanban-project-toggle"');
     expect(markup).toContain('>Robot</span></button></h3>');
     expect(markup).not.toContain("table-pagination");
@@ -63,10 +69,47 @@ describe("Task Queue board", () => {
     expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(1);
     expect(markup).toContain('data-board-state="waiting-on-dependency"');
     expect(markup.match(/data-board-state="waiting-on-dependency"/g)).toHaveLength(1);
-    expect(markup.match(/data-board-state=/g)).toHaveLength(17);
+    expect(markup.match(/data-board-state=/g)).toHaveLength(16);
+    expect(markup).toContain('data-board-state="unrecorded"');
     expect(markup).toContain("Task 16");
     expect(markup).toContain("Task 17");
     expect(markup).toContain('aria-label="Outreach"');
+  });
+
+  it("defaults to all task statuses, shows explicitly selected completed tasks, and clears back to all tasks", () => {
+    const bootstrap = createBootstrap();
+    const filters = {
+      activePersonFilter: [],
+      disciplineFilter: [],
+      isAllProjectsView: false,
+      ownerFilter: [],
+      priorityFilter: [],
+      projectFilter: [],
+      searchFilter: "",
+      subsystemFilter: [],
+      subsystemIterationFilter: [],
+      showSubsystemIterationFilter: false,
+      subsystemsById: {},
+    };
+    const activeTasks = filterTaskQueueTasks(bootstrap.tasks, bootstrap, {
+      ...filters,
+      statusFilter: [],
+    });
+    const completedTasks = filterTaskQueueTasks(bootstrap.tasks, bootstrap, {
+      ...filters,
+      statusFilter: ["complete"],
+    });
+    const clearedTasks = filterTaskQueueTasks(bootstrap.tasks, bootstrap, {
+      ...filters,
+      statusFilter: [],
+    });
+
+    expect(activeTasks.length).toBeGreaterThan(0);
+    expect(activeTasks.some((task) => task.status !== "complete")).toBe(true);
+    expect(activeTasks.some((task) => task.status === "complete")).toBe(true);
+    expect(completedTasks.length).toBeGreaterThan(0);
+    expect(completedTasks.every((task) => task.status === "complete")).toBe(true);
+    expect(clearedTasks.map((task) => task.id)).toEqual(activeTasks.map((task) => task.id));
   });
 
   it("renders task zoom with the shared workspace topbar controls", () => {
@@ -90,6 +133,9 @@ describe("Task Queue board", () => {
     expect(markup).toContain('aria-label="Zoom in task queue"');
     expect(markup).toContain('d="M8 11h6"');
     expect(markup).toContain('d="M11 8v6"');
+    expect(markup).toContain('title="Task 1"');
+    expect(markup).toContain('title="Task 5"');
+    expect(markup).not.toContain('title="Task 14"');
   });
 
   it("keeps the focused kanban view in the same order passed in by filters and sort", () => {

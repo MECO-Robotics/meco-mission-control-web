@@ -1,5 +1,8 @@
 import workerUrl from "./cadStep.worker?worker&url";
-import type { CadGeometryResult, CadMesh } from "./cadGeometry";
+import type { CadGeometryResult } from "./cadGeometry";
+
+type CadWorkerResult = CadGeometryResult | { glb: ArrayBuffer; error?: never; meshes?: never; root?: never };
+type WorkerOutput = "meshes" | "glb";
 
 // Trust only the worker URL emitted by our build, never a URL from an uploaded file.
 const trustedTypes = (globalThis as typeof globalThis & {
@@ -12,7 +15,7 @@ const workerPolicy = trustedTypes?.createPolicy("meco-cad-worker", {
   },
 });
 
-export function loadCadGeometry(file: File, signal: AbortSignal): Promise<CadMesh[]> {
+function runCadWorker(file: File, signal: AbortSignal, output: WorkerOutput): Promise<CadWorkerResult> {
   return new Promise((resolve, reject) => {
     if (signal.aborted) { reject(new DOMException("Canceled", "AbortError")); return; }
     if (file.size > 50 * 1024 * 1024) { reject(new Error("Choose a STEP file smaller than 50 MB for the 3D preview.")); return; }
@@ -20,16 +23,29 @@ export function loadCadGeometry(file: File, signal: AbortSignal): Promise<CadMes
     const cleanup = () => { clearTimeout(timeout); worker.terminate(); signal.removeEventListener("abort", abort); };
     const fail = (error: Error) => { cleanup(); reject(error); };
     const abort = () => fail(new DOMException("Canceled", "AbortError"));
-    const timeout = setTimeout(() => fail(new Error("Preparing the geometry took too long. Try exporting a smaller assembly.")), 120_000);
+    const timeoutMs = file.size >= 40 * 1024 * 1024 ? 300_000 : 120_000;
+    const timeout = setTimeout(() => fail(new Error("Preparing the geometry took too long. Try exporting a smaller assembly.")), timeoutMs);
     signal.addEventListener("abort", abort, { once: true });
     worker.onerror = () => fail(new Error("The geometry reader could not start. Reload the page and try again."));
-    worker.onmessage = (event: MessageEvent<CadGeometryResult>) => {
+    worker.onmessage = (event: MessageEvent<CadWorkerResult>) => {
       cleanup();
       if (event.data.error !== undefined) reject(new Error(event.data.error));
-      else resolve(event.data.meshes);
+      else resolve(event.data);
     };
     void file.arrayBuffer().then((buffer) => {
-      if (!signal.aborted) worker.postMessage(buffer, [buffer]);
+      if (!signal.aborted) worker.postMessage({ buffer, output }, [buffer]);
     }).catch((error: Error) => fail(error));
   });
+}
+
+export async function loadCadGeometry(file: File, signal: AbortSignal): Promise<CadGeometryResult> {
+  const result = await runCadWorker(file, signal, "meshes");
+  if (!result.meshes || !result.root) throw new Error("The CAD geometry reader returned no preview meshes.");
+  return { meshes: result.meshes, root: result.root };
+}
+
+export async function loadCadGlb(file: File, signal: AbortSignal): Promise<ArrayBuffer> {
+  const result = await runCadWorker(file, signal, "glb");
+  if (!("glb" in result) || !result.glb) throw new Error("The CAD converter returned no optimized preview.");
+  return result.glb;
 }

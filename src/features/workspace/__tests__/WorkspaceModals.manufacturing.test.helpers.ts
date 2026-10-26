@@ -16,7 +16,6 @@ export function renderMaterialModal(materialModalMode: "create" | "edit") {
         name: "Aluminum 6061",
         category: "metal",
         unit: "sheet",
-        onHandQuantity: 12,
         reorderPoint: 6,
         location: "Rack A",
         preferredVendorId: null,
@@ -26,6 +25,8 @@ export function renderMaterialModal(materialModalMode: "create" | "edit") {
       setMaterialDraft: jest.fn(),
       bootstrap: EMPTY_BOOTSTRAP,
       requestPhotoUpload: jest.fn(async () => "https://example.test/material.png"),
+      handleMaterialTransaction: jest.fn(async () => true),
+      materialTransactions: [],
     }),
   );
 }

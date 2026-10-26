@@ -32,9 +32,9 @@ export function getPurchaseVendorName(item: PurchaseItemRecord, context: Purchas
 export function getPurchaseColumnValue(item: PurchaseItemRecord, field: PurchaseColumn, context: PurchaseListContext): string | number {
   switch (field) {
     case "item": return item.title;
-    case "task": return context.tasksById[item.taskId]?.title ?? "Missing procurement task";
+    case "task": return item.taskId ? context.tasksById[item.taskId]?.title ?? "Missing procurement task" : "Historical source record";
     case "vendor": return getPurchaseVendorName(item, context);
-    case "quantity": return item.quantity;
+    case "quantity": return item.quantity ?? -1;
     case "approval": return item.approvalStatus;
     case "order": return item.orderStatus;
     case "final": return item.finalCost?.amount ?? -1;

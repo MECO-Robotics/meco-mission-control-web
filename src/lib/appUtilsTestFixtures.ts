@@ -191,6 +191,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
       },
     ],
     materials: [],
+    materialTransactions: [],
     artifacts: [],
     partDefinitions: [partDefinition],
     partInstances: [partInstance],

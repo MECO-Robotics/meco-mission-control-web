@@ -1,4 +1,4 @@
-import type { ArtifactRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord, VendorRecord } from "./recordsInventory";
+import type { ArtifactRecord, MaterialRecord, MaterialTransactionRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord, VendorRecord } from "./recordsInventory";
 import type {
   AuditActionRecord,
   AttendanceRecord,
@@ -25,6 +25,7 @@ export interface BootstrapPayload {
   subsystems: SubsystemRecord[];
   mechanisms: MechanismRecord[];
   materials: MaterialRecord[];
+  materialTransactions: MaterialTransactionRecord[];
   artifacts: ArtifactRecord[];
   partDefinitions: PartDefinitionRecord[];
   partInstances: PartInstanceRecord[];

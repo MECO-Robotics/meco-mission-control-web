@@ -60,6 +60,6 @@ it("distinguishes missing identity from empty assignments and renders invalid da
   expect(render(null)).toContain("Sign in with a linked member account to see your tasks.");
   expect(render("self")).toContain("No unfinished tasks in this scope.");
   const html = render("self", [task("bad", { dueDate: "2026-10-22-extra" }), task("good")]);
-  expect(html).toContain("No due date");
+  expect(html).toContain("Due date unknown");
   expect(html).toContain('dateTime="2026-10-22"');
 });

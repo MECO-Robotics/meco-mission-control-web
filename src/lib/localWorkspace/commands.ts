@@ -247,7 +247,58 @@ function retestLocalFinding(snapshot: BootstrapPayload, findingId: string, body:
   return { item: updated };
 }
 
-function receiveLocalPurchase(snapshot: BootstrapPayload, itemId: string, body: Record<string, unknown>) {
+function recalculateLocalMaterialBalance(snapshot: BootstrapPayload, materialId: string) {
+  const material = snapshot.materials.find((candidate) => candidate.id === materialId);
+  if (!material) return null;
+  const movements = (snapshot.materialTransactions ?? []).filter((entry) => entry.materialId === materialId);
+  material.onHandQuantity = movements.some((entry) => entry.quantityDelta === null)
+    ? null
+    : Number(movements.reduce((total, entry) => total + (entry.quantityDelta ?? 0), 0).toFixed(12));
+  return material;
+}
+
+function createLocalMaterialTransaction(snapshot: BootstrapPayload, materialId: string, body: Record<string, unknown>, actorMemberId?: string | null) {
+  const material = snapshot.materials.find((candidate) => candidate.id === materialId);
+  if (!material) throw localCommandError("Material not found.", 404);
+  const operationId = typeof body.operationId === "string" ? body.operationId.trim() : "";
+  const movementType = body.movementType;
+  const quantity = typeof body.quantity === "number" ? body.quantity : Number.NaN;
+  const adjustmentDirection = body.adjustmentDirection;
+  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+  const taskId = typeof body.taskId === "string" ? body.taskId : undefined;
+  const projectId = typeof body.projectId === "string" ? body.projectId : undefined;
+  if (!operationId || operationId.length > 200 || !Number.isFinite(quantity) || quantity <= 0 || quantity > 1_000_000 || !reason || reason.length > 500 || !["receipt", "consumption", "adjustment"].includes(String(movementType))) {
+    throw localCommandError("Material transaction details are invalid.", 400);
+  }
+  if (movementType === "adjustment" && adjustmentDirection !== "increase" && adjustmentDirection !== "decrease") throw localCommandError("Choose whether the adjustment increases or decreases stock.", 400);
+  if (movementType !== "adjustment" && adjustmentDirection !== undefined) throw localCommandError("Adjustment direction only applies to adjustments.", 400);
+  const quantityDelta = movementType === "consumption" || (movementType === "adjustment" && adjustmentDirection === "decrease") ? -quantity : quantity;
+  const previous = (snapshot.materialTransactions ?? []).find((entry) => entry.materialId === materialId && entry.operationId === operationId);
+  if (previous) {
+    const samePayload = previous.movementType === movementType && previous.quantityDelta === quantityDelta && previous.reason === reason && previous.taskId === taskId && previous.projectId === projectId;
+    if (!samePayload) throw localCommandError("This operationId was already used with a different material transaction.", 409);
+    return { item: material, transaction: previous, replayed: true };
+  }
+  const currentBalance = recalculateLocalMaterialBalance(snapshot, materialId)?.onHandQuantity ?? null;
+  if (quantityDelta < 0) {
+    if (currentBalance === null) throw localCommandError("A count reconciliation is required before decreasing stock.", 409);
+    if (currentBalance + quantityDelta < -Number.EPSILON * Math.max(1, currentBalance, quantity) * 8) throw localCommandError("This transaction would make stock negative.", 409);
+  }
+  if (taskId && !snapshot.tasks.some((task) => task.id === taskId)) throw localCommandError("The linked task does not exist.", 400);
+  if (projectId && !snapshot.projects.some((project) => project.id === projectId)) throw localCommandError("The linked project does not exist.", 400);
+  const transaction = {
+    id: newLocalId(), operationId, materialId,
+    movementType: movementType as "receipt" | "consumption" | "adjustment",
+    quantityDelta: Number(quantityDelta.toFixed(12)), reason, recordedAt: new Date().toISOString(),
+    actorMemberId: snapshot.members.some((member) => member.id === actorMemberId) ? actorMemberId ?? null : null,
+    ...(taskId ? { taskId } : {}), ...(projectId ? { projectId } : {}),
+  };
+  snapshot.materialTransactions.push(transaction);
+  recalculateLocalMaterialBalance(snapshot, materialId);
+  return { item: material, transaction, replayed: false };
+}
+
+function receiveLocalPurchase(snapshot: BootstrapPayload, itemId: string, body: Record<string, unknown>, actorMemberId?: string | null) {
   const item = snapshot.purchaseItems.find((candidate) => candidate.id === itemId);
   if (!item) throw localCommandError("Purchase item not found.", 404);
   const operationId = typeof body.operationId === "string" ? body.operationId.trim() : "";
@@ -266,28 +317,37 @@ function receiveLocalPurchase(snapshot: BootstrapPayload, itemId: string, body: 
   if (discretePart && !Number.isSafeInteger(quantity)) throw localCommandError("Part-instance receipts require a whole number.", 400);
   if (!["ordered", "shipped", "delivered"].includes(item.orderStatus)) throw localCommandError("Only ordered purchases can be received.", 409);
   const received = receipts.reduce((total, receipt) => total + receipt.quantity, 0);
+  if (item.quantity === null) throw localCommandError("This purchase has no recorded quantity, so it cannot be received until its quantity is verified.", 409);
   if (received + quantity > item.quantity + Number.EPSILON * Math.max(1, item.quantity, received, quantity) * 8) throw localCommandError("Receipt quantity exceeds the remaining purchase quantity.", 409);
-  const task = snapshot.tasks.find((candidate) => candidate.id === item.taskId);
-  if (!task) throw localCommandError("Purchase item or linked task not found.", 404);
+  const task = item.taskId ? snapshot.tasks.find((candidate) => candidate.id === item.taskId) : undefined;
+  const projectId = task?.projectId ?? item.projectId ?? undefined;
+  if ((!task && item.taskId) || !projectId) throw localCommandError("Purchase item or linked project not found.", 404);
   const isMaterialPurchase = item.kind !== "manufacturing-service" && item.partDefinitionId === null && item.materialId !== null;
   const material = isMaterialPurchase ? snapshot.materials.find((candidate) => candidate.id === item.materialId) : undefined;
   if (isMaterialPurchase && !material) throw localCommandError("Linked stock material not found.", 404);
-  if (material && material.onHandQuantity > 0 && material.location.trim() !== location) throw localCommandError("Receive this material at its existing stock location.", 409);
+  if (material && material.onHandQuantity !== null && material.onHandQuantity > 0 && material.location.trim() !== location) throw localCommandError("Receive this material at its existing stock location.", 409);
   if (discretePart && !snapshot.partDefinitions.some((definition) => definition.id === item.partDefinitionId)) throw localCommandError("The purchased part definition no longer exists.", 409);
   const partInstanceIds: string[] = [];
   if (discretePart) {
     for (let index = 0; index < quantity; index += 1) {
       const partInstanceId = newLocalId();
       partInstanceIds.push(partInstanceId);
-      snapshot.partInstances.push({ id: partInstanceId, partDefinitionId: item.partDefinitionId!, intendedSubsystemId: task.subsystemIds[0] ?? null, intendedMechanismId: null, location: { kind: "stock", location } });
+      snapshot.partInstances.push({ id: partInstanceId, partDefinitionId: item.partDefinitionId!, intendedSubsystemId: task?.subsystemIds[0] ?? null, intendedMechanismId: null, location: { kind: "stock", location } });
     }
-  }
-  if (material) {
-    material.onHandQuantity = Number((material.onHandQuantity + quantity).toFixed(12));
-    if (material.onHandQuantity === quantity) material.location = location;
   }
   const receipt = { id: newLocalId(), operationId, quantity, location, receivedAt: new Date().toISOString(), partInstanceIds };
   item.receipts = [...receipts, receipt];
+  if (material) {
+    snapshot.materialTransactions.push({
+      id: newLocalId(), operationId, materialId: material.id, movementType: "receipt", quantityDelta: quantity,
+      reason: `Received through purchase ${item.title}`, recordedAt: receipt.receivedAt,
+      actorMemberId: snapshot.members.some((member) => member.id === actorMemberId) ? actorMemberId ?? null : null,
+      purchaseItemId: item.id, purchaseReceiptId: receipt.id, ...(item.taskId ? { taskId: item.taskId } : {}), projectId,
+    });
+    const wasEmpty = material.onHandQuantity === 0;
+    recalculateLocalMaterialBalance(snapshot, material.id);
+    if (wasEmpty) material.location = location;
+  }
   refreshLocalTaskState(snapshot);
   return { item, receipt };
 }
@@ -308,6 +368,7 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
   const today = localTodayDate();
   switch (resource) {
     case "seasons": return { type: "season", startDate: today, endDate: today };
+    case "materials": return { onHandQuantity: 0 };
     case "projects": return { description: "", status: "planned" };
     case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
     case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", icon: "users", color: "#4F86C6", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
@@ -412,7 +473,12 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   }
   if (resource === "qa-reports" && encodedId === "submit" && parts.length === 2 && method === "POST") return submitLocalQaReport(snapshot, body, actorMemberId);
   if (resource === "report-findings" && encodedId && extra === "retest" && parts.length === 3 && method === "POST") return retestLocalFinding(snapshot, decodeURIComponent(encodedId), body, actorMemberId);
-  if (resource === "purchases" && encodedId && extra === "receipts" && parts.length === 3 && method === "POST") return receiveLocalPurchase(snapshot, decodeURIComponent(encodedId), body);
+  if (resource === "materials" && encodedId && extra === "transactions" && parts.length === 3) {
+    const materialId = decodeURIComponent(encodedId);
+    if (method === "GET") return { items: snapshot.materialTransactions.filter((entry) => entry.materialId === materialId) };
+    if (method === "POST") return createLocalMaterialTransaction(snapshot, materialId, body, actorMemberId);
+  }
+  if (resource === "purchases" && encodedId && extra === "receipts" && parts.length === 3 && method === "POST") return receiveLocalPurchase(snapshot, decodeURIComponent(encodedId), body, actorMemberId);
   if (resource === "purchases" && extra === "transition" && parts.length === 3 && method === "POST") {
     if (Object.keys(body).some((field) => field !== "orderStatus" && field !== "finalCost" && field !== "purchaseOrderNumber")) throw new Error("Unsupported purchase transition fields.");
     return applyLocalCommand(snapshot, `/purchases/${encodedId}`, { ...options, method: "PATCH" });
@@ -429,6 +495,8 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   if (id && index < 0) throw new Error(`The ${resource} record no longer exists in this local workspace.`);
   if (method === "GET") return id ? { item: rows[index] } : { items: rows };
   if (!((method === "POST" && !id) || ((method === "PATCH" || method === "DELETE") && id))) throw new Error(`This local workspace does not support ${method} /${pathname}; nothing was synced.`);
+
+  if (resource === "materials" && Object.hasOwn(body, "onHandQuantity")) throw localCommandError("Stock quantities are managed by material transactions.", 400);
 
   if (method === "DELETE") {
     if (resource === "part-definitions" && snapshot.tasks.some((task) => task.manufacturingDetails?.part.kind === "part-definition" && task.manufacturingDetails.part.partDefinitionId === id)) throw new Error("Retarget or remove manufacturing work before deleting its part definition.");
@@ -497,7 +565,8 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
     if (typeof item.hours !== "number" || !Number.isFinite(item.hours) || item.hours <= 0) throw new Error("Work log hours must be a positive number.");
   }
   if (resource === "task-dependencies" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Dependency Task does not exist.");
-  if (resource === "purchases" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Purchasing records must link to a procurement or manufacturing Task.");
+  if (resource === "purchases" && item.taskId !== null && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Purchasing records must link to a procurement or manufacturing Task.");
+  if (resource === "purchases" && item.taskId === null && !item.sourceReference) throw new Error("Purchasing records must link to a procurement Task or a source record.");
   if (method === "POST") rows.push(item); else rows[index] = item;
   refreshLocalTaskState(snapshot);
   return { item };

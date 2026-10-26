@@ -2,6 +2,7 @@ import type { DropdownOption } from "./workspaceTypes";
 import type { TaskStatus } from "@/types/common";
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  unrecorded: "Unrecorded",
   "not-started": "Not started",
   "in-progress": "In progress",
   "waiting-for-qa": "QA",
@@ -54,6 +55,7 @@ export const MATERIAL_CATEGORY_OPTIONS: DropdownOption[] = [
   { id: "electronics", name: "Electronics" },
   { id: "hardware", name: "Hardware" },
   { id: "consumable", name: "Consumable" },
+  { id: "tool", name: "Tool" },
   { id: "other", name: "Other" },
 ];
 
@@ -61,6 +63,7 @@ export const MATERIAL_STOCK_OPTIONS: DropdownOption[] = [
   { id: "ok", name: "Stock OK" },
   { id: "low", name: "Low stock" },
   { id: "below-reorder", name: "Below reorder" },
+  { id: "unknown", name: "Quantity unknown" },
 ];
 
 export const READINESS_STATUS_OPTIONS: DropdownOption[] = [

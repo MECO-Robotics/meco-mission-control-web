@@ -2,7 +2,7 @@ import "./workspaceConsolidation.css";
 import { WorkspaceViewMemory } from "./shared/navigation/WorkspaceViewMemory";
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 
-import type { ArtifactKind, TaskStatus } from "@/types/common";
+import type { ArtifactKind, TaskWorkflowStatus } from "@/types/common";
 import type { ArtifactRecord, MaterialRecord, PartDefinitionRecord, PurchaseItemRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MemberPayload, MilestonePayload, RiskPayload } from "@/types/payloads";
@@ -64,7 +64,7 @@ export interface WorkspaceContentProps {
   handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
   handleDeleteMember: (id: string) => void;
   handleMeetingSave: (payload: MeetingPayload) => Promise<void>;
-  handleTaskStatusChange: (task: TaskRecord, status: TaskStatus) => Promise<void>;
+  handleTaskStatusChange: (task: TaskRecord, status: TaskWorkflowStatus) => Promise<void>;
   handleTimelineMilestoneDelete: (milestoneId: string) => Promise<void>;
   handleTimelineMilestoneSave: (
     mode: "create" | "edit",
@@ -87,7 +87,7 @@ export interface WorkspaceContentProps {
   membersById: Record<string, BootstrapPayload["members"][number]>;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   openCreateArtifactModal: (kind: ArtifactKind) => void;
-  openCreateMaterialModal: () => void;
+  openCreateMaterialModal: (category?: "tool") => void;
   openCreateMechanismModal: (subsystemId?: string) => void;
   openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number], partDefinitionId?: string) => void;
   openCreateSubsystemModal: () => void;
@@ -199,7 +199,7 @@ export function WorkspaceContent({
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "documents", "parts", "part-mappings", "purchases"],
+    ["materials", "tools", "documents", "parts", "part-mappings", "purchases"],
   );
 
   useEffect(() => {

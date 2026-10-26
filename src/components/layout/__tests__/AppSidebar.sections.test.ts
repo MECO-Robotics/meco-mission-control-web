@@ -10,7 +10,7 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain("sidebar-section-heading");
     expect(markup).toContain("sidebar-nav-item-icon");
     expect(markup).not.toContain("sidebar-section-chevron");
-    for (const label of ["Kanban", "Schedule", "Robot", "Parts", "People", "Teams"]) expect(markup).toContain(`>${label}</span>`);
+    for (const label of ["Kanban", "Schedule", "Robot", "Parts", "People", "Teams", "Results"]) expect(markup).toContain(`>${label}</span>`);
     expect(markup.indexOf('aria-label="Team"')).toBeLessThan(markup.indexOf('aria-label="Resources"'));
     expect(markup).toContain(">Risks</span>");
     expect(markup).not.toContain("workspace-primary-navigation");
@@ -21,6 +21,13 @@ describe("flat sidebar navigation", () => {
     expect(schedule).not.toContain('aria-label="Schedule views"');
     expect(schedule).not.toContain('aria-label="Calendar"');
     expect(schedule).not.toContain('aria-label="Agenda"');
+  });
+  it("shows Results as one direct destination without QA or milestone subviews", () => {
+    const markup = renderSidebar([], "worklogs", { worklogsView: "reports" });
+    expect(markup).toContain('aria-label="Results"');
+    expect(markup).not.toContain("QA results");
+    expect(markup).not.toContain("Milestone results");
+    expect(markup).not.toContain("QA and report views");
   });
   it("keeps destinations directly accessible when folded", () => {
     const markup = renderSidebar([], "tasks", { isCollapsed: true });

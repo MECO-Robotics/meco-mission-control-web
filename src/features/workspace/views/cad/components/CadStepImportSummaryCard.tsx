@@ -145,6 +145,14 @@ export function CadStepImportSummaryCard({
           </a>
         </p>
       ) : null}
+      {snapshot?.uploadedFileId ? (
+        <p className="cad-source-model-copy">
+          <a href={`/api/cad/assets/${encodeURIComponent(snapshot.uploadedFileId)}/source`}>
+            Download original STEP source
+          </a>
+          {" · Optimized binary glTF preview is stored with this source."}
+        </p>
+      ) : null}
       {usesPlaceholderParser ? (
         <p className="cad-parser-alert">{PLACEHOLDER_PARSER_WARNING_TEXT}</p>
       ) : null}

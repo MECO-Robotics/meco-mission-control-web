@@ -26,7 +26,7 @@ export interface ProductTimelineProject {
 export function buildProductTimelineProjects(bootstrap: BootstrapPayload, tasks: TaskRecord[], days: string[], groupBy: GroupBy): ProductTimelineProject[] {
   const projects = new Map<string, ProductTimelineProject>();
   const uniqueTasks = new Map(tasks.filter((task) => getProductTimelineTaskSpan(task, days)).map((task) => [task.id, task]));
-  const sortedTasks = Array.from(uniqueTasks.values()).sort((left, right) => left.startDate.localeCompare(right.startDate) || left.dueDate.localeCompare(right.dueDate) || left.title.localeCompare(right.title) || left.id.localeCompare(right.id));
+  const sortedTasks = Array.from(uniqueTasks.values()).sort((left, right) => (left.startDate ?? "").localeCompare(right.startDate ?? "") || (left.dueDate ?? "").localeCompare(right.dueDate ?? "") || left.title.localeCompare(right.title) || left.id.localeCompare(right.id));
   for (const task of sortedTasks) {
     const record = bootstrap.projects.find((project) => project.id === task.projectId);
     let project = projects.get(task.projectId);
@@ -65,14 +65,16 @@ export function buildProductTimelineProjects(bootstrap: BootstrapPayload, tasks:
 }
 
 export function getProductTimelineTaskSpan(task: TaskRecord, days: string[]) {
-  if (!days.length || !task.startDate || !task.dueDate) return null;
+  const startDate = task.startDate;
+  const dueDate = task.dueDate;
+  if (!days.length || !startDate || !dueDate) return null;
   const first = days[0];
   const last = days[days.length - 1];
-  if (task.startDate > task.dueDate || task.startDate > last || task.dueDate < first) return null;
-  const start = days.findIndex((day) => day >= task.startDate);
-  const end = days.findLastIndex((day) => day <= task.dueDate);
+  if (startDate > dueDate || startDate > last || dueDate < first) return null;
+  const start = days.findIndex((day) => day >= startDate);
+  const end = days.findLastIndex((day) => day <= dueDate);
   if (start < 0 || end < start) return null;
-  return { start, span: end - start + 1, spillsLeft: task.startDate < first, spillsRight: task.dueDate > last };
+  return { start, span: end - start + 1, spillsLeft: startDate < first, spillsRight: dueDate > last };
 }
 
 export function getProductTimelineTaskContext(task: TaskRecord, bootstrap: BootstrapPayload, today: string) {
@@ -80,6 +82,7 @@ export function getProductTimelineTaskContext(task: TaskRecord, bootstrap: Boots
   const waiting = getTaskWaitingOnDependencies(task.id, bootstrap);
   const signal = getTimelineTaskStatusSignal(task, bootstrap);
   const state = ({
+    unrecorded: "Unrecorded",
     "not-started": "Not started", "in-progress": "In progress", "waiting-for-qa": "Waiting for QA",
     complete: "Complete", blocked: "Blocked", "waiting-on-dependency": "Waiting on prerequisite",
   })[signal];
@@ -91,12 +94,12 @@ export function getProductTimelineTaskContext(task: TaskRecord, bootstrap: Boots
   return {
     team: task.responsibleGroupId ? bootstrap.responsibleGroups.find((group) => group.id === task.responsibleGroupId) : undefined,
     state, signal, overdueDays, overdueLabel,
-    description: [task.title, state, `${task.startDate} – ${task.dueDate}`, overdueLabel].filter(Boolean).join(" · "),
+    description: [task.title, state, `${task.startDate ?? "Start date unknown"} – ${task.dueDate ?? "Due date unknown"}`, overdueLabel].filter(Boolean).join(" · "),
     unavailableTargets,
     hasHandoffs: Boolean(task.isBlocked) || blockers.length > 0 || bootstrap.taskDependencies.some((dependency) => dependency.taskId === task.id || (dependency.kind === "task" && dependency.refId === task.id)),
     blocked: task.status !== "complete" && (Boolean(task.isBlocked) || blockers.length > 0),
     waiting: task.status !== "complete" && waiting.length > 0,
-    overdue: task.status !== "complete" && Boolean(task.dueDate) && task.dueDate < today,
+    overdue: task.status !== "complete" && task.dueDate !== null && task.dueDate !== undefined && task.dueDate < today,
   };
 }
 

@@ -5,7 +5,20 @@ export interface CadMesh {
   index: { array: number[] };
 }
 
-export type CadGeometryResult = { meshes: CadMesh[]; error?: never } | { error: string; meshes?: never };
+export interface CadAssemblyNode {
+  id: string;
+  name: string;
+  meshIndices: number[];
+  children: CadAssemblyNode[];
+}
+
+export interface CadAssemblySourceNode {
+  name: string;
+  meshes: number[];
+  children: CadAssemblySourceNode[];
+}
+
+export type CadGeometryResult = { meshes: CadMesh[]; root: CadAssemblyNode; error?: never } | { error: string; meshes?: never; root?: never };
 
 export function validateCadMeshes(meshes: CadMesh[]): CadMesh[] {
   const renderable = meshes.filter((mesh) => mesh.index.array.length > 0);

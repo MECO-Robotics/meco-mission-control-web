@@ -243,8 +243,9 @@ test("local purchase receipts preserve operation identity, stock updates and lin
   expect(() => command(state, "/purchases/part-purchase/receipts", { ...payload, operationId: "fractional-part", quantity: 1.5 })).toThrow("whole number");
 
   state.purchaseItems.push({ ...state.purchaseItems[0], id: "material-purchase", partDefinitionId: null, quantity: 3, receipts: [] });
-  command(state, "/purchases/material-purchase/receipts", { operationId: "material-receipt", quantity: 0.5, location: "Material shelf" });
+  const materialReceipt = command<{ receipt: { id: string } }>(state, "/purchases/material-purchase/receipts", { operationId: "material-receipt", quantity: 0.5, location: "Material shelf" }).receipt;
   expect(state.materials[0]).toMatchObject({ onHandQuantity: 0.5, location: "Material shelf" });
+  expect(state.materialTransactions).toContainEqual(expect.objectContaining({ movementType: "receipt", quantityDelta: 0.5, materialId: "steel", purchaseItemId: "material-purchase", purchaseReceiptId: materialReceipt.id }));
 
   state.purchaseItems.push({ ...state.purchaseItems[0], id: "service-purchase", kind: "manufacturing-service", quantity: 3, receipts: [] });
   const serviceReceipt = command<{ receipt: { quantity: number; partInstanceIds: string[] } }>(state, "/purchases/service-purchase/receipts", { operationId: "service-receipt", quantity: 1.5, location: "Shop" }).receipt;

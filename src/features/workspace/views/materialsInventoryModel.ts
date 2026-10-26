@@ -17,7 +17,7 @@ export type MaterialSortDirection = "ascending" | "descending";
 type MaterialStockValues = Pick<MaterialRecord, "onHandQuantity" | "reorderPoint">;
 
 export function isMaterialBelowReorder(material: MaterialStockValues) {
-  return material.onHandQuantity < material.reorderPoint;
+  return material.onHandQuantity !== null && material.reorderPoint !== null && material.onHandQuantity < material.reorderPoint;
 }
 
 export function matchesMaterialStockFilter(material: MaterialStockValues, filters: string[]) {
@@ -25,8 +25,9 @@ export function matchesMaterialStockFilter(material: MaterialStockValues, filter
     return true;
   }
 
+  const isUnknown = material.onHandQuantity === null;
   const isBelowReorder = isMaterialBelowReorder(material);
-  const isLowStock = material.onHandQuantity <= material.reorderPoint;
+  const isLowStock = material.onHandQuantity !== null && material.reorderPoint !== null && material.onHandQuantity <= material.reorderPoint;
 
   return filters.some((filter) => {
     if (filter === "below-reorder") {
@@ -36,7 +37,10 @@ export function matchesMaterialStockFilter(material: MaterialStockValues, filter
       return isLowStock;
     }
     if (filter === "ok") {
-      return !isLowStock;
+      return !isUnknown && !isLowStock;
+    }
+    if (filter === "unknown") {
+      return isUnknown;
     }
     return false;
   });
@@ -50,7 +54,7 @@ export function filterMaterialInventory(
   const search = filters.search.trim().toLowerCase();
 
   return materials.filter((material) => {
-    const quantity = `${material.onHandQuantity} / ${material.reorderPoint}`;
+    const quantity = `${material.onHandQuantity ?? "Unknown"} / ${material.reorderPoint ?? "Not set"}`;
     const location = material.location || "Unassigned";
     const vendor = material.preferredVendorId ? vendorNames[material.preferredVendorId] ?? "Unknown vendor" : "No preferred vendor";
     const matchesSearch =
@@ -89,7 +93,13 @@ export function sortMaterialInventory(
         result = left.category.localeCompare(right.category, undefined, { numeric: true });
         break;
       case "quantity":
-        result = left.onHandQuantity - right.onHandQuantity || left.reorderPoint - right.reorderPoint;
+        if (left.onHandQuantity === null || right.onHandQuantity === null) {
+          if (left.onHandQuantity === null && right.onHandQuantity !== null) return 1;
+          if (left.onHandQuantity !== null && right.onHandQuantity === null) return -1;
+          result = (left.reorderPoint ?? Infinity) - (right.reorderPoint ?? Infinity);
+        } else {
+          result = left.onHandQuantity - right.onHandQuantity || (left.reorderPoint ?? Infinity) - (right.reorderPoint ?? Infinity);
+        }
         break;
       case "location":
         result = (left.location || "Unassigned").localeCompare(right.location || "Unassigned", undefined, { numeric: true });

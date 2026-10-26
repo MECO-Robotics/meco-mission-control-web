@@ -5,6 +5,7 @@ import type {
   TaskDependencyType,
   TaskPriority,
   TaskStatus,
+  TaskWorkflowStatus,
 } from "../common";
 import type { ManufacturingDetailsRecord } from "../recordsExecution";
 
@@ -33,8 +34,8 @@ export interface TaskPayload {
   ownerId: string | null;
   assigneeIds: string[];
   mentorId: string | null;
-  startDate: string;
-  dueDate: string;
+  startDate: string | null;
+  dueDate: string | null;
   priority: TaskPriority;
   status: TaskStatus;
   checklistItems: string[];
@@ -43,6 +44,8 @@ export interface TaskPayload {
   manufacturingDetails: ManufacturingDetailsRecord | null;
   taskDependencies?: TaskDependencyDraft[];
 }
+
+export type TaskPatchPayload = Omit<TaskPayload, "status"> & { status: TaskWorkflowStatus };
 
 export interface TaskDependencyPayload {
   taskId: string;

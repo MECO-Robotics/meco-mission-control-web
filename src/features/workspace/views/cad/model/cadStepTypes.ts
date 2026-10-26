@@ -5,6 +5,7 @@ export interface CadStepImportRunRecord {
   source: "STEP_UPLOAD" | "ONSHAPE_API" | "ONSHAPE_BOM_CSV" | "MANUAL_BOM_CSV";
   status: "PENDING" | "PARSING" | "PARSED" | "MAPPING_REVIEW" | "MAPPED" | "FINALIZED" | "FAILED" | "CANCELED";
   originalFilename: string;
+  uploadedFileId?: string | null;
   uploadedFileHash: string | null;
   parserVersion: string | null;
   parseStartedAt: string | null;
@@ -21,6 +22,7 @@ export interface CadStepSnapshotRecord {
   importRunId: string;
   source: "STEP_UPLOAD" | "ONSHAPE_API" | "ONSHAPE_BOM_CSV" | "MANUAL_BOM_CSV";
   label: string;
+  uploadedFileId?: string | null;
   uploadedFileHash: string | null;
   previousSnapshotId: string | null;
   status: "parsed" | "mapping_review" | "mapped" | "finalized" | "superseded";

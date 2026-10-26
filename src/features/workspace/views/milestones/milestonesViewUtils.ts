@@ -24,6 +24,12 @@ export function formatMilestoneDateTime(value: string) {
   });
 }
 
+export function formatMilestoneRecordDate(milestone: Pick<MilestoneRecord, "date" | "dateLabel" | "startAt">) {
+  if (milestone.startAt) return formatMilestoneDateTime(milestone.startAt);
+  if (milestone.date) return new Date(`${milestone.date}T12:00:00`).toLocaleDateString();
+  return milestone.dateLabel || "Date unknown";
+}
+
 function isSameLocalCalendarDay(start: Date, end: Date) {
   return (
     start.getFullYear() === end.getFullYear() &&
@@ -113,7 +119,7 @@ export function buildMilestoneSearchSuggestions({
     .flatMap((milestone) => {
       const typeLabel = getMilestoneTypeStyle(milestone.type).label;
       const statusLabel = formatMilestoneStatusLabel(milestone.status);
-      const dateLabel = formatMilestoneDateTime(milestone.startAt);
+      const dateLabel = formatMilestoneRecordDate(milestone);
       const projectLabel = projectLabelByMilestoneId[milestone.id] ?? "All projects";
       const description = milestone.description.trim();
       const searchableText = [
@@ -222,7 +228,7 @@ export function filterAndSortMilestones({
       return getMilestoneTypeStyle(milestone.type).label;
     }
 
-    return milestone.startAt;
+    return milestone.startAt ?? milestone.date ?? milestone.dateLabel ?? "9999-99-99";
   };
 
   return result.sort((left, right) => {

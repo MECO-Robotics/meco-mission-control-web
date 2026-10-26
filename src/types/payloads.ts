@@ -77,12 +77,12 @@ export interface WorkLogPayload {
 }
 
 export interface PurchaseItemPayload {
-  taskId: string;
+  taskId: string | null;
   kind: "cots-goods" | "manufacturing-service";
   title: string;
   partDefinitionId: string | null;
   materialId: string | null;
-  quantity: number;
+  quantity: number | null;
   quotes: Array<{ id: string; vendorId: string; reference: string | null; amount: { amount: number; currency: string | null } | null; url?: string; expiresAt?: string | null; quotedAt: string | null }>;
   selectedQuoteId: string | null;
   approvalStatus: "pending" | "approved" | "rejected";
@@ -147,12 +147,21 @@ export interface MaterialPayload {
   name: string;
   category: MaterialCategory;
   unit: string;
-  onHandQuantity: number;
-  reorderPoint: number;
+  reorderPoint: number | null;
   location: string;
   preferredVendorId: string | null;
   notes: string;
   photoUrl?: string;
+}
+
+export interface MaterialTransactionPayload {
+  operationId: string;
+  movementType: "receipt" | "consumption" | "adjustment";
+  quantity: number;
+  adjustmentDirection?: "increase" | "decrease";
+  reason: string;
+  taskId?: string;
+  projectId?: string;
 }
 
 export interface ArtifactPayload {
@@ -196,6 +205,7 @@ export interface PartDefinitionPayload {
   activeSeasonIds?: string[];
   name: string;
   partNumber: string;
+  vendorPartNumbers?: Record<string, string>;
   revision: string;
   iteration: number;
   isArchived?: boolean;

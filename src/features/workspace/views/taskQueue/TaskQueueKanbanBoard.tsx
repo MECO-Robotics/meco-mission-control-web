@@ -1,10 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskStatus } from "@/types/common";
+import type { TaskWorkflowStatus } from "@/types/common";
 import type { OpenEditTaskModalOptions, TaskEditIntentState } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 
+import { ModalDialog } from "@/components/ModalDialog";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { KanbanProjectGroup } from "@/features/workspace/views/kanban/KanbanProjectGroup";
 import { KanbanSwimlane } from "@/features/workspace/views/kanban/KanbanSwimlane";
@@ -23,10 +24,13 @@ import { groupTaskQueueSwimlanes, type TaskQueueGroupBy } from "./taskQueueSwiml
 import { TaskQueueSwimlaneLabel } from "./taskQueueSwimlaneLabel";
 import { getProjectIconColor } from "@/components/layout/sidebarProjectIcons";
 
+const TASK_QUEUE_TASKS_PREVIEW_LIMIT = 5;
+
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
   { signal: TimelineTaskStatusSignal; status: TaskRecord["status"] }
 > = {
+  unrecorded: { signal: "unrecorded", status: "unrecorded" },
   "not-started": { signal: "not-started", status: "not-started" },
   "in-progress": { signal: "in-progress", status: "in-progress" },
   blocked: { signal: "blocked", status: "not-started" },
@@ -35,15 +39,15 @@ const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   complete: { signal: "complete", status: "complete" },
 };
 
-const TASK_QUEUE_DIRECT_STATUS_STATES: readonly TaskStatus[] = [
+const TASK_QUEUE_DIRECT_STATUS_STATES: readonly TaskWorkflowStatus[] = [
   "not-started",
   "in-progress",
   "waiting-for-qa",
   "complete",
 ];
 
-function isTaskQueueDirectStatusState(state: TaskQueueBoardState): state is TaskStatus {
-  return TASK_QUEUE_DIRECT_STATUS_STATES.includes(state as TaskStatus);
+function isTaskQueueDirectStatusState(state: TaskQueueBoardState): state is TaskWorkflowStatus {
+  return TASK_QUEUE_DIRECT_STATUS_STATES.includes(state as TaskWorkflowStatus);
 }
 
 function isTaskQueueEditIntentState(state: TaskQueueBoardState): state is TaskEditIntentState {
@@ -62,7 +66,7 @@ interface TaskQueueKanbanBoardProps {
   focusedState: TaskQueueBoardState | null;
   onClearFocus: () => void;
   onFocusState: (state: TaskQueueBoardState) => void;
-  onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
+  onReassignTaskStatus?: (task: TaskRecord, status: TaskWorkflowStatus) => void | Promise<void>;
 }
 
 export function TaskQueueKanbanBoard({
@@ -78,6 +82,11 @@ export function TaskQueueKanbanBoard({
   const [pendingTaskStatusDropIds, setPendingTaskStatusDropIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
+  const [tasksDialog, setTasksDialog] = useState<{
+    laneLabel: string;
+    state: TaskQueueBoardState;
+    tasks: TaskRecord[];
+  } | null>(null);
   const tasksByState = useMemo(
     () => groupTasksByBoardState(tasks, cardProps.bootstrap),
     [cardProps.bootstrap, tasks],
@@ -97,11 +106,43 @@ export function TaskQueueKanbanBoard({
       id: project.id,
       label: project.projectName,
       accentColor: getProjectIconColor(cardProps.projectsById[project.id] ?? null),
-      lanes: project.lanes.map((lane) => ({
-        id: lane.id,
-        header: <TaskQueueSwimlaneLabel {...lane.label} />,
-        itemsByState: groupTasksByBoardState(lane.tasks, cardProps.bootstrap),
-      })),
+      lanes: project.lanes.map((lane) => {
+        const itemsByState = groupTasksByBoardState(lane.tasks, cardProps.bootstrap);
+        const visibleItemsByState: Record<TaskQueueBoardState, TaskRecord[]> = { ...itemsByState };
+        const footerByState: Partial<Record<TaskQueueBoardState, ReactNode>> = {};
+
+        for (const { state } of TASK_QUEUE_BOARD_COLUMNS) {
+          const stateTasks = itemsByState[state];
+          visibleItemsByState[state] = stateTasks.slice(0, TASK_QUEUE_TASKS_PREVIEW_LIMIT);
+          if (stateTasks.length <= TASK_QUEUE_TASKS_PREVIEW_LIMIT) continue;
+
+          footerByState[state] = (
+            <button
+              aria-label={`Show all ${stateTasks.length} ${formatTaskQueueBoardState(state).toLowerCase()} tasks in ${project.projectName}, ${lane.label.name}`}
+              className="secondary-action task-queue-board-show-more"
+              onClick={(event) => {
+                event.stopPropagation();
+                setTasksDialog({
+                  laneLabel: `${project.projectName} · ${lane.label.name}`,
+                  state,
+                  tasks: stateTasks,
+                });
+              }}
+              type="button"
+            >
+              Show more
+            </button>
+          );
+        }
+
+        return {
+          id: lane.id,
+          header: <TaskQueueSwimlaneLabel {...lane.label} />,
+          itemsByState,
+          visibleItemsByState,
+          footerByState,
+        };
+      }),
     })),
     [cardProps.bootstrap, cardProps.projectsById, swimlanes],
   );
@@ -127,6 +168,46 @@ export function TaskQueueKanbanBoard({
       })),
     [tasksByState],
   );
+  const tasksDialogTitle = tasksDialog
+    ? `${formatTaskQueueBoardState(tasksDialog.state)} tasks · ${tasksDialog.laneLabel}`
+    : "";
+  const tasksDialogView = tasksDialog ? (
+    <ModalDialog
+      label={tasksDialogTitle}
+      onClose={() => setTasksDialog(null)}
+      dismissOnBackdrop
+    >
+      <section className="modal-card modal-panel-surface task-queue-completed-dialog">
+        <div className="panel-header compact-header">
+          <div>
+            <h2>{tasksDialogTitle}</h2>
+            <span>{tasksDialog.tasks.length} tasks</span>
+          </div>
+          <button
+            aria-label="Close completed tasks"
+            className="icon-button"
+            onClick={() => setTasksDialog(null)}
+            type="button"
+          >
+            Close
+          </button>
+        </div>
+        <div className="task-queue-completed-dialog-list">
+          {tasksDialog.tasks.map((task) => (
+            <TaskQueueCard
+              {...cardProps}
+              key={task.id}
+              task={task}
+              openEditTaskModal={(selectedTask, options) => {
+                setTasksDialog(null);
+                cardProps.openEditTaskModal(selectedTask, options);
+              }}
+            />
+          ))}
+        </div>
+      </section>
+    </ModalDialog>
+  ) : null;
 
   const setTaskStatusDropPending = (taskId: string, isPending: boolean) => {
     const nextPendingIds = new Set(pendingTaskStatusDropIdsRef.current);
@@ -140,7 +221,7 @@ export function TaskQueueKanbanBoard({
     setPendingTaskStatusDropIds(nextPendingIds);
   };
 
-  const runTaskStatusDrop = async (task: TaskRecord, state: TaskStatus) => {
+  const runTaskStatusDrop = async (task: TaskRecord, state: TaskWorkflowStatus) => {
     if (!onReassignTaskStatus || pendingTaskStatusDropIdsRef.current.has(task.id)) {
       return;
     }
@@ -196,10 +277,24 @@ export function TaskQueueKanbanBoard({
                     >
                       <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
                       <div className="task-queue-board-focused-lane-grid">
-                        {lane.tasks.map((task) => (
+                        {lane.tasks.slice(0, TASK_QUEUE_TASKS_PREVIEW_LIMIT).map((task) => (
                           <TaskQueueCard {...cardProps} key={task.id} task={task} />
                         ))}
                       </div>
+                      {lane.tasks.length > TASK_QUEUE_TASKS_PREVIEW_LIMIT ? (
+                        <button
+                          aria-label={`Show all ${lane.tasks.length} ${formatTaskQueueBoardState(focusedState).toLowerCase()} tasks in ${project.projectName}, ${lane.label.name}`}
+                          className="secondary-action task-queue-board-show-more"
+                          onClick={() => setTasksDialog({
+                            laneLabel: `${project.projectName} · ${lane.label.name}`,
+                            state: focusedState,
+                            tasks: lane.tasks,
+                          })}
+                          type="button"
+                        >
+                          Show more
+                        </button>
+                      ) : null}
                     </KanbanSwimlane>
                   ))}
                 </KanbanProjectGroup>
@@ -209,15 +304,18 @@ export function TaskQueueKanbanBoard({
             )}
           </div>
         </div>
+        {tasksDialogView}
       </section>
     );
   }
 
   return (
+    <>
     <KanbanColumns
       boardClassName="task-queue-board"
       canDragItem={(task) => !pendingTaskStatusDropIds.has(task.id)}
       canDropItem={(task, state, sourceState) => {
+        if (state === "unrecorded") return false;
         if (pendingTaskStatusDropIds.has(task.id)) {
           return false;
         }
@@ -263,5 +361,7 @@ export function TaskQueueKanbanBoard({
         />
       )}
     />
+    {tasksDialogView}
+    </>
   );
 }

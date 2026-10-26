@@ -421,6 +421,7 @@
               "electronics",
               "hardware",
               "consumable",
+              "tool",
               "other"
             ]
           },
@@ -428,10 +429,16 @@
             "type": "string"
           },
           "onHandQuantity": {
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "reorderPoint": {
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "location": {
             "type": "string"
@@ -459,6 +466,88 @@
           "location",
           "preferredVendorId",
           "notes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "materialTransactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "operationId": {
+            "type": "string"
+          },
+          "materialId": {
+            "type": "string"
+          },
+          "movementType": {
+            "type": "string",
+            "enum": [
+              "opening-balance",
+              "receipt",
+              "consumption",
+              "adjustment"
+            ]
+          },
+          "quantityDelta": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string"
+          },
+          "actorMemberId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "purchaseItemId": {
+            "type": "string"
+          },
+          "purchaseReceiptId": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sourceReference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "operationId",
+          "materialId",
+          "movementType",
+          "quantityDelta",
+          "reason",
+          "recordedAt",
+          "actorMemberId"
         ],
         "additionalProperties": false
       }
@@ -593,6 +682,16 @@
           "partNumber": {
             "type": "string"
           },
+          "vendorPartNumbers": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
           "revision": {
             "type": "string"
           },
@@ -665,6 +764,7 @@
           "activeSeasonIds",
           "name",
           "partNumber",
+          "vendorPartNumbers",
           "revision",
           "iteration",
           "isArchived",
@@ -877,8 +977,26 @@
           "title": {
             "type": "string"
           },
-          "startAt": {
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dateLabel": {
             "type": "string"
+          },
+          "startAt": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "endAt": {
             "type": [
@@ -2411,10 +2529,28 @@
             ]
           },
           "startDate": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "dueDate": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "priority": {
             "type": "string",
@@ -2431,7 +2567,8 @@
               "not-started",
               "in-progress",
               "waiting-for-qa",
-              "complete"
+              "complete",
+              "unrecorded"
             ]
           },
           "checklistItems": {
@@ -2843,8 +2980,26 @@
           "title": {
             "type": "string"
           },
-          "startAt": {
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dateLabel": {
             "type": "string"
+          },
+          "startAt": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "endAt": {
             "type": [
@@ -2903,8 +3058,26 @@
           "title": {
             "type": "string"
           },
-          "startAt": {
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dateLabel": {
             "type": "string"
+          },
+          "startAt": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "endAt": {
             "type": [
@@ -2986,8 +3159,15 @@
         "type": "object",
         "properties": {
           "taskId": {
-            "type": "string",
-            "minLength": 1
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "kind": {
             "type": "string",
@@ -3023,8 +3203,15 @@
             ]
           },
           "quantity": {
-            "type": "number",
-            "minimum": 1
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "quotes": {
             "type": "array",
@@ -3207,6 +3394,30 @@
               "null"
             ]
           },
+          "seasonId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "projectId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sourceStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sourceReference": {
+            "type": "string"
+          },
           "id": {
             "type": "string"
           },
@@ -3232,7 +3443,10 @@
                   "type": "string"
                 },
                 "receivedAt": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "partInstanceIds": {
                   "type": "array",
@@ -3309,6 +3523,7 @@
     "subsystems",
     "mechanisms",
     "materials",
+    "materialTransactions",
     "artifacts",
     "partDefinitions",
     "partInstances",
@@ -3336,7 +3551,7 @@
   "description": "Current bootstrap contract with target FRC domain identities and strict domain-owned collections.",
   "x_contract": {
     "contractName": "meco-mission-control-platform-bootstrap",
-    "contractVersion": 2,
+    "contractVersion": 3,
     "resource": "/api/bootstrap",
     "migrationPolicy": "Prototype contracts are replaced in coordination with both clients; no legacy payload support."
   },
@@ -3659,14 +3874,28 @@
           ]
         },
         "startDate": {
-          "type": "string",
-          "format": "date",
-          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dueDate": {
-          "type": "string",
-          "format": "date",
-          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "priority": {
           "type": "string",
@@ -3683,7 +3912,8 @@
             "not-started",
             "in-progress",
             "waiting-for-qa",
-            "complete"
+            "complete",
+            "unrecorded"
           ]
         },
         "estimatedHours": {
@@ -4028,14 +4258,28 @@
           ]
         },
         "startDate": {
-          "type": "string",
-          "format": "date",
-          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dueDate": {
-          "type": "string",
-          "format": "date",
-          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "priority": {
           "type": "string",

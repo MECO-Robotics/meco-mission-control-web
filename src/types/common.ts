@@ -1,4 +1,13 @@
-export type MemberRole = "student" | "lead" | "mentor" | "admin" | "external";
+export type MemberRole = "student" | "lead" | "mentor" | "admin" | "external" | "unknown";
+
+export const MEMBER_ROLE_LABELS: Record<MemberRole, string> = {
+  student: "Student",
+  lead: "Lead",
+  mentor: "Mentor",
+  admin: "Admin",
+  external: "External access",
+  unknown: "Unknown role",
+};
 
 export type PlannedAttendanceDay =
   | "monday"
@@ -48,7 +57,8 @@ export type DisciplineCode =
   | "social_media";
 
 export type TaskPriority = "critical" | "high" | "medium" | "low";
-export type TaskStatus = "not-started" | "in-progress" | "waiting-for-qa" | "complete";
+export type TaskStatus = "unrecorded" | "not-started" | "in-progress" | "waiting-for-qa" | "complete";
+export type TaskWorkflowStatus = Exclude<TaskStatus, "unrecorded">;
 export type TaskPlanningState = "ready" | "waiting-on-dependency" | "blocked" | "overdue" | "at-risk";
 export type ReadinessStatus = "not-ready" | "blocked" | "qa" | "ready";
 export type MilestoneStatus = "planned" | "active" | "complete";
@@ -87,7 +97,7 @@ export type TaskBlockerSeverity = "low" | "medium" | "high" | "critical";
 export type TaskBlockerStatus = "open" | "resolved";
 export type ManufacturingStatus = "requested" | "approved" | "in-progress" | "qa" | "complete";
 export type PurchaseStatus = "requested" | "approved" | "purchased" | "shipped" | "delivered";
-export type MaterialCategory = "metal" | "plastic" | "filament" | "electronics" | "hardware" | "consumable" | "other";
+export type MaterialCategory = "metal" | "plastic" | "filament" | "electronics" | "hardware" | "consumable" | "tool" | "other";
 export type ArtifactKind = "document" | "nontechnical";
 export type ArtifactStatus = "draft" | "in-review" | "published";
 export type SeasonType = "season" | "offseason" | "initiative";

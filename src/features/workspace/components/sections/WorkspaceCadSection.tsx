@@ -31,7 +31,7 @@ export function WorkspaceCadSection(props: WorkspaceContentPanelsViewProps) {
           </WorkspaceTopbarControls>
         </AppTopbarSlotPortal>
         {localMode ? (
-          <CadFileViewer importPlacement="topbar" key={props.selectedProject?.id ?? "none"} partDefinitions={Object.values(props.partDefinitionsById)} onSavePartImage={props.savePartImage} />
+          <CadFileViewer importPlacement="topbar" loadSeedMainAssembly={props.selectedProject?.id === "project-robot-2026"} key={props.selectedProject?.id ?? "none"} partDefinitions={Object.values(props.partDefinitionsById)} onSavePartImage={props.savePartImage} />
         ) : <CadIntegrationView
           onSavePartImage={props.savePartImage}
           mechanisms={Object.values(props.mechanismsById)}

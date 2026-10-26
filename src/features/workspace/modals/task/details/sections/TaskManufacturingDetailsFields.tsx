@@ -6,7 +6,7 @@ import { archiveManufacturingProcessRecord, createManufacturingProcessRecord } f
 
 function newManufacturingDetails(bootstrap: BootstrapPayload): ManufacturingDetailsRecord {
   const part = bootstrap.partDefinitions[0];
-  const material = bootstrap.materials[0];
+  const material = bootstrap.materials.find((item) => item.category !== "tool");
   return {
     part: part ? { kind: "part-definition", partDefinitionId: part.id } : { kind: "provisional", partNumber: "", revision: "" },
     quantity: 1,
@@ -28,6 +28,7 @@ interface TaskManufacturingDetailsFieldsProps {
 }
 
 export function TaskManufacturingDetailsFields({ activeTask, bootstrap, canEdit, setTaskDraft, taskDraft }: TaskManufacturingDetailsFieldsProps) {
+  const fabricationMaterials = bootstrap.materials.filter((item) => item.category !== "tool");
   const [processes, setProcesses] = useState(bootstrap.manufacturingProcesses);
   const [newProcessName, setNewProcessName] = useState("");
   const [processMessage, setProcessMessage] = useState<string | null>(null);
@@ -87,8 +88,8 @@ export function TaskManufacturingDetailsFields({ activeTask, bootstrap, canEdit,
           <label className="field"><span>Quantity</span><input disabled={!canEdit} min="1" required type="number" value={details.quantity} onChange={(event) => update({ quantity: Math.max(1, Number(event.target.value)) })} /></label>
           <label className="field"><span>Process</span><select disabled={!canEdit} required value={details.processId} onChange={(event) => update({ processId: event.target.value })}><option value="">Choose process</option>{processes.map((item) => <option disabled={!item.isActive} key={item.id} value={item.id}>{item.name}{item.isActive ? "" : " (archived)"}</option>)}</select></label>
           <label className="field"><span>Fulfillment source</span><select disabled={!canEdit} value={details.fulfillmentSource} onChange={(event) => update({ fulfillmentSource: event.target.value as ManufacturingDetailsRecord["fulfillmentSource"] })}><option value="in-house">In-house</option><option value="outsourced">Outsourced</option></select></label>
-          <label className="field"><span>Material source</span><select disabled={!canEdit} value={details.material.kind} onChange={(event) => update({ material: event.target.value === "inventory-material" ? (bootstrap.materials[0] ? { kind: "inventory-material", materialId: bootstrap.materials[0].id } : { kind: "specified-material", name: "" }) : { kind: "specified-material", name: "" } })}><option value="inventory-material">Inventory material</option><option value="specified-material">Specify material</option></select></label>
-          {details.material.kind === "inventory-material" ? <label className="field"><span>Material</span><select disabled={!canEdit} required value={details.material.materialId} onChange={(event) => update({ material: { kind: "inventory-material", materialId: event.target.value } })}>{bootstrap.materials.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <label className="field"><span>Material</span><input disabled={!canEdit} required value={details.material.name} onChange={(event) => update({ material: { kind: "specified-material", name: event.target.value } })} /></label>}
+          <label className="field"><span>Material source</span><select disabled={!canEdit} value={details.material.kind} onChange={(event) => update({ material: event.target.value === "inventory-material" ? (fabricationMaterials[0] ? { kind: "inventory-material", materialId: fabricationMaterials[0].id } : { kind: "specified-material", name: "" }) : { kind: "specified-material", name: "" } })}><option value="inventory-material">Inventory material</option><option value="specified-material">Specify material</option></select></label>
+          {details.material.kind === "inventory-material" ? <label className="field"><span>Material</span><select disabled={!canEdit} required value={details.material.materialId} onChange={(event) => update({ material: { kind: "inventory-material", materialId: event.target.value } })}>{fabricationMaterials.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <label className="field"><span>Material</span><input disabled={!canEdit} required value={details.material.name} onChange={(event) => update({ material: { kind: "specified-material", name: event.target.value } })} /></label>}
           <label className="field"><span>Fabrication files</span><select aria-label="Fabrication files" disabled={!canEdit} multiple value={details.fileArtifactIds} onChange={(event) => update({ fileArtifactIds: Array.from(event.target.selectedOptions, (option) => option.value) })}>{bootstrap.artifacts.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
           <label className="field"><span>Tolerances (one per line)</span><textarea disabled={!canEdit} value={details.tolerances.join("\n")} onChange={(event) => updateLines("tolerances", event.target.value)} /></label>
           <label className="field"><span>QA requirements (one per line)</span><textarea disabled={!canEdit} value={details.qaRequirements.join("\n")} onChange={(event) => updateLines("qaRequirements", event.target.value)} /></label>

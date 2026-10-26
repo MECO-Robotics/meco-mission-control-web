@@ -16,12 +16,29 @@ export interface MaterialRecord {
   name: string;
   category: MaterialCategory;
   unit: string;
-  onHandQuantity: number;
-  reorderPoint: number;
+  onHandQuantity: number | null;
+  reorderPoint: number | null;
   location: string;
   preferredVendorId: string | null;
   notes: string;
   photoUrl?: string;
+}
+
+export interface MaterialTransactionRecord {
+  id: string;
+  operationId: string;
+  materialId: string;
+  movementType: "opening-balance" | "receipt" | "consumption" | "adjustment";
+  quantityDelta: number | null;
+  reason: string;
+  recordedAt: string;
+  occurredAt?: string | null;
+  sourceReference?: string;
+  actorMemberId: string | null;
+  taskId?: string;
+  projectId?: string;
+  purchaseItemId?: string;
+  purchaseReceiptId?: string;
 }
 
 export interface ArtifactRecord {
@@ -43,6 +60,7 @@ export interface PartDefinitionRecord extends CadSourceMetadata {
   activeSeasonIds?: string[];
   name: string;
   partNumber: string;
+  vendorPartNumbers?: Record<string, string>;
   revision: string;
   iteration: number;
   isArchived?: boolean;
@@ -80,18 +98,22 @@ export interface PurchaseReceiptRecord {
   operationId?: string;
   quantity: number;
   location: string;
-  receivedAt: string;
+  receivedAt: string | null;
   partInstanceIds: string[];
 }
 
 export interface PurchaseItemRecord {
   id: string;
-  taskId: string;
+  taskId: string | null;
+  seasonId?: string;
+  projectId?: string | null;
+  sourceStatus?: string | null;
+  sourceReference?: string;
   kind: PurchaseKind;
   partDefinitionId: string | null;
   materialId: string | null;
   title: string;
-  quantity: number;
+  quantity: number | null;
   quotes: PurchaseQuoteRecord[];
   selectedQuoteId: string | null;
   approvalStatus: PurchaseApprovalStatus;

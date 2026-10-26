@@ -209,16 +209,18 @@ describe("workspace creation modals", () => {
       closeMaterialModal: jest.fn(),
       handleDeleteMaterial: jest.fn(),
       handleMaterialSubmit: jest.fn(),
+      handleMaterialTransaction: jest.fn(async () => true),
       isDeletingMaterial: false,
       isSavingMaterial: false,
       materialDraft: buildEmptyMaterialPayload(),
       materialModalMode: "create",
       requestPhotoUpload: jest.fn(async () => "https://cdn.example.test/material.png"),
       setMaterialDraft: jest.fn(),
+      materialTransactions: [],
     }));
 
     expect(markup).toContain("Reorder point");
-    expect(markup).not.toContain('disabled="" min="0" type="number" value="0"');
+    expect(markup).not.toContain("On hand");
     expect(markup).not.toContain("Auto-set to 50%");
   });
 

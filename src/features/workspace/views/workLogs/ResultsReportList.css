@@ -1,26 +1,26 @@
-.qa-report-row {
+.results-report-row {
   grid-template-columns: var(--workspace-grid-template);
 }
 
-.qa-report-disclosure > summary {
+.results-report-disclosure > summary {
   display: grid;
   list-style: none;
 }
 
-.qa-report-disclosure > summary::-webkit-details-marker {
+.results-report-disclosure > summary::-webkit-details-marker {
   display: none;
 }
 
-.qa-report-details {
+.results-report-details {
   padding: 0.5rem 0.75rem 0.75rem;
 }
 
-.qa-finding-details {
+.results-finding-details {
   border-top: 1px solid var(--border-base);
   padding: 0.5rem 0;
 }
 
-.qa-finding-details > p {
+.results-finding-details > p {
   margin: 0.35rem 0;
 }
 

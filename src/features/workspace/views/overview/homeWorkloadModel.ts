@@ -2,9 +2,10 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import type { AttentionQueueRow } from "../attention/attentionQueue";
 import type { HomePressureGroup } from "./homePressureModel";
 
-export type HomeWorkloadState = "attention" | "not-started" | "in-progress" | "waiting-for-qa";
+export type HomeWorkloadState = "attention" | "unrecorded" | "not-started" | "in-progress" | "waiting-for-qa";
 export const HOME_WORKLOAD_STATES: readonly { id: HomeWorkloadState; label: string; tone: string }[] = [
   { id: "attention", label: "Needs attention", tone: "danger" },
+  { id: "unrecorded", label: "Unrecorded", tone: "neutral" },
   { id: "not-started", label: "Not started", tone: "neutral" },
   { id: "in-progress", label: "In progress", tone: "info" },
   { id: "waiting-for-qa", label: "Waiting for QA", tone: "warning" },
@@ -36,7 +37,7 @@ export function buildHomeWorkloadModel({ tasks, groups }: {
   const risks = new Map<string, AttentionQueueRow>();
   const rows = groups.flatMap(group => {
     const row: HomeWorkloadRow = { id: group.id, label: group.label, tasks: [], risks: [],
-      tasksByState: { attention: [], "not-started": [], "in-progress": [], "waiting-for-qa": [] } };
+      tasksByState: { attention: [], unrecorded: [], "not-started": [], "in-progress": [], "waiting-for-qa": [] } };
     const seen = new Set<string>();
     for (const item of group.items) {
       if (seen.has(item.key)) continue;

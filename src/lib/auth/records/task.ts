@@ -1,8 +1,8 @@
-import type { TaskPayload } from "@/types/payloads/task";
+import type { TaskPatchPayload, TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
-function taskCommand(payload: Partial<TaskPayload>) {
+function taskCommand<T extends { taskDependencies?: TaskPayload["taskDependencies"] }>(payload: T): Omit<T, "taskDependencies"> {
   const command = { ...payload };
   delete command.taskDependencies;
   return command;
@@ -14,10 +14,10 @@ export function createTask(payload: TaskPayload, onUnauthorized?: () => void) {
 
 export function updateTaskRecord(
   taskId: string,
-  payload: Partial<TaskPayload>,
+  payload: Partial<TaskPatchPayload>,
   onUnauthorized?: () => void,
 ) {
-  return requestItem<TaskRecord, Partial<TaskPayload>>(
+  return requestItem<TaskRecord, Partial<TaskPatchPayload>>(
     `/tasks/${taskId}`,
     "PATCH",
     taskCommand(payload),

@@ -9,6 +9,7 @@ interface TimelineTaskStatusLogoProps {
 }
 
 const statusSignalLabels: Record<TimelineTaskStatusSignal, string> = {
+  unrecorded: "Unrecorded",
   "not-started": "Not Started",
   "in-progress": "In Progress",
   "waiting-for-qa": "Waiting for QA",
@@ -19,6 +20,12 @@ const statusSignalLabels: Record<TimelineTaskStatusSignal, string> = {
 
 function renderStatusGlyph(signal: TimelineTaskStatusSignal) {
   switch (signal) {
+    case "unrecorded":
+      return (
+        <svg aria-hidden="true" viewBox="0 0 12 12">
+          <circle cx="6" cy="6" r="3.5" fill="none" stroke="currentColor" strokeDasharray="1.4 1.2" strokeWidth="1.4" />
+        </svg>
+      );
     case "not-started":
       return (
         <svg aria-hidden="true" viewBox="0 0 12 12">

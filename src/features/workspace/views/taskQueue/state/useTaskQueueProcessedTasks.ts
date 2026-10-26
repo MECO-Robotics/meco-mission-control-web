@@ -105,7 +105,7 @@ export function useTaskQueueProcessedTasks({
       if (sortField === "projectId") return projectsById[task.projectId]?.name ?? "";
       if (sortField === "ownerId") return formatTaskQueueAssignees(task, membersById);
       if (sortField === "title") return task.title.toLowerCase();
-      return task.dueDate;
+      return task.dueDate ?? "9999-99-99";
     };
 
     return filtered.sort((left, right) => {

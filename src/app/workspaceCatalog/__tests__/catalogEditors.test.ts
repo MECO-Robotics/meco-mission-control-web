@@ -211,14 +211,15 @@ it("deletes the active artifact and closes its editor", async () => {
   expect(read().mode).toBeNull();
 });
 
-it("saves the selected material create reorder point and converts edit records to draft payloads", async () => {
+it("keeps material stock read-only while saving reorder settings", async () => {
   const { read, record } = setup(cases.find((item) => item.name === "material")!);
   read().openCreate();
-  read().setDraft({ ...read().draft, name: "Aluminum", onHandQuantity: 9, reorderPoint: 99 });
+  read().setDraft({ ...read().draft, name: "Aluminum", reorderPoint: 99 });
   await read().submit();
   expect(inventory.createMaterialRecord).toHaveBeenCalledWith(expect.objectContaining({ name: "Aluminum", reorderPoint: 99 }), expect.any(Function));
   read().openEdit(record);
   expect(read().draft).not.toHaveProperty("id");
+  expect(read().draft).not.toHaveProperty("onHandQuantity");
 });
 
 it.each(["", "0", "123.45"])("stores purchase final cost %j as a commercial amount", async (finalCost) => {

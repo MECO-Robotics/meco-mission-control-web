@@ -30,7 +30,7 @@ export function getRiskRecordReference(ref: Reference, bootstrap: BootstrapPaylo
     }
     case "purchase-item": {
       const purchase = bootstrap.purchaseItems.find(item => item.id === ref.id);
-      record = purchase; name = purchase?.title; labelKind = "Purchase"; taskIds = purchase ? [purchase.taskId] : []; break;
+      record = purchase; name = purchase?.title; labelKind = "Purchase"; taskIds = purchase?.taskId ? [purchase.taskId] : []; break;
     }
     case "project": record = bootstrap.projects.find(item => item.id === ref.id); name = bootstrap.projects.find(item => item.id === ref.id)?.name; taskIds = tasks.filter(task => task.projectId === ref.id).map(task => task.id); break;
     case "workstream": record = bootstrap.workstreams.find(item => item.id === ref.id); name = bootstrap.workstreams.find(item => item.id === ref.id)?.name; taskIds = tasks.filter(task => task.workstreamIds.includes(ref.id)).map(task => task.id); break;
@@ -54,7 +54,7 @@ export function getRiskRecordReference(ref: Reference, bootstrap: BootstrapPaylo
         const details = task.manufacturingDetails;
         if (details && ((details.part.kind === "part-definition" && definitions.includes(details.part.partDefinitionId)) || (ref.kind === "material" && details.material.kind === "inventory-material" && details.material.materialId === ref.id))) taskIds.push(task.id);
       }
-      taskIds.push(...bootstrap.purchaseItems.filter(item => (item.partDefinitionId && definitions.includes(item.partDefinitionId)) || (ref.kind === "material" && item.materialId === ref.id)).map(item => item.taskId)); break;
+      taskIds.push(...bootstrap.purchaseItems.filter(item => (item.partDefinitionId && definitions.includes(item.partDefinitionId)) || (ref.kind === "material" && item.materialId === ref.id)).flatMap(item => item.taskId ? [item.taskId] : [])); break;
     }
     case "report": case "qa-finding": case "test-finding": case "qa-request": case "test-result": case "artifact": {
       const entity = ref.kind === "report" ? bootstrap.reports.find(item => item.id === ref.id) : ref.kind === "qa-finding" ? bootstrap.qaFindings.find(item => item.id === ref.id) : ref.kind === "test-finding" ? bootstrap.testFindings.find(item => item.id === ref.id) : ref.kind === "qa-request" ? bootstrap.qaRequests.find(item => item.id === ref.id) : ref.kind === "test-result" ? bootstrap.testResults.find(item => item.id === ref.id) : bootstrap.artifacts.find(item => item.id === ref.id);
@@ -71,7 +71,7 @@ export function getRiskRecordReference(ref: Reference, bootstrap: BootstrapPaylo
       record = entity; name = entity?.title;
       taskIds = tasks.filter(task => task.scheduleRefs.some(target => target.kind === ref.kind && target.id === ref.id)).map(task => task.id); break;
     }
-    case "vendor": { const vendor = bootstrap.vendors.find(item => item.id === ref.id); record = vendor; name = vendor?.name; taskIds = bootstrap.purchaseItems.filter(item => item.quotes.some(quote => quote.vendorId === ref.id)).map(item => item.taskId); break; }
+    case "vendor": { const vendor = bootstrap.vendors.find(item => item.id === ref.id); record = vendor; name = vendor?.name; taskIds = bootstrap.purchaseItems.filter(item => item.quotes.some(quote => quote.vendorId === ref.id)).flatMap(item => item.taskId ? [item.taskId] : []); break; }
     case "risk": { const risk = bootstrap.risks.find(item => item.id === ref.id); record = risk; name = risk?.title; taskIds = risk ? linked([...risk.relatedTargets, ...(risk.source.kind === "manual" ? [] : [risk.source])]) : []; break; }
     case "design-iteration": { const iteration = bootstrap.designIterations?.find(item => item.id === ref.id); record = iteration; name = iteration?.title; taskIds = iteration?.taskId ? [iteration.taskId] : []; break; }
   }

@@ -4,8 +4,8 @@
   border-radius: 0.95rem;
   display: grid;
   gap: 0.7rem;
-  min-height: 0;
-  overflow: auto;
+  min-height: auto;
+  overflow: visible;
   padding: 0.75rem;
 }
 
@@ -82,10 +82,4 @@
 
 .robot-config-detail-readonly .section-copy {
   margin: 0;
-}
-
-@media (max-width: 1100px) {
-  .robot-config-detail-panel {
-    max-height: 48vh;
-  }
 }

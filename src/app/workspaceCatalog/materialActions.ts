@@ -9,7 +9,9 @@ import { useCatalogRecordActions } from "./useCatalogRecordActions";
 import { buildEmptyMaterialPayload } from "@/lib/appUtils/payloadBuilders";
 import { materialToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
-import { createMaterialRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
+import { createMaterialRecord, createMaterialTransactionRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
+import type { MaterialTransactionPayload } from "@/types/payloads";
+import type { MaterialCategory } from "@/types/common";
 
 export function useMaterialEditor({
   bootstrap, selectedProjectId, selectedSeasonId,
@@ -53,6 +55,10 @@ export function useMaterialEditor({
     records: bootstrap.materials,
     setDataMessage,
   });
+  const openCreateInventoryItem = useCallback((category?: MaterialCategory) => {
+    openCreateMaterialModal();
+    if (category) setMaterialDraft((current) => ({ ...current, category }));
+  }, [openCreateMaterialModal, setMaterialDraft]);
 
   const handleMaterialSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
@@ -79,12 +85,32 @@ export function useMaterialEditor({
     }
   }, [activeMaterialId, closeMaterialModal, handleUnauthorized, beginOperation, materialDraft, materialModalMode, setDataMessage]);
 
+  const handleMaterialTransaction = useCallback(async (payload: MaterialTransactionPayload) => {
+    if (!activeMaterialId || materialModalMode !== "edit") return false;
+    const operation = beginOperation();
+    if (!operation) return false;
+    setDataMessage(null);
+
+    try {
+      await createMaterialTransactionRecord(activeMaterialId, payload, handleUnauthorized);
+      await operation.refresh();
+      if (operation.isCurrent()) setDataMessage("Stock transaction recorded.");
+      return operation.isCurrent();
+    } catch (error) {
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
+      return false;
+    } finally {
+      operation.finish();
+    }
+  }, [activeMaterialId, beginOperation, handleUnauthorized, materialModalMode, setDataMessage]);
+
   return {
     materialModalMode, activeMaterialId, materialDraft, setMaterialDraft, isSavingMaterial, isDeletingMaterial,
     closeMaterialModal,
     handleDeleteMaterial,
     handleMaterialSubmit,
-    openCreateMaterialModal,
+    handleMaterialTransaction,
+    openCreateMaterialModal: openCreateInventoryItem,
     openEditMaterialModal,
   };
 }

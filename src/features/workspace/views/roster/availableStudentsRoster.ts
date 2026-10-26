@@ -89,7 +89,7 @@ function pickActiveTask(tasks: TaskRecord[], openBlockerTaskIds: Set<string>, bo
       return blockedDelta;
     }
 
-    return left.dueDate.localeCompare(right.dueDate) || left.title.localeCompare(right.title);
+    return (left.dueDate ?? "9999-99-99").localeCompare(right.dueDate ?? "9999-99-99") || left.title.localeCompare(right.title);
   })[0] ?? null;
 }
 

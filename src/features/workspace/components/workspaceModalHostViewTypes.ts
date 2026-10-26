@@ -35,7 +35,7 @@ export interface WorkspaceModalHostViewProps {
   partDefinitionEditor: Omit<ComponentProps<typeof PartDefinitionEditorModal>, "bootstrap" | "requestPhotoUpload" | "partDefinitionModalMode"> & { partDefinitionModalMode: "create" | "edit" | null };
   workstreamEditor: Omit<ComponentProps<typeof WorkstreamEditorModal>, "bootstrap" | "workstreamModalMode"> & { workstreamModalMode: "create" | "edit" | null };
   artifactEditor: Omit<ComponentProps<typeof ArtifactEditorModal>, "bootstrap" | "requestPhotoUpload" | "artifactModalMode"> & { artifactModalMode: "create" | "edit" | null };
-  materialEditor: Omit<ComponentProps<typeof MaterialEditorModal>, "bootstrap" | "requestPhotoUpload">;
+  materialEditor: Omit<ComponentProps<typeof MaterialEditorModal>, "bootstrap" | "requestPhotoUpload" | "materialTransactions">;
   bootstrap: BootstrapPayload;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;

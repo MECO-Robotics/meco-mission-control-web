@@ -103,8 +103,8 @@ export function useMilestoneEditor({
       ...timelineMilestoneDraftFromRecord(milestone),
       projectIds: milestone.projectIds.length > 0 ? milestone.projectIds : scopedProjectIds,
     });
-    setMilestoneStartDate(datePortion(milestone.startAt));
-    setMilestoneStartTime(timePortion(milestone.startAt));
+    setMilestoneStartDate(datePortion(milestone.startAt ?? milestone.date ?? ""));
+    setMilestoneStartTime(milestone.startAt ? timePortion(milestone.startAt) : "18:00");
     setMilestoneEndDate(milestone.endAt ? datePortion(milestone.endAt) : "");
     setMilestoneEndTime(milestone.endAt ? timePortion(milestone.endAt) : "");
     setMilestoneError(null);

@@ -39,11 +39,11 @@ export function getActiveNavigationSubItemId(state: NavigationState, context?: V
     case "risks": return "work-risks";
     case "documents": return "resources-documents";
     case "tasks": return state.taskView === "robot-map" ? "resources-structure" : state.taskView === "kanban" ? "work-tasks" : "work-schedule";
-    case "worklogs": return state.worklogsView === "qa" || state.worklogsView === "results" ? "resources-qa-reports" : "work-activity";
+    case "worklogs": return state.worklogsView === "reports" ? "resources-qa-reports" : "work-activity";
     case "cad": case "subsystems": return "resources-structure";
     case "roster": return "team-people";
     case "teams": return "team-teams";
-    case "inventory": return state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? "resources-materials" : "resources-parts";
+    case "inventory": return state.inventoryView === "tools" ? "resources-tools" : state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? "resources-materials" : "resources-parts";
     default: return null;
   }
 }

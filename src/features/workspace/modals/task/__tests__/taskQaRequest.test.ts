@@ -18,6 +18,7 @@ const blockedCases: Array<[string, Partial<TaskRecord>, string]> = [
   ["missing mentor", { mentorId: null }, "Assign an eligible mentor before requesting QA."],
   ["ineligible mentor", { mentorId: "lead-1" }, "Assign an eligible mentor before requesting QA."],
   ["not started", { status: "not-started" }, "Start this task before requesting QA."],
+  ["unrecorded", { status: "unrecorded" }, "Record task progress before requesting QA."],
   ["complete", { status: "complete" }, "Completed tasks cannot request QA."],
   ["blocked", { isBlocked: true }, "Resolve this task’s blocker before requesting QA."],
   ["waiting on dependency", { isWaitingOnDependency: true }, "Resolve this task’s blocker before requesting QA."],

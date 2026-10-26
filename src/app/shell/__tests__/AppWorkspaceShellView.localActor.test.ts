@@ -93,7 +93,7 @@ function renderForAccount(email: string, role: "mentor" | "student", signedInMem
     dataMessage: null,
     taskEditNotices: [],
     taskView: "queue",
-    worklogsView: "qa",
+    worklogsView: "reports",
   };
   const controller = { model } as never;
   return renderToStaticMarkup(React.createElement(AppWorkspaceShellView, { controller }));

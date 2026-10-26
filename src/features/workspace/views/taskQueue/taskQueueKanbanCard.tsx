@@ -6,7 +6,7 @@ import { normalizeTaskTargetIds } from "@/features/workspace/shared/task/normali
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
-import { getTaskQueueBoardState } from "./taskQueueKanbanBoardState";
+import { getTaskQueueBoardState, TASK_QUEUE_DEFAULT_BOARD_STATES } from "./taskQueueKanbanBoardState";
 
 function formatNames(
   ids: string[],
@@ -107,11 +107,12 @@ export function filterTaskQueueTasks(
   if (isAllProjectsView && projectFilter.length > 0) {
     result = result.filter((task) => filterSelectionIncludes(projectFilter, task.projectId));
   }
-  if (statusFilter.length > 0) {
-    result = result.filter((task) =>
-      filterSelectionIncludes(statusFilter, getTaskQueueBoardState(task, bootstrap)),
-    );
-  }
+  const selectedStatuses: FilterSelection = statusFilter.length > 0
+    ? statusFilter
+    : [...TASK_QUEUE_DEFAULT_BOARD_STATES];
+  result = result.filter((task) =>
+    filterSelectionIncludes(selectedStatuses, getTaskQueueBoardState(task, bootstrap)),
+  );
   if (disciplineFilter.length > 0) {
     result = result.filter((task) => filterSelectionIncludes(disciplineFilter, task.workTypeId));
   }

@@ -35,6 +35,10 @@ const baseTask: BootstrapPayload["tasks"][number] = {
 };
 
 describe("timeline task dependency counts and status", () => {
+  it("preserves the neutral unrecorded source status", () => {
+    expect(getTimelineTaskStatusSignal({ ...baseTask, status: "unrecorded" }, EMPTY_BOOTSTRAP)).toBe("unrecorded");
+  });
+
   it("prioritizes active blockers over dependency and status icons", () => {
     const bootstrap: BootstrapPayload = {
       ...EMPTY_BOOTSTRAP,

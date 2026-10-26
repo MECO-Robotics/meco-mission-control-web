@@ -115,7 +115,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     if (!model.sessionUser || model.isPublicDemoSession || !task || !member || !["student", "lead"].includes(member.role)) return;
     if (!task.assigneeIds.includes(member.id) && task.ownerId !== member.id) return;
     const mentor = model.bootstrap.members.find((candidate) => candidate.id === task.mentorId && candidate.role === "mentor");
-    if (!mentor || task.status === "not-started" || task.status === "complete" || task.status === "waiting-for-qa" || task.isBlocked || task.isWaitingOnDependency) return;
+    if (!mentor || task.status === "unrecorded" || task.status === "not-started" || task.status === "complete" || task.status === "waiting-for-qa" || task.isBlocked || task.isWaitingOnDependency) return;
     if (acknowledgedQaRequests.some((request) => request.taskId === taskId) || model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id) && ["requested", "in-review"].includes(request.status))) return;
     const context = qaRequestContext.current;
     const mount = qaRequestMount.current;

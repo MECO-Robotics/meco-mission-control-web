@@ -44,6 +44,20 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
       >
         <MaterialsView
           bootstrap={bootstrap}
+          inventoryKind="materials"
+          openCreateMaterialModal={openCreateMaterialModal}
+          openEditMaterialModal={openEditMaterialModal}
+        />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={effectiveInventoryView === "tools"}
+        swipeDirection={inventorySwipeDirection}
+      >
+        <MaterialsView
+          bootstrap={bootstrap}
+          inventoryKind="tools"
           openCreateMaterialModal={openCreateMaterialModal}
           openEditMaterialModal={openEditMaterialModal}
         />
