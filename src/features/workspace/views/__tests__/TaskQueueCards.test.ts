@@ -73,7 +73,7 @@ describe("Task Queue cards", () => {
     ["2026-10-23", "not-started", "Due Oct 23", "neutral"],
     ["2026-10-20", "complete", "Due Oct 20", "neutral"],
     ["2026-10-21", "complete", "Due Oct 21", "neutral"],
-    ["", "not-started", "No due date", "neutral"],
+    ["", "not-started", "Due date unknown", "neutral"],
     ["bad-date", "not-started", "No due date", "neutral"],
     ["2026-02-30", "not-started", "No due date", "neutral"],
   ] as const)("renders %s on a %s task as %s", (dueDate, status, text, tone) => {

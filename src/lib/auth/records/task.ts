@@ -3,7 +3,8 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 function taskCommand<T extends { taskDependencies?: TaskPayload["taskDependencies"] }>(payload: T): Omit<T, "taskDependencies"> {
-  const { taskDependencies: _taskDependencies, ...command } = payload;
+  const command = { ...payload };
+  delete command.taskDependencies;
   return command;
 }
 

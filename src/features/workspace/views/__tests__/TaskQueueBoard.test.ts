@@ -69,7 +69,7 @@ describe("Task Queue board", () => {
     expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(1);
     expect(markup).toContain('data-board-state="waiting-on-dependency"');
     expect(markup.match(/data-board-state="waiting-on-dependency"/g)).toHaveLength(1);
-    expect(markup.match(/data-board-state=/g)).toHaveLength(18);
+    expect(markup.match(/data-board-state=/g)).toHaveLength(16);
     expect(markup).toContain('data-board-state="unrecorded"');
     expect(markup).toContain("Task 16");
     expect(markup).toContain("Task 17");

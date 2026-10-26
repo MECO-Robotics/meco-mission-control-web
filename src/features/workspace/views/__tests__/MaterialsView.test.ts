@@ -86,7 +86,7 @@ describe("MaterialsView stock presentation", () => {
     [
       "Filter materials by name",
       "Filter materials by category",
-      "Filter materials by on-hand and reorder quantities",
+      "Filter materials by quantity",
       "Filter materials by location",
       "Filter materials by vendor",
       "Filter materials by stock level",

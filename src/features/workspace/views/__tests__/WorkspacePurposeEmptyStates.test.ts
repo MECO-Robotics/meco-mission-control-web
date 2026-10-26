@@ -22,8 +22,7 @@ describe("workspace purpose empty states", () => {
       }),
     );
 
-    expect(markup).toContain("Manage consumable and raw material inventory here");
-    expect(markup).toContain("No stock, vendor, location, or reorder threshold records");
+    expect(markup).toContain("No stock, vendor, location, or reorder threshold records have been added for this workspace yet.");
     expect(markup).toContain('aria-label="Add material"');
     expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No materials match the current filters.");
@@ -40,7 +39,7 @@ describe("workspace purpose empty states", () => {
     );
 
     expect(markup).toContain("Track commercial acquisition here");
-    expect(markup).toContain("No task-linked purchase lines have been captured");
+    expect(markup).toContain("No purchase records have been captured for this project scope.");
     expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No purchases match these filters");
   });

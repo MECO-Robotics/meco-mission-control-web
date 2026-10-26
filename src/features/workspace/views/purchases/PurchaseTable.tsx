@@ -75,7 +75,7 @@ export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass,
             <TableCell label="Final">{finalCost}</TableCell>
             {item.sourceReference ? null : <EditableHoverIndicator />}
           </button>
-          <div className="purchase-receipt-summary"><span>Received {received} of {item.quantity ?? "unknown quantity"}</span><span>{remaining ?? "Remaining unknown"}</span>{receipts.length ? <span>Receipts: {receipts.map((receipt) => `${receipt.location} · ${receipt.quantity} · ${receipt.receivedAt ? new Date(receipt.receivedAt).toLocaleDateString() : "date not recorded"}`).join("; ")}</span> : <span>No receipts recorded</span>}{canReceive ? <button className="secondary-action" type="button" onClick={() => onReceive(item)}>Receive</button> : null}</div>
+          <div className="purchase-receipt-summary"><span>Received {received} of {item.quantity ?? "unknown quantity"}</span><span>{remaining === null ? "Remaining unknown" : `${remaining} remaining`}</span>{receipts.length ? <span>Receipts: {receipts.map((receipt) => `${receipt.location} · ${receipt.quantity} · ${receipt.receivedAt ? new Date(receipt.receivedAt).toLocaleDateString() : "date not recorded"}`).join("; ")}</span> : <span>No receipts recorded</span>}{canReceive ? <button className="secondary-action" type="button" onClick={() => onReceive(item)}>Receive</button> : null}</div>
           </Fragment>
         );
       })}
