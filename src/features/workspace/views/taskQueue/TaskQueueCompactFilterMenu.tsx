@@ -122,7 +122,7 @@ export function TaskQueueCompactFilterMenu({
           value: ownerFilter,
         }),
         compactFilterDropdownMenuItem({
-          allLabel: "Active work",
+          allLabel: "All tasks",
           ariaLabel: "Filter tasks by status",
           label: "Status",
           icon: <IconTasks />,
@@ -131,7 +131,7 @@ export function TaskQueueCompactFilterMenu({
             selection.length === 1 ? getTaskQueueStatusToneClassName(selection[0]) : undefined,
           onChange: setStatusFilter,
           options: TASK_QUEUE_STATUS_OPTIONS,
-          selectedAllLabel: "Active work",
+          selectedAllLabel: "All tasks",
           value: statusFilter,
         }),
         compactFilterDropdownMenuItem({

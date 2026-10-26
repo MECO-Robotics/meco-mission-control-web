@@ -46,6 +46,8 @@ interface KanbanColumnsProps<TState extends string, TItem> {
       id: string;
       header: ReactNode;
       itemsByState: Record<TState, readonly TItem[]>;
+      visibleItemsByState?: Record<TState, readonly TItem[]>;
+      footerByState?: Partial<Record<TState, ReactNode>>;
     }[];
   }[];
   style?: CSSProperties;
@@ -86,6 +88,8 @@ export function KanbanColumns<TState extends string, TItem>({
     column: KanbanColumnDefinition<TState>,
     items: readonly TItem[],
     showHeader: boolean,
+    visibleItems = items,
+    footer?: ReactNode,
   ) => {
     const columnDropProps = drag.getColumnDropProps(column.state);
 
@@ -123,8 +127,8 @@ export function KanbanColumns<TState extends string, TItem>({
           dropProps={columnDropProps}
           label={column.state}
         >
-          {items.length > 0 ? (
-            items.map((item, index) => {
+          {visibleItems.length > 0 ? (
+            visibleItems.map((item, index) => {
               const itemId = getItemId?.(item);
               if (!drag.dragEnabled || !itemId) {
                 const renderedItem = renderItem(item, column.state);
@@ -154,9 +158,10 @@ export function KanbanColumns<TState extends string, TItem>({
                 </div>
               );
             })
-          ) : (
+          ) : items.length === 0 ? (
             <p className={columnEmptyClassName}>{emptyLabel}</p>
-          )}
+          ) : null}
+          {footer}
         </KanbanColumnScrollArea> : null}
       </section>
     );
@@ -174,7 +179,13 @@ export function KanbanColumns<TState extends string, TItem>({
           {group.lanes.map((lane) => (
             <KanbanSwimlane header={lane.header} key={lane.id}>
               <div className="kanban-swimlane-columns">
-                {columns.map((column) => renderColumn(column, lane.itemsByState[column.state], false))}
+                {columns.map((column) => renderColumn(
+                  column,
+                  lane.itemsByState[column.state],
+                  false,
+                  lane.visibleItemsByState?.[column.state],
+                  lane.footerByState?.[column.state],
+                ))}
               </div>
             </KanbanSwimlane>
           ))}

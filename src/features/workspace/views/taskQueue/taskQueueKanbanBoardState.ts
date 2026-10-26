@@ -39,6 +39,11 @@ export const TASK_QUEUE_ACTIVE_BOARD_STATES: readonly TaskQueueBoardState[] = [
   "waiting-for-qa",
 ];
 
+export const TASK_QUEUE_DEFAULT_BOARD_STATES: readonly TaskQueueBoardState[] = [
+  ...TASK_QUEUE_ACTIVE_BOARD_STATES,
+  "complete",
+];
+
 export const TASK_QUEUE_STATUS_OPTIONS: DropdownOption[] = [
   { id: "unrecorded", name: "Unrecorded", icon: React.createElement(TimelineTaskStatusLogo, { compact: true, signal: "unrecorded", status: "unrecorded" }) },
   ...(["not-started", "in-progress", "waiting-for-qa", "complete"] as const).map((status) => ({

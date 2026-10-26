@@ -76,7 +76,7 @@ describe("Task Queue board", () => {
     expect(markup).toContain('aria-label="Outreach"');
   });
 
-  it("defaults to active work, shows explicitly selected completed tasks, and clears back to active work", () => {
+  it("defaults to all task statuses, shows explicitly selected completed tasks, and clears back to all tasks", () => {
     const bootstrap = createBootstrap();
     const filters = {
       activePersonFilter: [],
@@ -105,7 +105,8 @@ describe("Task Queue board", () => {
     });
 
     expect(activeTasks.length).toBeGreaterThan(0);
-    expect(activeTasks.every((task) => task.status !== "complete")).toBe(true);
+    expect(activeTasks.some((task) => task.status !== "complete")).toBe(true);
+    expect(activeTasks.some((task) => task.status === "complete")).toBe(true);
     expect(completedTasks.length).toBeGreaterThan(0);
     expect(completedTasks.every((task) => task.status === "complete")).toBe(true);
     expect(clearedTasks.map((task) => task.id)).toEqual(activeTasks.map((task) => task.id));
@@ -133,7 +134,8 @@ describe("Task Queue board", () => {
     expect(markup).toContain('d="M8 11h6"');
     expect(markup).toContain('d="M11 8v6"');
     expect(markup).toContain('title="Task 1"');
-    expect(markup).not.toContain('title="Task 5"');
+    expect(markup).toContain('title="Task 5"');
+    expect(markup).not.toContain('title="Task 14"');
   });
 
   it("keeps the focused kanban view in the same order passed in by filters and sort", () => {

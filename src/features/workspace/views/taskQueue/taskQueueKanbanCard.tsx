@@ -6,7 +6,7 @@ import { normalizeTaskTargetIds } from "@/features/workspace/shared/task/normali
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
-import { getTaskQueueBoardState, TASK_QUEUE_ACTIVE_BOARD_STATES } from "./taskQueueKanbanBoardState";
+import { getTaskQueueBoardState, TASK_QUEUE_DEFAULT_BOARD_STATES } from "./taskQueueKanbanBoardState";
 
 function formatNames(
   ids: string[],
@@ -109,7 +109,7 @@ export function filterTaskQueueTasks(
   }
   const selectedStatuses: FilterSelection = statusFilter.length > 0
     ? statusFilter
-    : [...TASK_QUEUE_ACTIVE_BOARD_STATES];
+    : [...TASK_QUEUE_DEFAULT_BOARD_STATES];
   result = result.filter((task) =>
     filterSelectionIncludes(selectedStatuses, getTaskQueueBoardState(task, bootstrap)),
   );
