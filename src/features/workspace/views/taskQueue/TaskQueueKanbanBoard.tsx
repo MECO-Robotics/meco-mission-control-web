@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskWorkflowStatus } from "@/types/common";
@@ -24,7 +24,7 @@ import { groupTaskQueueSwimlanes, type TaskQueueGroupBy } from "./taskQueueSwiml
 import { TaskQueueSwimlaneLabel } from "./taskQueueSwimlaneLabel";
 import { getProjectIconColor } from "@/components/layout/sidebarProjectIcons";
 
-const TASK_QUEUE_COMPLETED_PREVIEW_LIMIT = 5;
+const TASK_QUEUE_MIN_COMPLETED_PREVIEW_LIMIT = 5;
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,
@@ -82,8 +82,9 @@ export function TaskQueueKanbanBoard({
   const [pendingTaskStatusDropIds, setPendingTaskStatusDropIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  const [completedTasksDialog, setCompletedTasksDialog] = useState<{
+  const [tasksDialog, setTasksDialog] = useState<{
     laneLabel: string;
+    state: TaskQueueBoardState;
     tasks: TaskRecord[];
   } | null>(null);
   const tasksByState = useMemo(
@@ -100,6 +101,10 @@ export function TaskQueueKanbanBoard({
     () => groupTaskQueueSwimlanes(focusedState === null ? tasks : focusedTasks, cardProps.bootstrap, groupBy),
     [cardProps.bootstrap, focusedState, focusedTasks, groupBy, tasks],
   );
+  const completedTasksPreviewLimit = Math.max(
+    TASK_QUEUE_MIN_COMPLETED_PREVIEW_LIMIT,
+    swimlanes.reduce((count, project) => count + project.lanes.length, 0),
+  );
   const boardSwimlanes = useMemo(
     () => swimlanes.map((project) => ({
       id: project.id,
@@ -107,40 +112,43 @@ export function TaskQueueKanbanBoard({
       accentColor: getProjectIconColor(cardProps.projectsById[project.id] ?? null),
       lanes: project.lanes.map((lane) => {
         const itemsByState = groupTasksByBoardState(lane.tasks, cardProps.bootstrap);
-        const completedTasks = itemsByState.complete;
+        const visibleItemsByState: Record<TaskQueueBoardState, TaskRecord[]> = { ...itemsByState };
+        const footerByState: Partial<Record<TaskQueueBoardState, ReactNode>> = {};
+
+        for (const { state } of TASK_QUEUE_BOARD_COLUMNS) {
+          const stateTasks = itemsByState[state];
+          visibleItemsByState[state] = stateTasks.slice(0, completedTasksPreviewLimit);
+          if (stateTasks.length <= completedTasksPreviewLimit) continue;
+
+          footerByState[state] = (
+            <button
+              aria-label={`Show all ${stateTasks.length} ${formatTaskQueueBoardState(state).toLowerCase()} tasks in ${project.projectName}, ${lane.label.name}`}
+              className="secondary-action task-queue-board-show-more"
+              onClick={(event) => {
+                event.stopPropagation();
+                setTasksDialog({
+                  laneLabel: `${project.projectName} · ${lane.label.name}`,
+                  state,
+                  tasks: stateTasks,
+                });
+              }}
+              type="button"
+            >
+              Show more
+            </button>
+          );
+        }
 
         return {
           id: lane.id,
           header: <TaskQueueSwimlaneLabel {...lane.label} />,
           itemsByState,
-          visibleItemsByState: {
-            ...itemsByState,
-            complete: completedTasks.slice(0, TASK_QUEUE_COMPLETED_PREVIEW_LIMIT),
-          },
-          footerByState: completedTasks.length > TASK_QUEUE_COMPLETED_PREVIEW_LIMIT
-            ? {
-                complete: (
-                  <button
-                    aria-label={`Show all ${completedTasks.length} completed tasks in ${project.projectName}, ${lane.label.name}`}
-                    className="secondary-action task-queue-board-show-more"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setCompletedTasksDialog({
-                        laneLabel: `${project.projectName} · ${lane.label.name}`,
-                        tasks: completedTasks,
-                      });
-                    }}
-                    type="button"
-                  >
-                    Show more
-                  </button>
-                ),
-              }
-            : undefined,
+          visibleItemsByState,
+          footerByState,
         };
       }),
     })),
-    [cardProps.bootstrap, cardProps.projectsById, swimlanes],
+    [cardProps.bootstrap, cardProps.projectsById, completedTasksPreviewLimit, swimlanes],
   );
   const boardColumns = useMemo(
     () =>
@@ -164,35 +172,38 @@ export function TaskQueueKanbanBoard({
       })),
     [tasksByState],
   );
-  const completedTasksDialogView = completedTasksDialog ? (
+  const tasksDialogTitle = tasksDialog
+    ? `${formatTaskQueueBoardState(tasksDialog.state)} tasks · ${tasksDialog.laneLabel}`
+    : "";
+  const tasksDialogView = tasksDialog ? (
     <ModalDialog
-      label={`Completed tasks · ${completedTasksDialog.laneLabel}`}
-      onClose={() => setCompletedTasksDialog(null)}
+      label={tasksDialogTitle}
+      onClose={() => setTasksDialog(null)}
       dismissOnBackdrop
     >
       <section className="modal-card modal-panel-surface task-queue-completed-dialog">
         <div className="panel-header compact-header">
           <div>
-            <h2>Completed tasks · {completedTasksDialog.laneLabel}</h2>
-            <span>{completedTasksDialog.tasks.length} tasks</span>
+            <h2>{tasksDialogTitle}</h2>
+            <span>{tasksDialog.tasks.length} tasks</span>
           </div>
           <button
             aria-label="Close completed tasks"
             className="icon-button"
-            onClick={() => setCompletedTasksDialog(null)}
+            onClick={() => setTasksDialog(null)}
             type="button"
           >
             Close
           </button>
         </div>
         <div className="task-queue-completed-dialog-list">
-          {completedTasksDialog.tasks.map((task) => (
+          {tasksDialog.tasks.map((task) => (
             <TaskQueueCard
               {...cardProps}
               key={task.id}
               task={task}
               openEditTaskModal={(selectedTask, options) => {
-                setCompletedTasksDialog(null);
+                setTasksDialog(null);
                 cardProps.openEditTaskModal(selectedTask, options);
               }}
             />
@@ -270,18 +281,17 @@ export function TaskQueueKanbanBoard({
                     >
                       <span className="task-queue-board-column-count kanban-swimlane-cell-count">{lane.tasks.length}</span>
                       <div className="task-queue-board-focused-lane-grid">
-                        {(focusedState === "complete"
-                          ? lane.tasks.slice(0, TASK_QUEUE_COMPLETED_PREVIEW_LIMIT)
-                          : lane.tasks).map((task) => (
+                        {lane.tasks.slice(0, completedTasksPreviewLimit).map((task) => (
                           <TaskQueueCard {...cardProps} key={task.id} task={task} />
                         ))}
                       </div>
-                      {focusedState === "complete" && lane.tasks.length > TASK_QUEUE_COMPLETED_PREVIEW_LIMIT ? (
+                      {lane.tasks.length > completedTasksPreviewLimit ? (
                         <button
-                          aria-label={`Show all ${lane.tasks.length} completed tasks in ${project.projectName}, ${lane.label.name}`}
+                          aria-label={`Show all ${lane.tasks.length} ${formatTaskQueueBoardState(focusedState).toLowerCase()} tasks in ${project.projectName}, ${lane.label.name}`}
                           className="secondary-action task-queue-board-show-more"
-                          onClick={() => setCompletedTasksDialog({
+                          onClick={() => setTasksDialog({
                             laneLabel: `${project.projectName} · ${lane.label.name}`,
+                            state: focusedState,
                             tasks: lane.tasks,
                           })}
                           type="button"
@@ -298,7 +308,7 @@ export function TaskQueueKanbanBoard({
             )}
           </div>
         </div>
-        {completedTasksDialogView}
+        {tasksDialogView}
       </section>
     );
   }
@@ -355,7 +365,7 @@ export function TaskQueueKanbanBoard({
         />
       )}
     />
-    {completedTasksDialogView}
+    {tasksDialogView}
     </>
   );
 }
