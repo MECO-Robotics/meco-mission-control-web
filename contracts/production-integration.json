@@ -1,8 +1,8 @@
 {
   "version": 1,
   "platform": {
-    "branch": "development",
-    "revision": "aacb3709f60c55150d07a2428e80a6be00b0e0b0"
+    "branch": "main",
+    "revision": "2b862ad7b6c9cb3ac208019a236a7d3746b14925"
   },
   "mobile": {
     "branch": "development",
