@@ -159,7 +159,7 @@ function createOverviewBootstrap() {
 }
 
 describe("Workspace overview views", () => {
-  it("shows scoped chart summaries and keeps record lists behind drilldowns", () => {
+  it("shows scoped chart summaries and unassigned task details", () => {
     const bootstrap = createOverviewBootstrap();
     const markup = renderToStaticMarkup(React.createElement(HomeView, {
       bootstrap,
@@ -180,8 +180,9 @@ describe("Workspace overview views", () => {
     expect(markup).not.toContain("Completed gate");
     expect(markup).toContain('aria-label="View tasks by status"');
     expect(markup).toContain("Waiting for QA");
+    expect(markup).toContain('aria-label="Unassigned unfinished tasks"');
     expect(markup).not.toContain("Later media recap");
-    expect(markup).not.toContain("Finish bellypan CAD");
+    expect(markup).toContain("Finish bellypan CAD");
     expect(markup).not.toContain("Battery cart not inspected");
     expect(markup).toContain("3 unfinished tasks · 3 need attention");
     expect(markup).toContain('aria-label="Complete: 1 tasks"');
